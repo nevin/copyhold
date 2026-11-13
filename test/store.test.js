@@ -9,7 +9,12 @@ import * as store from "../src/lib/store.js";
 await new Promise((resolve, reject) => {
   const request = indexedDB.open("clipfile", 3);
   request.onupgradeneeded = () => {
-    request.result.createObjectStore("entries", { keyPath: "id" }).createIndex("expiresAt", "expiresAt");
+    const entries = request.result.createObjectStore("entries", { keyPath: "id" });
+    entries.createIndex("expiresAt", "expiresAt");
+    entries.put({
+      id: "legacy", text: "from 1.1", title: "", description: "", visibility: "visible", pinned: false,
+      createdAt: "2026-01-01T00:00:00.000Z", lastUsedAt: null, expiresAt: null,
+    });
     const clipboard = request.result.createObjectStore("clipboard");
     clipboard.put(7, "retentionDays");
     clipboard.put("old-fingerprint", "fingerprint");
@@ -31,8 +36,21 @@ test("upgrading keeps settings and capture state from the old clipboard store", 
     historyLimit: 0,
     density: "comfortable",
     hidePreviews: false,
+    sensitiveClips: "mask",
+    captureImages: false,
+    lockAfterMinutes: 15,
   });
   assert.equal((await store.getMeta(["fingerprint"])).fingerprint, "old-fingerprint");
+});
+
+test("upgrading indexes existing clips, and hashes are filled in afterward", async () => {
+  const [legacy] = await store.listRecent(10);
+  assert.equal(legacy.order, "0:2026-01-01T00:00:00.000Z");
+  assert.equal(legacy.hash, undefined);
+  assert.equal(await store.backfillHashes(), 1);
+  assert.equal(await store.backfillHashes(), 0);
+  assert.equal((await store.findByHash(await store.contentDigest({ text: "from 1.1" }))).id, "legacy");
+  await store.remove("legacy");
 });
 
 test("settings changes are saved and reach listeners", async () => {
@@ -92,4 +110,18 @@ test("trimHistory keeps pinned clips and the most recently used unpinned ones", 
   assert.equal(await store.trimHistory(3), 2);
   const left = (await store.list()).filter((entry) => entry.text.startsWith("trim")).map((entry) => entry.text).sort();
   assert.deepEqual(left, ["trim 0", "trim 1", "trim 4", "trim 5"]);
+});
+
+test("listRecent returns the first clips in list order", async () => {
+  await store.removeMany((await store.list()).map(({ id }) => id));
+  const now = Date.now();
+  const clips = Array.from({ length: 5 }, (_, index) =>
+    createEntry({ text: `recent ${index}`, createdAt: new Date(now - index * 60_000).toISOString() }));
+  clips[3].pinned = true;
+  await store.add(clips);
+  assert.deepEqual((await store.listRecent(3)).map((entry) => entry.text), ["recent 3", "recent 0", "recent 1"]);
+  await store.update(clips[4].id, { lastUsedAt: new Date(now + 1000).toISOString() });
+  assert.deepEqual((await store.listRecent(2)).map((entry) => entry.text), ["recent 3", "recent 4"]);
+  assert.equal(await store.countUnpinned(), (await store.list()).filter((entry) => !entry.pinned).length);
+  await store.removeMany(clips.map(({ id }) => id));
 });

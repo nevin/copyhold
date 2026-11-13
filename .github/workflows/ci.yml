@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,5 +18,20 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
       - run: npm test
       - run: npm run package
+
+  browsers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx puppeteer browsers install chrome firefox
+      # Headless Chrome and Firefox share the virtual display's clipboard.
+      - run: xvfb-run --auto-servernum npm run test:e2e

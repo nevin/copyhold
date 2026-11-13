@@ -1,0 +1,999 @@
+{
+  "extName": {
+    "message": "Copyhold",
+    "description": "The extension's name. Keep it untranslated."
+  },
+  "extDescription": {
+    "message": "Save, organize, and reuse text and images from your clipboard."
+  },
+  "commandSaveClipboard": {
+    "message": "Save the clipboard to Copyhold"
+  },
+  "newClip": {
+    "message": "New clip"
+  },
+  "openInNewTab": {
+    "message": "Open in new tab"
+  },
+  "lockCopyhold": {
+    "message": "Lock Copyhold"
+  },
+  "settingsAndBackups": {
+    "message": "Settings and backups"
+  },
+  "automaticallySaveCopiedText": {
+    "message": "Automatically save copied text"
+  },
+  "passphrase": {
+    "message": "Passphrase"
+  },
+  "savedClips": {
+    "message": "Saved clips"
+  },
+  "searchClips": {
+    "message": "Search clips"
+  },
+  "clearSearch": {
+    "message": "Clear search"
+  },
+  "hideClipPreviews": {
+    "message": "Hide clip previews"
+  },
+  "selectClips": {
+    "message": "Select clips"
+  },
+  "selectAllShown": {
+    "message": "Select all shown"
+  },
+  "deleteSelectedClips": {
+    "message": "Delete selected clips"
+  },
+  "quickExpiry": {
+    "message": "Quick expiry"
+  },
+  "previewInClipList": {
+    "message": "Preview in clip list"
+  },
+  "clipText": {
+    "message": "Clip text"
+  },
+  "copyhold": {
+    "message": "Copyhold"
+  },
+  "saveClipboard": {
+    "message": "Save clipboard"
+  },
+  "done": {
+    "message": "Done"
+  },
+  "appearance": {
+    "message": "Appearance"
+  },
+  "light": {
+    "message": "Light"
+  },
+  "dark": {
+    "message": "Dark"
+  },
+  "system": {
+    "message": "System"
+  },
+  "listDensity": {
+    "message": "List density"
+  },
+  "comfortable": {
+    "message": "Comfortable"
+  },
+  "compact": {
+    "message": "Compact"
+  },
+  "savesTextInThisBrowser": {
+    "message": "Saves text in this browser profile, even when the Copyhold popup is closed."
+  },
+  "theFullTabViewStays": {
+    "message": "The full-tab view stays open."
+  },
+  "passwordsKeysAndCardNumbers": {
+    "message": "Passwords, keys, and card numbers"
+  },
+  "saveThemMasked": {
+    "message": "Save them masked"
+  },
+  "donTSaveThemAutomatically": {
+    "message": "Don't save them automatically"
+  },
+  "saveThemLikeOtherText": {
+    "message": "Save them like other text"
+  },
+  "copyholdRecognizesCommonSecretsOn": {
+    "message": "Copyhold recognizes common secrets on this device. It can miss some, so mask other sensitive clips yourself."
+  },
+  "usesMoreMemoryAndBattery": {
+    "message": "Uses more memory and battery. Save clipboard saves an image whenever the clipboard has no text."
+  },
+  "defaultClipRetention": {
+    "message": "Default clip retention"
+  },
+  "keepUntilDeleted": {
+    "message": "Keep until deleted"
+  },
+  "1Day": {
+    "message": "1 day"
+  },
+  "7Days": {
+    "message": "7 days"
+  },
+  "30Days": {
+    "message": "30 days"
+  },
+  "90Days": {
+    "message": "90 days"
+  },
+  "appliesToNewUnpinnedClips": {
+    "message": "Applies to new unpinned clips. Pinning clears the default expiry. Dates you set manually still apply."
+  },
+  "historySize": {
+    "message": "History size"
+  },
+  "keepAllClips": {
+    "message": "Keep all clips"
+  },
+  "last100Clips": {
+    "message": "Last 100 clips"
+  },
+  "last500Clips": {
+    "message": "Last 500 clips"
+  },
+  "last1000Clips": {
+    "message": "Last 1,000 clips"
+  },
+  "last5000Clips": {
+    "message": "Last 5,000 clips"
+  },
+  "whenTheHistoryIsFull": {
+    "message": "When the history is full, the least recently used clips are deleted. Pinned clips are always kept."
+  },
+  "passphraseLock": {
+    "message": "Passphrase lock"
+  },
+  "lockAgainAfter": {
+    "message": "Lock again after"
+  },
+  "5MinutesWithoutUse": {
+    "message": "5 minutes without use"
+  },
+  "15MinutesWithoutUse": {
+    "message": "15 minutes without use"
+  },
+  "1HourWithoutUse": {
+    "message": "1 hour without use"
+  },
+  "theBrowserCloses": {
+    "message": "The browser closes"
+  },
+  "setUpLock": {
+    "message": "Set up lock"
+  },
+  "changePassphrase": {
+    "message": "Change passphrase"
+  },
+  "turnOffLock": {
+    "message": "Turn off lock"
+  },
+  "importBackup": {
+    "message": "Import backup"
+  },
+  "exportBackup": {
+    "message": "Export backup"
+  },
+  "retryCapture": {
+    "message": "Retry capture"
+  },
+  "pause": {
+    "message": "Pause"
+  },
+  "saveCopiedTextAutomatically": {
+    "message": "Save copied text automatically?"
+  },
+  "copyholdCanSaveTextYou": {
+    "message": "Copyhold can save text you copy anywhere in this browser, even when this popup is closed. Text that looks like a password, key, or card number is masked. Clips stay on this device and are never sent anywhere."
+  },
+  "youCanPauseOrTurn": {
+    "message": "You can pause or turn this off at any time."
+  },
+  "turnOn": {
+    "message": "Turn on"
+  },
+  "notNow": {
+    "message": "Not now"
+  },
+  "copyholdIsLocked": {
+    "message": "Copyhold is locked"
+  },
+  "enterYourPassphraseToSee": {
+    "message": "Enter your passphrase to see your clips. Copyhold keeps saving while it's locked."
+  },
+  "unlock": {
+    "message": "Unlock"
+  },
+  "forgotYourPassphrase": {
+    "message": "Forgot your passphrase?"
+  },
+  "copy": {
+    "message": "Copy"
+  },
+  "selectAllShownClips": {
+    "message": "Select all shown clips"
+  },
+  "filterSavedClips": {
+    "message": "Filter saved clips"
+  },
+  "allClips": {
+    "message": "All clips"
+  },
+  "pinned": {
+    "message": "Pinned"
+  },
+  "pin": {
+    "message": "Pin"
+  },
+  "recent": {
+    "message": "Recent"
+  },
+  "noSavedClips": {
+    "message": "No saved clips"
+  },
+  "showAllClips": {
+    "message": "Show all clips"
+  },
+  "undo": {
+    "message": "Undo"
+  },
+  "clipboardText": {
+    "message": "Clipboard text"
+  },
+  "optional": {
+    "message": "Optional"
+  },
+  "deleteAutomatically": {
+    "message": "Delete automatically"
+  },
+  "1Hour": {
+    "message": "1 hour"
+  },
+  "1Week": {
+    "message": "1 week"
+  },
+  "never": {
+    "message": "Never"
+  },
+  "usesLocalTimeNewClips": {
+    "message": "Uses local time. New clips without a date follow your default retention setting."
+  },
+  "clipPreview": {
+    "message": "Clip preview"
+  },
+  "show": {
+    "message": "Show"
+  },
+  "mask": {
+    "message": "Mask"
+  },
+  "hide": {
+    "message": "Hide"
+  },
+  "showsTheClipText": {
+    "message": "Shows the clip text."
+  },
+  "showsUpToThreeCharacters": {
+    "message": "Shows up to three characters, then **."
+  },
+  "showsOnlyHiddenAndThe": {
+    "message": "Shows only “Hidden” and the length of the text."
+  },
+  "copyAndExportAlwaysUse": {
+    "message": "Copy and export always use the original text."
+  },
+  "cancel": {
+    "message": "Cancel"
+  },
+  "reveal": {
+    "message": "Reveal"
+  },
+  "close": {
+    "message": "Close"
+  },
+  "setUpAPassphraseLock": {
+    "message": "Set up a passphrase lock"
+  },
+  "atLeast8CharactersA": {
+    "message": "At least 8 characters. A few unrelated words are easy to remember and hard to guess."
+  },
+  "confirmPassphrase": {
+    "message": "Confirm passphrase"
+  },
+  "turnOnLock": {
+    "message": "Turn on lock"
+  },
+  "closeThePopupAfterCopying": {
+    "message": "Close the popup after copying"
+  },
+  "automaticallySaveCopiedImages": {
+    "message": "Automatically save copied images"
+  },
+  "allShown": {
+    "message": "All shown"
+  },
+  "delete": {
+    "message": "Delete"
+  },
+  "title": {
+    "message": "Title"
+  },
+  "description": {
+    "message": "Description"
+  },
+  "expiryAndPrivacy": {
+    "message": "Expiry and privacy"
+  },
+  "errorInvalidJson": {
+    "message": "This file does not contain valid JSON."
+  },
+  "errorNotBackup": {
+    "message": "Choose a Copyhold JSON backup."
+  },
+  "errorInvalidEntry": {
+    "message": "Entry $1 is invalid. No entries were imported."
+  },
+  "errorImageTooLarge": {
+    "message": "This image is too large to save."
+  },
+  "saveExisting": {
+    "message": "Already saved. Moved it to the top."
+  },
+  "saveMasked": {
+    "message": "Saved and masked, because it looks like $1."
+  },
+  "saveDone": {
+    "message": "Saved."
+  },
+  "errorReadClipboard": {
+    "message": "Could not read the clipboard."
+  },
+  "clipboardEmpty": {
+    "message": "The clipboard is empty."
+  },
+  "errorWriteClipboard": {
+    "message": "Could not write to the clipboard."
+  },
+  "errorRecordClipboard": {
+    "message": "Copied, but automatic capture could not record the clipboard change."
+  },
+  "sensitive_privateKey": {
+    "message": "a private key"
+  },
+  "sensitive_apiKey": {
+    "message": "an API key"
+  },
+  "sensitive_accessToken": {
+    "message": "an access token"
+  },
+  "sensitive_cardNumber": {
+    "message": "a card number"
+  },
+  "sensitive_password": {
+    "message": "a password"
+  },
+  "errorPassphrase": {
+    "message": "That passphrase isn't right."
+  },
+  "errorClipRemoved": {
+    "message": "This clip was removed in another view."
+  },
+  "hiddenPreview_one": {
+    "message": "Hidden · $1 character"
+  },
+  "hiddenPreview_other": {
+    "message": "Hidden · $1 characters"
+  },
+  "spacesOnly": {
+    "message": "(spaces only)"
+  },
+  "ageNow": {
+    "message": "now"
+  },
+  "ageMinutes": {
+    "message": "$1m"
+  },
+  "ageHours": {
+    "message": "$1h"
+  },
+  "ageDays": {
+    "message": "$1d"
+  },
+  "ageWeeks": {
+    "message": "$1w"
+  },
+  "justNow": {
+    "message": "just now"
+  },
+  "inUnderAMinute": {
+    "message": "in under a minute"
+  },
+  "menuSaveSelection": {
+    "message": "Save selection to Copyhold"
+  },
+  "badgeTitle": {
+    "message": "Copyhold: $1"
+  },
+  "errorSaveSelection": {
+    "message": "Could not save the selection."
+  },
+  "errorSaveClipboard": {
+    "message": "Could not save the clipboard."
+  },
+  "errorUpdateCapture": {
+    "message": "Could not update automatic capture."
+  },
+  "clipExpired": {
+    "message": "This clip has expired."
+  },
+  "errorLastUsed": {
+    "message": "Copied, but the clip's last-used time could not be saved."
+  },
+  "clipUnpinned": {
+    "message": "Clip unpinned."
+  },
+  "clipPinned": {
+    "message": "Clip pinned."
+  },
+  "clipMasked": {
+    "message": "Clip masked."
+  },
+  "clipShown": {
+    "message": "Clip shown."
+  },
+  "hiddenImage": {
+    "message": "Hidden image · $1 × $2"
+  },
+  "conceal": {
+    "message": "Conceal"
+  },
+  "autoSaveOff": {
+    "message": "Auto-save off"
+  },
+  "autoSavePaused": {
+    "message": "Auto-save paused"
+  },
+  "autoSaveOn": {
+    "message": "Auto-save on"
+  },
+  "autoSaveIssue": {
+    "message": "Auto-save needs attention"
+  },
+  "autoSavePausedUntil": {
+    "message": "Auto-save paused until $1"
+  },
+  "autoSaveActive": {
+    "message": "Saving copied text automatically"
+  },
+  "captureIssue": {
+    "message": "Capture needs attention"
+  },
+  "resume": {
+    "message": "Resume"
+  },
+  "resumeTitle": {
+    "message": "Resume automatic capture"
+  },
+  "pauseTitle": {
+    "message": "Pause automatic capture for 15 minutes"
+  },
+  "retryTitle": {
+    "message": "Capture may be unavailable. Restart automatic capture."
+  },
+  "errorReachMonitor": {
+    "message": "Could not reach the clipboard monitor."
+  },
+  "captureOn": {
+    "message": "Automatic capture is on."
+  },
+  "captureOff": {
+    "message": "Automatic capture is off."
+  },
+  "skippedLarge": {
+    "message": "Copyhold didn't automatically save something very large you copied. Select Save clipboard to keep it."
+  },
+  "importHintTab": {
+    "message": "You can also drop a backup file onto this page."
+  },
+  "importHintPopup": {
+    "message": "Import opens Copyhold in a tab so the file picker stays open."
+  },
+  "imported_one": {
+    "message": "Imported $1 clip."
+  },
+  "imported_other": {
+    "message": "Imported $1 clips."
+  },
+  "exportTitle": {
+    "message": "Export clips?"
+  },
+  "exportMessage": {
+    "message": "The backup contains all saved clips unencrypted, including masked, hidden, and locked ones. Store it somewhere safe."
+  },
+  "export": {
+    "message": "Export"
+  },
+  "exportStarted": {
+    "message": "Export started."
+  },
+  "importPrompt": {
+    "message": "Select Import backup to choose a Copyhold backup."
+  },
+  "somethingWentWrong": {
+    "message": "Something went wrong."
+  },
+  "image": {
+    "message": "Image"
+  },
+  "editorEmptyPreview": {
+    "message": "Enter text to see a preview."
+  },
+  "noExpiry": {
+    "message": "No expiry"
+  },
+  "expiresIn": {
+    "message": "Expires $1"
+  },
+  "expiryInPast": {
+    "message": "Expiry is in the past"
+  },
+  "visibilityShown": {
+    "message": "Shown"
+  },
+  "visibilityMasked": {
+    "message": "Masked"
+  },
+  "visibilityHidden": {
+    "message": "Hidden"
+  },
+  "optionsSummary": {
+    "message": "$1 · $2"
+  },
+  "editImageClip": {
+    "message": "Edit image clip"
+  },
+  "editClip": {
+    "message": "Edit clip"
+  },
+  "saveShortcutMac": {
+    "message": "⌘↵"
+  },
+  "saveShortcutOther": {
+    "message": "Ctrl+Enter"
+  },
+  "errorExpiryPast": {
+    "message": "Choose an expiry date and time in the future."
+  },
+  "errorSaveClip": {
+    "message": "Could not save the clip."
+  },
+  "clipUpdated": {
+    "message": "Clip updated."
+  },
+  "clipAdded": {
+    "message": "Clip added."
+  },
+  "lockSummaryOn": {
+    "message": "On. Clip text and images are encrypted with your passphrase."
+  },
+  "lockSummaryOff": {
+    "message": "Off. Clips are stored unencrypted in this browser profile."
+  },
+  "unlocking": {
+    "message": "Unlocking…"
+  },
+  "forgotTitle": {
+    "message": "Delete all clips and remove the lock?"
+  },
+  "forgotMessage": {
+    "message": "Without the passphrase, locked clips can't be decrypted by anyone, including Copyhold. This deletes every clip so you can start again. It can't be undone."
+  },
+  "deleteAllClips": {
+    "message": "Delete all clips"
+  },
+  "forgotDone": {
+    "message": "All clips deleted. The lock is off."
+  },
+  "lockSetupTitle": {
+    "message": "Set up a passphrase lock"
+  },
+  "lockSetupMessage": {
+    "message": "Copyhold encrypts every clip's text and images. Saving keeps working while locked. If you forget the passphrase, your clips can't be recovered."
+  },
+  "lockChangeMessage": {
+    "message": "Your clips stay encrypted with the same key; only the passphrase that unlocks it changes."
+  },
+  "passphraseTooShort": {
+    "message": "Use at least 8 characters."
+  },
+  "passphraseMismatch": {
+    "message": "The passphrases don't match."
+  },
+  "encrypting": {
+    "message": "Encrypting your clips…"
+  },
+  "saving": {
+    "message": "Saving…"
+  },
+  "lockOn": {
+    "message": "Lock is on. Your clips are encrypted."
+  },
+  "passphraseChanged": {
+    "message": "Passphrase changed."
+  },
+  "errorSaveLock": {
+    "message": "Could not save the lock."
+  },
+  "lockRemoveTitle": {
+    "message": "Turn off the lock?"
+  },
+  "lockRemoveMessage": {
+    "message": "Copyhold will decrypt every clip and store it unencrypted in this browser profile."
+  },
+  "decrypting": {
+    "message": "Decrypting your clips…"
+  },
+  "lockOff": {
+    "message": "Lock is off."
+  },
+  "preview": {
+    "message": "Preview"
+  },
+  "openLink": {
+    "message": "Open link"
+  },
+  "unpin": {
+    "message": "Unpin"
+  },
+  "edit": {
+    "message": "Edit"
+  },
+  "select": {
+    "message": "Select"
+  },
+  "actionsFor": {
+    "message": "Actions for $1"
+  },
+  "menuKeyPreview": {
+    "message": "V"
+  },
+  "menuKeyOpen": {
+    "message": "O"
+  },
+  "menuKeyMask": {
+    "message": "M"
+  },
+  "menuKeyPin": {
+    "message": "P"
+  },
+  "menuKeyEdit": {
+    "message": "E"
+  },
+  "menuKeySelect": {
+    "message": "S"
+  },
+  "menuKeyDelete": {
+    "message": "D"
+  },
+  "copiedClips_one": {
+    "message": "Copied $1 clip."
+  },
+  "copiedClips_other": {
+    "message": "Copied $1 clips."
+  },
+  "copiedLines_one": {
+    "message": "Copied $1 clip, one per line."
+  },
+  "copiedLines_other": {
+    "message": "Copied $1 clips, one per line."
+  },
+  "imagesOneAtATime": {
+    "message": "Images can only be copied one at a time."
+  },
+  "pinnedClips_one": {
+    "message": "Pinned $1 clip."
+  },
+  "pinnedClips_other": {
+    "message": "Pinned $1 clips."
+  },
+  "unpinnedClips_one": {
+    "message": "Unpinned $1 clip."
+  },
+  "unpinnedClips_other": {
+    "message": "Unpinned $1 clips."
+  },
+  "deleteClipsTitle_one": {
+    "message": "Delete $1 clip?"
+  },
+  "deleteClipsTitle_other": {
+    "message": "Delete $1 clips?"
+  },
+  "deleteSelectedMessage": {
+    "message": "The selected clips will be permanently removed."
+  },
+  "deletionUndone": {
+    "message": "Deletion undone."
+  },
+  "expiredNotRestored": {
+    "message": "Expired clips could not be restored."
+  },
+  "clipsDeleted_one": {
+    "message": "Clip deleted"
+  },
+  "clipsDeleted_other": {
+    "message": "$1 clips deleted"
+  },
+  "untitledClip": {
+    "message": "Untitled clip"
+  },
+  "copiedToClipboard": {
+    "message": "Copied to clipboard"
+  },
+  "copiedAnnouncement": {
+    "message": "Copied to clipboard."
+  },
+  "imageDimensions": {
+    "message": "$1 × $2"
+  },
+  "imageLabel": {
+    "message": "$1 × $2 image"
+  },
+  "characters_one": {
+    "message": "$1 character"
+  },
+  "characters_other": {
+    "message": "$1 characters"
+  },
+  "imageShort": {
+    "message": "img"
+  },
+  "metaCopied": {
+    "message": "Copied $1"
+  },
+  "metaSaved": {
+    "message": "Saved $1"
+  },
+  "metaExpires": {
+    "message": "Expires $1"
+  },
+  "metaSeparator": {
+    "message": " · "
+  },
+  "maskedAutomatically": {
+    "message": "Masked automatically: looks like $1"
+  },
+  "moreActions": {
+    "message": "More actions"
+  },
+  "tryDifferentSearchOrAll": {
+    "message": "Try a different search or show all clips."
+  },
+  "tryDifferentSearch": {
+    "message": "Try a different search."
+  },
+  "searchLimitations": {
+    "message": "Masked, hidden, and image clips are searched by title, description, category, and tags only. Type #tag to search tags."
+  },
+  "noMatchingClips": {
+    "message": "No matching clips"
+  },
+  "noPinnedClips": {
+    "message": "No pinned clips"
+  },
+  "noPinnedHint": {
+    "message": "Choose Pin from a clip’s More actions menu to keep it here."
+  },
+  "emptyAutoHint": {
+    "message": "Text you copy is saved here automatically."
+  },
+  "emptyManualHint": {
+    "message": "Copy some text, then select Save clipboard. You can turn on automatic saving in Settings."
+  },
+  "emptyOpenShortcut": {
+    "message": "Open Copyhold anytime with $1."
+  },
+  "emptySaveShortcut": {
+    "message": "Save the clipboard without opening Copyhold with $1."
+  },
+  "emptyPrivacy": {
+    "message": "Clips stay in this browser profile and are never sent anywhere."
+  },
+  "welcome": {
+    "message": "Welcome to Copyhold"
+  },
+  "selectedCount": {
+    "message": "$1 selected"
+  },
+  "searchHintSelect": {
+    "message": "Use Up and Down to choose a clip. Enter selects or clears it."
+  },
+  "searchHintCopy": {
+    "message": "Use Up and Down to choose a clip. Enter copies it. Shift+Enter opens more actions."
+  },
+  "showMore": {
+    "message": "Show $1 more of $2"
+  },
+  "clipCount_one": {
+    "message": "$1 clip"
+  },
+  "clipCount_other": {
+    "message": "$1 clips"
+  },
+  "clipCountFiltered": {
+    "message": "$1 of $2 clips"
+  },
+  "clipsFound": {
+    "message": "$1 found."
+  },
+  "clipsShown": {
+    "message": "$1 shown."
+  },
+  "showClipPreviews": {
+    "message": "Show clip previews"
+  },
+  "clipPreviewsHidden": {
+    "message": "Clip previews hidden."
+  },
+  "clipPreviewsShown": {
+    "message": "Clip previews shown."
+  },
+  "trimTitle_one": {
+    "message": "Delete $1 older clip?"
+  },
+  "trimTitle_other": {
+    "message": "Delete $1 older clips?"
+  },
+  "trimMessage": {
+    "message": "Keeping the last $1 clips deletes the least recently used unpinned clips now. Pinned clips are kept. This can't be undone."
+  },
+  "deleteClips": {
+    "message": "Delete clips"
+  },
+  "trimmed_one": {
+    "message": "Deleted $1 older clip."
+  },
+  "trimmed_other": {
+    "message": "Deleted $1 older clips."
+  },
+  "historySaved": {
+    "message": "History size saved."
+  },
+  "category": {
+    "message": "Category"
+  },
+  "subcategory": {
+    "message": "Subcategory"
+  },
+  "tags": {
+    "message": "Tags"
+  },
+  "addTag": {
+    "message": "Add a tag"
+  },
+  "tagHint": {
+    "message": "Press Enter or comma to add a tag."
+  },
+  "filter": {
+    "message": "Filter"
+  },
+  "activeFilters": {
+    "message": "Active filters"
+  },
+  "filterClips": {
+    "message": "Filter clips"
+  },
+  "autoSaveHint": {
+    "message": "Changes save automatically. $1 to close."
+  },
+  "unsavedChanges": {
+    "message": "Editing…"
+  },
+  "savedState": {
+    "message": "Saved"
+  },
+  "removeTag": {
+    "message": "Remove tag $1"
+  },
+  "categoryPath": {
+    "message": "$1 › $2"
+  },
+  "filterByTag": {
+    "message": "Show clips tagged $1"
+  },
+  "filterEmptyHint": {
+    "message": "No clips match the chosen filters."
+  },
+  "allCategories": {
+    "message": "All categories"
+  },
+  "noCategoriesYet": {
+    "message": "No categories yet. Give a clip a category in its editor."
+  },
+  "tagsAllMatch": {
+    "message": "Tags (clips must have all)"
+  },
+  "noTagsYet": {
+    "message": "No tags yet. Add tags to a clip in its editor."
+  },
+  "clearFilters": {
+    "message": "Clear filters"
+  },
+  "removeFilter": {
+    "message": "Remove filter $1"
+  },
+  "categoriesAndTags": {
+    "message": "Categories and tags"
+  },
+  "manageHint": {
+    "message": "Rename, merge, or delete them across all clips."
+  },
+  "manageCategoriesAndTags": {
+    "message": "Manage categories and tags"
+  },
+  "manageDialogHint": {
+    "message": "Renaming to a name that already exists merges the two. Deleting removes it from its clips; the clips stay."
+  },
+  "categories": {
+    "message": "Categories"
+  },
+  "renamedInClips_one": {
+    "message": "Renamed in $1 clip."
+  },
+  "renamedInClips_other": {
+    "message": "Renamed in $1 clips."
+  },
+  "removedFromClips_one": {
+    "message": "Removed from $1 clip."
+  },
+  "removedFromClips_other": {
+    "message": "Removed from $1 clips."
+  },
+  "renameItem": {
+    "message": "Rename $1"
+  },
+  "save": {
+    "message": "Save"
+  },
+  "rename": {
+    "message": "Rename"
+  },
+  "deleteCategoryTitle": {
+    "message": "Delete the category $1?"
+  },
+  "deleteCategoryMessage_one": {
+    "message": "$1 clip loses this category and its subcategory. The clip isn't deleted."
+  },
+  "deleteCategoryMessage_other": {
+    "message": "$1 clips lose this category and their subcategories. The clips aren't deleted."
+  },
+  "deleteSubcategoryTitle": {
+    "message": "Delete the subcategory $1?"
+  },
+  "deleteSubcategoryMessage_one": {
+    "message": "$1 clip keeps its category but loses this subcategory."
+  },
+  "deleteSubcategoryMessage_other": {
+    "message": "$1 clips keep their category but lose this subcategory."
+  },
+  "deleteTagTitle": {
+    "message": "Delete the tag $1?"
+  },
+  "deleteTagMessage_one": {
+    "message": "The tag is removed from $1 clip. The clip isn't deleted."
+  },
+  "deleteTagMessage_other": {
+    "message": "The tag is removed from $1 clips. The clips aren't deleted."
+  }
+}

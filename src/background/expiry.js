@@ -1,5 +1,5 @@
 import { getSettings } from "../lib/settings.js";
-import { removeExpired, trimHistory } from "../lib/store.js";
+import { backfillHashes, removeExpired, trimHistory } from "../lib/store.js";
 
 const alarmName = "copyhold-expiry";
 
@@ -28,6 +28,11 @@ async function startExpiry() {
     console.error("Clip expiry alarm:", error);
   }
   await cleanUp();
+  try {
+    await backfillHashes();
+  } catch (error) {
+    console.error("Clip hashes:", error);
+  }
 }
 
 chrome.alarms.onAlarm.addListener((alarm) => {

@@ -7,8 +7,9 @@ const root = fileURLToPath(new URL("../", import.meta.url));
 const source = join(root, "src");
 const dist = join(root, "dist");
 const browsers = ["chromium", "firefox"];
-// Firefox has no offscreen documents, so its build keeps the expiry alarm but not the clipboard monitor.
+// Firefox has no offscreen documents; its background page reads the clipboard itself.
 const chromiumOnly = ["background/service-worker.js", "offscreen"];
+const firefoxOnly = ["background/firefox.js"];
 
 function zipFolder(folder, archive, entries) {
   execFileSync("zip", ["-q", "-r", "-X", archive, ...entries], { cwd: folder, stdio: "inherit" });
@@ -34,13 +35,14 @@ async function build() {
       const output = join(staging, browser);
       await cp(source, output, { recursive: true, filter: (path) => basename(path) !== ".DS_Store" });
       const browserManifest = { ...manifest };
-      if (browser === "chromium") delete browserManifest.browser_specific_settings;
+      if (browser === "chromium") {
+        delete browserManifest.browser_specific_settings;
+        for (const path of firefoxOnly) await rm(join(output, path), { force: true });
+      }
       if (browser === "firefox") {
-        browserManifest.background = { scripts: ["background/expiry.js"], type: "module" };
+        browserManifest.background = { scripts: ["background/firefox.js"], type: "module" };
         delete browserManifest.minimum_chrome_version;
-        browserManifest.permissions = manifest.permissions.filter(
-          (permission) => permission !== "offscreen" && permission !== "idle",
-        );
+        browserManifest.permissions = manifest.permissions.filter((permission) => permission !== "offscreen");
         for (const path of chromiumOnly) await rm(join(output, path), { recursive: true, force: true });
       }
       await writeFile(join(output, "manifest.json"), `${JSON.stringify(browserManifest, null, 2)}\n`);

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Copyhold: a private clipboard manager for Chrome</title>
-  <meta name="description" content="Copyhold keeps the text you copy so you can search for it and copy it again. Keyboard-first, private by design, and free.">
+  <meta name="description" content="Copyhold keeps the text and images you copy so you can search for them and copy them again. Keyboard-first, encrypted if you like, private by design, and free.">
   <meta property="og:title" content="Copyhold: a private clipboard manager for Chrome">
   <meta property="og:description" content="Keep the text you copy, find it fast, and keep sensitive clips out of sight. Your clips never leave your device.">
   <meta property="og:image" content="https://nevin.github.io/copyhold/screenshots/popup-list.png">
@@ -31,7 +31,7 @@
         <div>
           <span class="eyebrow">Free and open source</span>
           <h1>Everything you copy, kept close.</h1>
-          <p class="lede">Copyhold is a clipboard manager for Chrome and Edge. It keeps the text you copy, lets you find it again in a keystroke, and never sends a single clip off your device.</p>
+          <p class="lede">Copyhold is a clipboard manager for Chrome, Edge, and Firefox. It keeps the text and images you copy, finds them again in a keystroke, masks secrets, and never sends a single clip off your device.</p>
           <div class="actions">
             <a class="button primary" href="https://github.com/nevin/copyhold/releases/latest/download/copyhold-chromium.zip">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 19h14"/></svg>
@@ -39,7 +39,7 @@
             </a>
             <a class="button secondary" href="#install">How to install</a>
           </div>
-          <p class="note">Version 1.1.0 · <a href="https://github.com/nevin/copyhold/releases/latest">What's new</a>. Coming soon to the Chrome Web Store; until then, install it from the download in under a minute.</p>
+          <p class="note">Version 1.2.0 · <a href="https://github.com/nevin/copyhold/releases/latest">What's new</a>: categories and tags, passphrase lock, image clips, and secret detection. Coming soon to the Chrome Web Store; until then, install it from the download in under a minute.</p>
         </div>
         <div class="frame">
           <img src="screenshots/popup-list.png" width="896" height="1200" alt="The Copyhold popup listing pinned and recent clips, with a search field and a highlighted link clip.">
@@ -62,7 +62,7 @@
           <div class="feature">
             <div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/></svg></div>
             <h3>Saves as you copy, if you want</h3>
-            <p>Turn on automatic saving and Copyhold keeps what you copy, even with the popup closed. It's off until you choose, and you can pause it anytime.</p>
+            <p>Turn on automatic saving and Copyhold keeps what you copy, even with the popup closed. Copy something again and it moves to the top instead of repeating.</p>
           </div>
           <div class="feature">
             <div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 8.5 7 10 4-1.5 7-5.5 7-10V6l-7-3Z"/></svg></div>
@@ -70,9 +70,29 @@
             <p>No servers, no accounts, no analytics, no network requests. Your clips live in your browser profile and nowhere else.</p>
           </div>
           <div class="feature">
+            <div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11V8a5 5 0 0 1 10 0v3M5 11h14v10H5Z"/></svg></div>
+            <h3>Passphrase lock</h3>
+            <p>Encrypt every clip with a passphrase. Copyhold keeps saving while locked and locks again when you step away or lock your computer.</p>
+          </div>
+          <div class="feature">
             <div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M10 6.2c.6-.1 1.3-.2 2-.2 6.4 0 10 6 10 6a16 16 0 0 1-3 3.4M6.2 7.8A17 17 0 0 0 2 12s3.6 6 10 6c1.5 0 2.9-.3 4.1-.9"/></svg></div>
-            <h3>Sensitive text stays out of sight</h3>
-            <p>Mask or hide a clip's preview, or hide every preview with one click while you share your screen. Copying still uses the original text.</p>
+            <h3>Secrets stay out of sight</h3>
+            <p>Passwords, API keys, and card numbers are spotted on your device and masked automatically. Hide every preview with one click while you share your screen.</p>
+          </div>
+          <div class="feature">
+            <div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16l-6 8v5l-4 2v-7Z"/></svg></div>
+            <h3>Categories and tags</h3>
+            <p>File clips under a category and subcategory, add as many tags as you like, and filter by them. Type <kbd>#tag</kbd> in search to find tagged clips.</p>
+          </div>
+          <div class="feature">
+            <div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4ZM4 16l5-5 4 4 2-2 5 5M15 9h.01"/></svg></div>
+            <h3>Images too</h3>
+            <p>Save screenshots and copied images with a thumbnail, and copy them back as images.</p>
+          </div>
+          <div class="feature">
+            <div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3l2-3h6l2 3h3v12H4ZM12 10v6m-3-3h6"/></svg></div>
+            <h3>Save without opening it</h3>
+            <p>Press <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd> to save the clipboard, or right-click selected text and choose Save selection to Copyhold.</p>
           </div>
           <div class="feature">
             <div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></div>
@@ -82,7 +102,7 @@
           <div class="feature">
             <div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3 4 14h7l-1 7 9-11h-7l1-7Z"/></svg></div>
             <h3>Fast with big histories</h3>
-            <p>Search stays instant with thousands of clips. Links, code, emails, and colors are recognized at a glance.</p>
+            <p>Opens and searches instantly with thousands of clips. Links, code, emails, and colors are recognized at a glance.</p>
           </div>
           <div class="feature">
             <div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg></div>
@@ -106,28 +126,28 @@
         </div>
         <div class="gallery three">
           <figure>
-            <div class="frame"><img src="screenshots/popup-compact-dark.png" width="896" height="1200" loading="lazy" alt="Compact view in the dark theme: one line per clip with its age, length, and row actions for pin, edit, and delete."></div>
-            <figcaption><strong>Compact view</strong>One line per clip, with when you last used it and how long it is. Pin, edit, or delete right from the row.</figcaption>
+            <div class="frame"><img src="screenshots/popup-locked.png" width="896" height="800" loading="lazy" alt="The Copyhold popup locked, asking for a passphrase, with Save clipboard still available."></div>
+            <figcaption><strong>Locked with a passphrase</strong>Clips are encrypted on your device. Saving keeps working while it's locked.</figcaption>
           </figure>
           <figure>
-            <div class="frame"><img src="screenshots/popup-menu.png" width="896" height="1200" loading="lazy" alt="The actions menu for a clip, listing Preview, Open link, Mask text, Pin, Edit, Select, and Delete with letter shortcuts."></div>
-            <figcaption><strong>Every action, one key away</strong>Press Shift+Enter for the menu, then the letter for what you need.</figcaption>
+            <div class="frame"><img src="screenshots/popup-compact-dark.png" width="896" height="1200" loading="lazy" alt="Compact view in the dark theme: one line per clip with its age and length, an image thumbnail, and a masked API key."></div>
+            <figcaption><strong>Compact view</strong>One line per clip, images included. Pin, edit, or delete right from the row.</figcaption>
           </figure>
           <figure>
-            <div class="frame"><img src="screenshots/popup-select.png" width="896" height="1200" loading="lazy" alt="Three clips selected, with Copy, Pin, and Delete buttons for the selection."></div>
+            <div class="frame"><img src="screenshots/popup-settings.png" width="896" height="1200" loading="lazy" alt="Settings for passwords, keys, and card numbers, automatic image saving, retention, history size, and the passphrase lock."></div>
+            <figcaption><strong>Secrets stay masked</strong>Choose whether recognized secrets are masked, skipped, or kept.</figcaption>
+          </figure>
+          <figure>
+            <div class="frame"><img src="screenshots/popup-filter.png" width="896" height="1360" loading="lazy" alt="The filter panel with the Work category and the snippet tag chosen, listing categories, subcategories, and tags with counts."></div>
+            <figcaption><strong>Categories and tags</strong>Give clips a category, subcategory, and tags, then filter by any of them.</figcaption>
+          </figure>
+          <figure>
+            <div class="frame"><img src="screenshots/popup-select.png" width="896" height="1200" loading="lazy" alt="Several clips selected, with Copy, Pin, and Delete buttons for the selection."></div>
             <figcaption><strong>Work with many clips</strong>Select all, then copy, pin, or delete them together.</figcaption>
           </figure>
           <figure>
-            <div class="frame"><img src="screenshots/popup-hidden.png" width="896" height="1200" loading="lazy" alt="Every clip's text replaced by its first three characters after selecting the eye button."></div>
-            <figcaption><strong>Hide every preview</strong>One click hides all clip text while you share your screen.</figcaption>
-          </figure>
-          <figure>
             <div class="frame"><img src="screenshots/popup-editor.png" width="896" height="1280" loading="lazy" alt="Editing a clip, with quick expiry choices of 1 hour, 1 day, 1 week, or never, and preview options."></div>
-            <figcaption><strong>Expiry and privacy per clip</strong>Pick when a clip deletes itself and how much of it shows.</figcaption>
-          </figure>
-          <figure>
-            <div class="frame"><img src="screenshots/popup-prompt.png" width="896" height="940" loading="lazy" alt="The first-run question asking whether to save copied text automatically, with Turn on and Not now buttons."></div>
-            <figcaption><strong>You decide what gets saved</strong>Automatic saving asks first, and the switch at the top turns it on or off anytime.</figcaption>
+            <figcaption><strong>Edits save themselves</strong>Change the text, category, or tags and it's saved as you type.</figcaption>
           </figure>
         </div>
         <figure class="gallery wide">
@@ -140,7 +160,7 @@
       <div class="wrap">
         <div class="section-head">
           <h2>Install in under a minute</h2>
-          <p>Copyhold is on its way to the Chrome Web Store. Until then, load it straight from the download. It works in Chrome and Microsoft Edge.</p>
+          <p>Copyhold is on its way to the Chrome Web Store. Until then, load it straight from the download. It works in Chrome and Microsoft Edge; a Firefox package is on each <a href="https://github.com/nevin/copyhold/releases/latest">release</a>.</p>
         </div>
         <ol class="steps">
           <li><div><h3>Download and unzip</h3><p><a href="https://github.com/nevin/copyhold/releases/latest/download/copyhold-chromium.zip">Download copyhold-chromium.zip</a> and unzip it. Keep the <code>copyhold</code> folder somewhere it won't be deleted, because Chrome loads the extension from it.</p></div></li>
@@ -162,6 +182,7 @@
           <div><strong>No network access</strong><span>Copyhold makes no network requests and has no servers.</span></div>
           <div><strong>No tracking</strong><span>No analytics, ads, or third-party code.</span></div>
           <div><strong>Opt-in capture</strong><span>Automatic saving stays off until you turn it on, and pauses while you're away.</span></div>
+          <div><strong>Encryption if you want it</strong><span>A passphrase lock encrypts every clip with AES-GCM on your device.</span></div>
           <div><strong>Open source</strong><span>Read every line on <a href="https://github.com/nevin/copyhold">GitHub</a>.</span></div>
         </div>
         <p class="note">Read the full <a href="privacy.html">privacy policy</a>.</p>

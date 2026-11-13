@@ -1,22 +1,24 @@
 {
   "manifest_version": 3,
-  "name": "Copyhold",
-  "version": "1.1.0",
-  "description": "Save, organize, and reuse text from your clipboard.",
+  "name": "__MSG_extName__",
+  "version": "1.2.0",
+  "description": "__MSG_extDescription__",
   "permissions": [
     "clipboardRead",
     "clipboardWrite",
     "alarms",
+    "contextMenus",
     "idle",
-    "offscreen"
+    "offscreen",
+    "storage"
   ],
-  "minimum_chrome_version": "116",
+  "minimum_chrome_version": "123",
   "background": {
     "service_worker": "background/service-worker.js",
     "type": "module"
   },
   "action": {
-    "default_title": "Copyhold",
+    "default_title": "__MSG_extName__",
     "default_popup": "popup/popup.html",
     "default_icon": {
       "16": "icons/16.png",
@@ -25,7 +27,15 @@
   },
   "commands": {
     "_execute_action": {
-      "suggested_key": { "default": "Alt+Shift+Y" }
+      "suggested_key": {
+        "default": "Alt+Shift+Y"
+      }
+    },
+    "save-clipboard": {
+      "suggested_key": {
+        "default": "Alt+Shift+S"
+      },
+      "description": "__MSG_commandSaveClipboard__"
     }
   },
   "icons": {
@@ -44,5 +54,6 @@
         ]
       }
     }
-  }
+  },
+  "default_locale": "en"
 }

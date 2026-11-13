@@ -3,29 +3,32 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Copyhold</title>
+  <title data-i18n="extName">Copyhold</title>
   <link rel="stylesheet" href="popup.css">
-  <script type="module" src="popup.js"></script>
+  <script type="module" src="main.js"></script>
 </head>
 <body>
   <main>
     <header class="page-header">
       <div class="brand">
         <img src="../icons/32.png" width="28" height="28" alt="">
-        <h1>Copyhold</h1>
+        <h1 data-i18n="copyhold">Copyhold</h1>
       </div>
       <div class="header-actions">
-        <button id="capture" class="primary" type="button">Save clipboard</button>
-        <button id="new" class="secondary" type="button" aria-label="New clip" title="New clip">
+        <button id="capture" class="primary" type="button" data-i18n="saveClipboard">Save clipboard</button>
+        <button id="new" class="secondary" type="button" aria-label="New clip" title="New clip" data-i18n-aria-label="newClip" data-i18n-title="newClip">
           <svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v14M5 12h14"/></svg>
         </button>
-        <a id="open-tab" class="button secondary" href="popup.html?view=tab" target="_blank" rel="noopener" aria-label="Open in new tab" title="Open in new tab">
+        <a id="open-tab" class="button secondary" href="popup.html?view=tab" target="_blank" rel="noopener" aria-label="Open in new tab" title="Open in new tab" data-i18n-aria-label="openInNewTab" data-i18n-title="openInNewTab">
           <svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
             <path d="M14 4h6v6m0-6-9 9m7 0v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5"/>
           </svg>
         </a>
-        <details class="settings">
-          <summary class="button secondary" aria-label="Settings and backups" title="Settings and backups">
+        <button id="lock-now" class="secondary" type="button" aria-label="Lock Copyhold" title="Lock Copyhold" hidden data-i18n-aria-label="lockCopyhold" data-i18n-title="lockCopyhold">
+          <svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 11V8a5 5 0 0 1 10 0v3M5 11h14v10H5Z"/></svg>
+        </button>
+        <details id="settings" class="settings">
+          <summary class="button secondary" aria-label="Settings and backups" title="Settings and backups" data-i18n-aria-label="settingsAndBackups" data-i18n-title="settingsAndBackups">
             <svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="m10 3-.6 2.5-2 .9L5 5.6 3 9l1.8 1.8v2.4L3 15l2 3.4 2.4-.8 2 .9.6 2.5h4l.6-2.5 2-.9 2.4.8 2-3.4-1.8-1.8v-2.4L21 9l-2-3.4-2.4.8-2-.9L14 3Z"/>
               <circle cx="12" cy="12" r="3"/>
@@ -33,60 +36,97 @@
           </summary>
           <div class="settings-body">
             <div class="settings-heading">
-              <h2>Settings and backups</h2>
-              <button id="close-settings" class="quiet" type="button">Done</button>
+              <h2 data-i18n="settingsAndBackups">Settings and backups</h2>
+              <button id="close-settings" class="quiet" type="button" data-i18n="done">Done</button>
             </div>
             <fieldset class="theme-setting">
-              <legend>Appearance</legend>
+              <legend data-i18n="appearance">Appearance</legend>
               <div class="filters">
-                <label><input type="radio" name="theme" value="light"><span>Light</span></label>
-                <label><input type="radio" name="theme" value="dark"><span>Dark</span></label>
-                <label><input type="radio" name="theme" value="system" checked><span>System</span></label>
+                <label><input type="radio" name="theme" value="light"><span data-i18n="light">Light</span></label>
+                <label><input type="radio" name="theme" value="dark"><span data-i18n="dark">Dark</span></label>
+                <label><input type="radio" name="theme" value="system" checked><span data-i18n="system">System</span></label>
               </div>
             </fieldset>
             <fieldset class="theme-setting">
-              <legend>List density</legend>
+              <legend data-i18n="listDensity">List density</legend>
               <div class="filters">
-                <label><input type="radio" name="density" value="comfortable" checked><span>Comfortable</span></label>
-                <label><input type="radio" name="density" value="compact"><span>Compact</span></label>
+                <label><input type="radio" name="density" value="comfortable" checked><span data-i18n="comfortable">Comfortable</span></label>
+                <label><input type="radio" name="density" value="compact"><span data-i18n="compact">Compact</span></label>
               </div>
             </fieldset>
             <div id="auto-capture-setting" hidden>
               <label class="capture-setting">
                 <input id="auto-capture" type="checkbox" disabled aria-describedby="auto-capture-hint capture-state">
-                Automatically save copied text
+                <span data-i18n="automaticallySaveCopiedText">Automatically save copied text</span>
               </label>
               <p id="capture-state" class="sr-only" hidden></p>
-              <p id="auto-capture-hint" class="hint">Saves text in this browser profile, even when the Copyhold popup is closed.</p>
+              <p id="auto-capture-hint" class="hint" data-i18n="savesTextInThisBrowser">Saves text in this browser profile, even when the Copyhold popup is closed.</p>
             </div>
             <div>
               <label class="capture-setting">
                 <input id="close-after-copy" type="checkbox" disabled aria-describedby="close-after-copy-hint">
-                Close the popup after copying
+                <span data-i18n="closeThePopupAfterCopying">Close the popup after copying</span>
               </label>
-              <p id="close-after-copy-hint" class="hint">The full-tab view stays open.</p>
+              <p id="close-after-copy-hint" class="hint" data-i18n="theFullTabViewStays">The full-tab view stays open.</p>
             </div>
-            <label for="retention-days">Default clip retention</label>
+            <label for="sensitive-clips" data-i18n="passwordsKeysAndCardNumbers">Passwords, keys, and card numbers</label>
+            <select id="sensitive-clips" aria-describedby="sensitive-hint" disabled>
+              <option value="mask" data-i18n="saveThemMasked">Save them masked</option>
+              <option value="skip" data-i18n="donTSaveThemAutomatically">Don't save them automatically</option>
+              <option value="keep" data-i18n="saveThemLikeOtherText">Save them like other text</option>
+            </select>
+            <p id="sensitive-hint" class="hint" data-i18n="copyholdRecognizesCommonSecretsOn">Copyhold recognizes common secrets on this device. It can miss some, so mask other sensitive clips yourself.</p>
+            <div>
+              <label class="capture-setting">
+                <input id="capture-images" type="checkbox" disabled aria-describedby="capture-images-hint">
+                <span data-i18n="automaticallySaveCopiedImages">Automatically save copied images</span>
+              </label>
+              <p id="capture-images-hint" class="hint" data-i18n="usesMoreMemoryAndBattery">Uses more memory and battery. Save clipboard saves an image whenever the clipboard has no text.</p>
+            </div>
+            <label for="retention-days" data-i18n="defaultClipRetention">Default clip retention</label>
             <select id="retention-days" aria-describedby="retention-hint" disabled>
-              <option value="0">Keep until deleted</option>
-              <option value="1">1 day</option>
-              <option value="7">7 days</option>
-              <option value="30">30 days</option>
-              <option value="90">90 days</option>
+              <option value="0" data-i18n="keepUntilDeleted">Keep until deleted</option>
+              <option value="1" data-i18n="1Day">1 day</option>
+              <option value="7" data-i18n="7Days">7 days</option>
+              <option value="30" data-i18n="30Days">30 days</option>
+              <option value="90" data-i18n="90Days">90 days</option>
             </select>
-            <p id="retention-hint" class="hint">Applies to new unpinned clips. Pinning clears the default expiry. Dates you set manually still apply.</p>
-            <label for="history-limit">History size</label>
+            <p id="retention-hint" class="hint" data-i18n="appliesToNewUnpinnedClips">Applies to new unpinned clips. Pinning clears the default expiry. Dates you set manually still apply.</p>
+            <label for="history-limit" data-i18n="historySize">History size</label>
             <select id="history-limit" aria-describedby="history-limit-hint" disabled>
-              <option value="0">Keep all clips</option>
-              <option value="100">Last 100 clips</option>
-              <option value="500">Last 500 clips</option>
-              <option value="1000">Last 1,000 clips</option>
-              <option value="5000">Last 5,000 clips</option>
+              <option value="0" data-i18n="keepAllClips">Keep all clips</option>
+              <option value="100" data-i18n="last100Clips">Last 100 clips</option>
+              <option value="500" data-i18n="last500Clips">Last 500 clips</option>
+              <option value="1000" data-i18n="last1000Clips">Last 1,000 clips</option>
+              <option value="5000" data-i18n="last5000Clips">Last 5,000 clips</option>
             </select>
-            <p id="history-limit-hint" class="hint">When the history is full, the least recently used clips are deleted. Pinned clips are always kept.</p>
+            <p id="history-limit-hint" class="hint" data-i18n="whenTheHistoryIsFull">When the history is full, the least recently used clips are deleted. Pinned clips are always kept.</p>
+            <div class="organize-setting">
+              <p class="setting-label" data-i18n="categoriesAndTags">Categories and tags</p>
+              <p class="hint" data-i18n="manageHint">Rename, merge, or delete them across all clips.</p>
+              <button id="manage-organization" class="secondary" type="button" data-i18n="manageCategoriesAndTags">Manage categories and tags</button>
+            </div>
+            <fieldset class="lock-setting">
+              <legend data-i18n="passphraseLock">Passphrase lock</legend>
+              <p id="lock-summary" class="hint"></p>
+              <div id="lock-options" class="lock-options" hidden>
+                <label for="lock-after" data-i18n="lockAgainAfter">Lock again after</label>
+                <select id="lock-after">
+                  <option value="5" data-i18n="5MinutesWithoutUse">5 minutes without use</option>
+                  <option value="15" data-i18n="15MinutesWithoutUse">15 minutes without use</option>
+                  <option value="60" data-i18n="1HourWithoutUse">1 hour without use</option>
+                  <option value="0" data-i18n="theBrowserCloses">The browser closes</option>
+                </select>
+              </div>
+              <div class="actions">
+                <button id="lock-setup" class="secondary" type="button" data-i18n="setUpLock">Set up lock</button>
+                <button id="lock-change" class="secondary" type="button" hidden data-i18n="changePassphrase">Change passphrase</button>
+                <button id="lock-remove" class="secondary" type="button" hidden data-i18n="turnOffLock">Turn off lock</button>
+              </div>
+            </fieldset>
             <div class="actions">
-              <button id="import" class="secondary" type="button" aria-describedby="import-hint">Import backup</button>
-              <button id="export" class="secondary" type="button">Export backup</button>
+              <button id="import" class="secondary" type="button" aria-describedby="import-hint" data-i18n="importBackup">Import backup</button>
+              <button id="export" class="secondary" type="button" data-i18n="exportBackup">Export backup</button>
               <input id="file" type="file" accept=".json,application/json" hidden>
             </div>
             <p id="import-hint" class="hint"></p>
@@ -96,144 +136,216 @@
     </header>
 
     <div id="capture-toolbar" class="capture-toolbar" hidden>
-      <button id="capture-switch" class="switch" type="button" role="switch" aria-checked="false" aria-label="Automatically save copied text"></button>
+      <button id="capture-switch" class="switch" type="button" role="switch" aria-checked="false" aria-label="Automatically save copied text" data-i18n-aria-label="automaticallySaveCopiedText"></button>
       <span id="capture-indicator" role="status"></span>
-      <button id="capture-retry" class="quiet" type="button" hidden>Retry capture</button>
-      <button id="capture-pause" class="quiet" type="button" hidden>Pause</button>
+      <button id="capture-retry" class="quiet" type="button" hidden data-i18n="retryCapture">Retry capture</button>
+      <button id="capture-pause" class="quiet" type="button" hidden data-i18n="pause">Pause</button>
     </div>
 
     <section id="capture-prompt" class="capture-prompt" aria-labelledby="capture-prompt-title" hidden>
-      <h2 id="capture-prompt-title">Save copied text automatically?</h2>
-      <p>Copyhold can save text you copy anywhere in this browser, even when this popup is closed. That includes sensitive text such as passwords. Clips stay on this device and are never sent anywhere.</p>
-      <p>You can pause or turn this off at any time.</p>
+      <h2 id="capture-prompt-title" data-i18n="saveCopiedTextAutomatically">Save copied text automatically?</h2>
+      <p data-i18n="copyholdCanSaveTextYou">Copyhold can save text you copy anywhere in this browser, even when this popup is closed. Text that looks like a password, key, or card number is masked. Clips stay on this device and are never sent anywhere.</p>
+      <p data-i18n="youCanPauseOrTurn">You can pause or turn this off at any time.</p>
       <div class="actions">
-        <button id="capture-prompt-on" class="primary" type="button">Turn on</button>
-        <button id="capture-prompt-off" class="secondary" type="button">Not now</button>
+        <button id="capture-prompt-on" class="primary" type="button" data-i18n="turnOn">Turn on</button>
+        <button id="capture-prompt-off" class="secondary" type="button" data-i18n="notNow">Not now</button>
       </div>
     </section>
 
-    <section class="panel" aria-label="Saved clips">
+    <section id="lock-screen" class="lock-screen" aria-labelledby="lock-screen-title" hidden>
+      <svg class="lock-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 11V8a5 5 0 0 1 10 0v3M5 11h14v10H5Z"/></svg>
+      <h2 id="lock-screen-title" data-i18n="copyholdIsLocked">Copyhold is locked</h2>
+      <p class="hint" data-i18n="enterYourPassphraseToSee">Enter your passphrase to see your clips. Copyhold keeps saving while it's locked.</p>
+      <form id="unlock-form" class="unlock-form">
+        <label class="sr-only" for="unlock-passphrase" data-i18n="passphrase">Passphrase</label>
+        <input id="unlock-passphrase" type="password" autocomplete="current-password" placeholder="Passphrase" required data-i18n-placeholder="passphrase">
+        <button class="primary" type="submit" data-i18n="unlock">Unlock</button>
+      </form>
+      <p id="unlock-status" role="alert"></p>
+      <button id="forgot-passphrase" class="quiet" type="button" data-i18n="forgotYourPassphrase">Forgot your passphrase?</button>
+    </section>
+
+    <section id="clips-panel" class="panel" aria-label="Saved clips" data-i18n-aria-label="savedClips">
       <div class="search">
-        <label class="sr-only" for="search">Search clips</label>
+        <label class="sr-only" for="search" data-i18n="searchClips">Search clips</label>
         <div class="search-field">
           <svg class="action-icon search-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
             <circle cx="10.5" cy="10.5" r="5.5"/><path d="m15 15 4.5 4.5"/>
           </svg>
           <input id="search" type="search" placeholder="Search clips" autocomplete="off" role="combobox"
-            aria-controls="entries" aria-expanded="false" aria-autocomplete="list" aria-describedby="search-shortcut">
+            aria-controls="entries" aria-expanded="false" aria-autocomplete="list" aria-describedby="search-shortcut" data-i18n-placeholder="searchClips">
           <span id="search-shortcut" class="sr-only"></span>
-          <span id="search-key-hint" aria-hidden="true" hidden><kbd>↑↓</kbd> <kbd>↵</kbd> <span id="search-key-action">Copy</span></span>
-          <button id="clear-search" class="quiet" type="button" aria-label="Clear search" title="Clear search" hidden>
+          <span id="search-key-hint" aria-hidden="true" hidden><kbd>↑↓</kbd> <kbd>↵</kbd> <span id="search-key-action" data-i18n="copy">Copy</span></span>
+          <button id="clear-search" class="quiet" type="button" aria-label="Clear search" title="Clear search" hidden data-i18n-aria-label="clearSearch" data-i18n-title="clearSearch">
             <svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m6 6 12 12M18 6 6 18"/></svg>
           </button>
         </div>
-        <button id="hide-previews" class="quiet privacy-toggle" type="button" aria-pressed="false" aria-label="Hide clip previews" title="Hide clip previews">
+        <button id="hide-previews" class="quiet privacy-toggle" type="button" aria-pressed="false" aria-label="Hide clip previews" title="Hide clip previews" data-i18n-aria-label="hideClipPreviews" data-i18n-title="hideClipPreviews">
           <svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 3l18 18M10 6.2c.6-.1 1.3-.2 2-.2 6.4 0 10 6 10 6a16 16 0 0 1-3 3.4M6.2 7.8A17 17 0 0 0 2 12s3.6 6 10 6c1.5 0 2.9-.3 4.1-.9M10 10a3 3 0 0 0 4 4"/></svg>
         </button>
       </div>
       <div id="list-tools" class="list-tools">
-        <label class="select-all" title="Select clips"><input id="select-all" type="checkbox"><span class="sr-only">Select all shown clips</span></label>
+        <label class="select-all" title="Select clips" data-i18n-title="selectClips"><input id="select-all" type="checkbox"><span class="sr-only" data-i18n="selectAllShownClips">Select all shown clips</span></label>
         <fieldset class="filters">
-          <legend class="sr-only">Filter saved clips</legend>
-          <label><input id="all-clips" name="clip-filter" type="radio" checked><span>All clips</span></label>
-          <label><input id="pinned-clips" name="clip-filter" type="radio"><span>Pinned</span></label>
+          <legend class="sr-only" data-i18n="filterSavedClips">Filter saved clips</legend>
+          <label><input id="all-clips" name="clip-filter" type="radio" checked><span data-i18n="allClips">All clips</span></label>
+          <label><input id="pinned-clips" name="clip-filter" type="radio"><span data-i18n="pinned">Pinned</span></label>
         </fieldset>
+        <button id="filter-button" class="filter-button" type="button" popovertarget="filter-panel" aria-controls="filter-panel" aria-expanded="false">
+          <svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 5h16l-6 8v5l-4 2v-7Z"/></svg>
+          <span data-i18n="filter">Filter</span>
+          <span id="filter-count" class="filter-count"></span>
+        </button>
         <p id="count"></p>
       </div>
+      <div id="active-filters" class="active-filters" aria-label="Active filters" data-i18n-aria-label="activeFilters" hidden></div>
       <div id="bulk-actions" class="actions bulk-actions" hidden>
-        <label><input id="select-visible" type="checkbox" aria-label="Select all shown"> All shown</label>
+        <label><input id="select-visible" type="checkbox" aria-label="Select all shown" data-i18n-aria-label="selectAllShown"> <span data-i18n="allShown">All shown</span></label>
         <span id="selected-count" role="status"></span>
-        <button id="copy-selected" class="secondary selection-control" type="button" disabled>Copy</button>
-        <button id="pin-selected" class="secondary selection-control" type="button" disabled>Pin</button>
-        <button id="delete-selected" class="secondary selection-control" type="button" aria-label="Delete selected clips" title="Delete selected clips" disabled>
+        <button id="copy-selected" class="secondary selection-control" type="button" disabled data-i18n="copy">Copy</button>
+        <button id="pin-selected" class="secondary selection-control" type="button" disabled data-i18n="pin">Pin</button>
+        <button id="delete-selected" class="secondary selection-control" type="button" aria-label="Delete selected clips" title="Delete selected clips" disabled data-i18n-aria-label="deleteSelectedClips" data-i18n-title="deleteSelectedClips">
           <svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v5m4-5v5"/></svg>
-          Delete
+          <span data-i18n="delete">Delete</span>
         </button>
-        <button id="finish-selection" class="quiet selection-control" type="button">Done</button>
+        <button id="finish-selection" class="quiet selection-control" type="button" data-i18n="done">Done</button>
       </div>
       <p id="search-status" class="sr-only" role="status" aria-atomic="true"></p>
       <p id="status" role="status" aria-atomic="true"></p>
       <p id="copy-status" class="sr-only" role="status" aria-atomic="true"></p>
-      <div id="entries" class="clips" role="listbox" aria-label="Saved clips">
+      <div id="entries" class="clips" role="listbox" aria-label="Saved clips" data-i18n-aria-label="savedClips">
         <div id="pinned-group" class="clip-group" role="group" aria-labelledby="pinned-heading" hidden>
-          <div id="pinned-heading" class="group-heading" role="presentation">Pinned</div>
+          <div id="pinned-heading" class="group-heading" role="presentation" data-i18n="pinned">Pinned</div>
         </div>
         <div id="recent-group" class="clip-group" role="group" aria-labelledby="recent-heading" hidden>
-          <div id="recent-heading" class="group-heading" role="presentation">Recent</div>
+          <div id="recent-heading" class="group-heading" role="presentation" data-i18n="recent">Recent</div>
         </div>
       </div>
       <button id="show-more" class="quiet show-more" type="button" hidden></button>
       <div id="empty" class="empty" hidden>
-        <strong id="empty-title">No saved clips</strong>
+        <strong id="empty-title" data-i18n="noSavedClips">No saved clips</strong>
         <div id="empty-hints"></div>
-        <button id="reset-filters" class="secondary" type="button" hidden>Show all clips</button>
+        <button id="reset-filters" class="secondary" type="button" hidden data-i18n="showAllClips">Show all clips</button>
       </div>
     </section>
   </main>
   <div id="undo-bar" class="undo-bar" hidden>
     <span id="undo-message" role="status"></span>
-    <button id="undo-delete" class="secondary" type="button">Undo</button>
+    <button id="undo-delete" class="secondary" type="button" data-i18n="undo">Undo</button>
     <span id="undo-progress" class="undo-progress" aria-hidden="true"></span>
   </div>
 
   <div id="clip-menu" class="menu" role="menu" popover></div>
+  <div id="filter-panel" class="filter-panel" popover role="dialog" aria-label="Filter clips" data-i18n-aria-label="filterClips"></div>
 
   <dialog id="editor" aria-labelledby="editor-title">
-    <form id="edit-form">
-      <h2 id="editor-title">New clip</h2>
-      <label for="text">Clipboard text</label>
-      <textarea id="text" name="text" rows="4" required spellcheck="false" autofocus></textarea>
-      <label for="title">Title <span>Optional</span></label>
+    <form id="edit-form" novalidate>
+      <h2 id="editor-title" data-i18n="newClip">New clip</h2>
+      <div id="text-field" class="field">
+        <label for="text" data-i18n="clipboardText">Clipboard text</label>
+        <textarea id="text" name="text" rows="4" required spellcheck="false" autofocus></textarea>
+      </div>
+      <label for="title"><span data-i18n="title">Title</span> <span class="optional" data-i18n="optional">Optional</span></label>
       <input id="title" name="title" type="text">
-      <label for="description">Description <span>Optional</span></label>
+      <label for="description"><span data-i18n="description">Description</span> <span class="optional" data-i18n="optional">Optional</span></label>
       <textarea id="description" name="description" rows="2"></textarea>
+      <div class="field-row">
+        <div class="field">
+          <label for="category"><span data-i18n="category">Category</span> <span class="optional" data-i18n="optional">Optional</span></label>
+          <input id="category" name="category" type="text" list="category-options" autocomplete="off" maxlength="40">
+        </div>
+        <div class="field">
+          <label for="subcategory"><span data-i18n="subcategory">Subcategory</span> <span class="optional" data-i18n="optional">Optional</span></label>
+          <input id="subcategory" name="subcategory" type="text" list="subcategory-options" autocomplete="off" maxlength="40" disabled>
+        </div>
+      </div>
+      <datalist id="category-options"></datalist>
+      <datalist id="subcategory-options"></datalist>
+      <label for="tag-input"><span data-i18n="tags">Tags</span> <span class="optional" data-i18n="optional">Optional</span></label>
+      <div id="tag-field" class="tag-field">
+        <ul id="tag-list" class="tag-list" aria-label="Tags" data-i18n-aria-label="tags"></ul>
+        <input id="tag-input" type="text" list="tag-options" autocomplete="off" maxlength="40" aria-describedby="tag-hint"
+          placeholder="Add a tag" data-i18n-placeholder="addTag">
+      </div>
+      <datalist id="tag-options"></datalist>
+      <p id="tag-hint" class="hint" data-i18n="tagHint">Press Enter or comma to add a tag.</p>
       <details id="editor-options" class="editor-options">
-        <summary>Expiry and privacy <span id="options-summary"></span></summary>
+        <summary><span data-i18n="expiryAndPrivacy">Expiry and privacy</span> <span id="options-summary"></span></summary>
         <div class="options-body">
-          <label for="expires-at">Delete automatically</label>
-          <div id="expiry-presets" class="expiry-presets" role="group" aria-label="Quick expiry">
-            <button type="button" class="chip" data-expiry="3600000">1 hour</button>
-            <button type="button" class="chip" data-expiry="86400000">1 day</button>
-            <button type="button" class="chip" data-expiry="604800000">1 week</button>
-            <button type="button" class="chip" data-expiry="0">Never</button>
+          <label for="expires-at" data-i18n="deleteAutomatically">Delete automatically</label>
+          <div id="expiry-presets" class="expiry-presets" role="group" aria-label="Quick expiry" data-i18n-aria-label="quickExpiry">
+            <button type="button" class="chip" data-expiry="3600000" data-i18n="1Hour">1 hour</button>
+            <button type="button" class="chip" data-expiry="86400000" data-i18n="1Day">1 day</button>
+            <button type="button" class="chip" data-expiry="604800000" data-i18n="1Week">1 week</button>
+            <button type="button" class="chip" data-expiry="0" data-i18n="never">Never</button>
           </div>
           <input id="expires-at" name="expiresAt" type="datetime-local" aria-describedby="expiry-hint">
-          <p id="expiry-hint" class="hint">Uses local time. New clips without a date follow your default retention setting.</p>
+          <p id="expiry-hint" class="hint" data-i18n="usesLocalTimeNewClips">Uses local time. New clips without a date follow your default retention setting.</p>
           <fieldset class="visibility-options">
-            <legend>Clip preview</legend>
+            <legend data-i18n="clipPreview">Clip preview</legend>
             <div class="filters">
-              <label><input type="radio" name="visibility" value="visible" aria-describedby="preview-visible" checked><span>Show</span></label>
-              <label><input type="radio" name="visibility" value="masked" aria-describedby="preview-masked"><span>Mask</span></label>
-              <label><input type="radio" name="visibility" value="hidden" aria-describedby="preview-hidden"><span>Hide</span></label>
+              <label><input type="radio" name="visibility" value="visible" aria-describedby="preview-visible" checked><span data-i18n="show">Show</span></label>
+              <label><input type="radio" name="visibility" value="masked" aria-describedby="preview-masked"><span data-i18n="mask">Mask</span></label>
+              <label><input type="radio" name="visibility" value="hidden" aria-describedby="preview-hidden"><span data-i18n="hide">Hide</span></label>
             </div>
-            <p id="preview-visible" class="hint">Shows the clip text.</p>
-            <p id="preview-masked" class="hint">Shows up to three characters, then **.</p>
-            <p id="preview-hidden" class="hint">Shows only “Hidden” and the length of the text.</p>
-            <div class="preview-sample" role="group" aria-label="Preview in clip list">
+            <p id="preview-visible" class="hint" data-i18n="showsTheClipText">Shows the clip text.</p>
+            <p id="preview-masked" class="hint" data-i18n="showsUpToThreeCharacters">Shows up to three characters, then **.</p>
+            <p id="preview-hidden" class="hint" data-i18n="showsOnlyHiddenAndThe">Shows only “Hidden” and the length of the text.</p>
+            <div class="preview-sample" role="group" aria-label="Preview in clip list" data-i18n-aria-label="previewInClipList">
               <p id="sample-title" class="clip-title" hidden></p>
               <p id="sample-text" class="preview"></p>
             </div>
-            <p class="hint">Copy and export always use the original text.</p>
+            <p class="hint" data-i18n="copyAndExportAlwaysUse">Copy and export always use the original text.</p>
           </fieldset>
         </div>
       </details>
       <p id="form-status" role="alert"></p>
       <div class="actions dialog-actions editor-actions">
-        <span id="save-shortcut" class="hint" aria-hidden="true"></span>
-        <button id="cancel-edit" class="secondary" type="button">Cancel</button>
-        <button id="save-edit" class="primary" type="submit">Save clip</button>
+        <span id="save-state" class="save-state" role="status" aria-live="polite"></span>
+        <button id="save-edit" class="primary" type="submit" data-i18n="done">Done</button>
       </div>
     </form>
   </dialog>
 
   <dialog id="clip-preview" aria-labelledby="clip-preview-heading">
-    <h2 id="clip-preview-heading">Clip preview</h2>
+    <h2 id="clip-preview-heading" data-i18n="clipPreview">Clip preview</h2>
     <p id="clip-preview-title" class="clip-preview-title" hidden></p>
     <p id="clip-preview-description" class="clip-preview-description" hidden></p>
-    <pre id="clip-preview-text" tabindex="0" aria-label="Clip text"></pre>
+    <pre id="clip-preview-text" tabindex="0" aria-label="Clip text" data-i18n-aria-label="clipText"></pre>
+    <img id="clip-preview-image" class="clip-preview-image" alt="Clip image" hidden>
     <form method="dialog" class="actions dialog-actions">
-      <button id="clip-preview-reveal" class="secondary" type="button" aria-controls="clip-preview-text">Reveal text</button>
-      <button class="primary" autofocus>Close</button>
+      <button id="clip-preview-reveal" class="secondary" type="button" aria-controls="clip-preview-text" data-i18n="reveal">Reveal</button>
+      <button class="primary" autofocus data-i18n="close">Close</button>
+    </form>
+  </dialog>
+
+  <dialog id="manage-dialog" aria-labelledby="manage-title">
+    <h2 id="manage-title" data-i18n="categoriesAndTags">Categories and tags</h2>
+    <p class="hint" data-i18n="manageDialogHint">Renaming to a name that already exists merges the two. Deleting removes it from its clips; the clips stay.</p>
+    <h3 data-i18n="categories">Categories</h3>
+    <ul id="manage-categories" class="manage-list"></ul>
+    <h3 data-i18n="tags">Tags</h3>
+    <ul id="manage-tags" class="manage-list"></ul>
+    <p id="manage-status" class="hint" role="status"></p>
+    <form method="dialog" class="actions dialog-actions">
+      <button class="primary" data-i18n="done">Done</button>
+    </form>
+  </dialog>
+
+  <dialog id="lock-dialog" aria-labelledby="lock-dialog-title">
+    <form id="lock-form" class="lock-form">
+      <h2 id="lock-dialog-title" data-i18n="setUpAPassphraseLock">Set up a passphrase lock</h2>
+      <p id="lock-dialog-message" class="hint"></p>
+      <label for="new-passphrase" data-i18n="passphrase">Passphrase</label>
+      <input id="new-passphrase" type="password" autocomplete="new-password" required aria-describedby="passphrase-hint">
+      <p id="passphrase-hint" class="hint" data-i18n="atLeast8CharactersA">At least 8 characters. A few unrelated words are easy to remember and hard to guess.</p>
+      <label for="confirm-passphrase" data-i18n="confirmPassphrase">Confirm passphrase</label>
+      <input id="confirm-passphrase" type="password" autocomplete="new-password" required>
+      <p id="lock-form-status" role="alert"></p>
+      <div class="actions dialog-actions">
+        <button id="cancel-lock" class="secondary" type="button" data-i18n="cancel">Cancel</button>
+        <button id="save-lock" class="primary" type="submit" data-i18n="turnOnLock">Turn on lock</button>
+      </div>
     </form>
   </dialog>
 
@@ -242,7 +354,7 @@
       <h2 id="confirm-title"></h2>
       <p id="confirm-message"></p>
       <div class="actions dialog-actions">
-        <button class="secondary" value="cancel" autofocus>Cancel</button>
+        <button class="secondary" value="cancel" autofocus data-i18n="cancel">Cancel</button>
         <button id="confirm-action" class="primary" value="confirm"></button>
       </div>
     </form>

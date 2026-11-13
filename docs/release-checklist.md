@@ -4,8 +4,8 @@ Run through this with the built packages before each store submission. Use a fre
 
 ## Build
 
-- [ ] Bump `version` in `src/manifest.json`.
-- [ ] Run `npm test`.
+- [ ] Bump `version` in `src/manifest.json` and add a section for it to `CHANGELOG.md`.
+- [ ] Run `npm run check` (lint, types, unit tests) and `npm run test:e2e` (Chrome and Firefox).
 - [ ] Run `npm run package` and confirm `dist/copyhold-<version>-chromium.zip`, `dist/copyhold-<version>-firefox.zip`, and `dist/copyhold-chromium.zip` exist.
 - [ ] Unzip each package and check it contains only the extension files: no SVG sources, docs, or `.DS_Store`.
 
@@ -14,7 +14,7 @@ Run through this with the built packages before each store submission. Use a fre
 Load it with **Load unpacked** on `chrome://extensions` and `edge://extensions`.
 
 **Install and first run**
-- [ ] The install prompt lists only clipboard access; no website access is requested. (`idle`, `alarms`, and `offscreen` show no warning.)
+- [ ] The install prompt lists only clipboard access; no website access is requested. (`alarms`, `contextMenus`, `idle`, `offscreen`, and `storage` show no warning.)
 - [ ] The toolbar icon is sharp on light and dark browser themes.
 - [ ] The popup shows **Save copied text automatically?** and the status bar reads **Auto-save off**.
 - [ ] **Not now** hides the prompt; reopening the popup doesn't show it again, and copying text saves nothing.
@@ -28,6 +28,31 @@ Load it with **Load unpacked** on `chrome://extensions` and `edge://extensions`.
 - [ ] Leave the computer idle for two minutes or lock it: the offscreen document disappears from `chrome://extensions` → Copyhold → **Inspect views**. Move the mouse: it comes back, and the next copy is saved.
 - [ ] Open the popup right after returning from idle: no lasting **Capture needs attention** warning.
 - [ ] Copy text over 1,000,000 characters: it isn't saved automatically, and the next popup open says so once. **Save clipboard** still saves it.
+
+**Saving without the popup**
+- [ ] With the popup closed, copy text and press Alt+Shift+S: the toolbar icon shows a check mark, and the clip is there next time.
+- [ ] Select text on a page, right-click, and choose **Save selection to Copyhold**: same result.
+- [ ] Copy something already saved and save it again: it moves to the top instead of appearing twice.
+
+**Sensitive text and images**
+- [ ] Copy a test API key such as `sk_test_` followed by 24 letters: it's saved masked, with a shield in the details.
+- [ ] Choose **Don't save them automatically**: the test key isn't saved by automatic capture.
+- [ ] Copy a screenshot and select **Save clipboard**: an image clip with a thumbnail appears, and copying it pastes the image.
+- [ ] Turn on **Automatically save copied images**: a copied image is saved without the popup.
+
+**Passphrase lock**
+- [ ] Set up a lock: clips stay visible, and the lock button appears in the header.
+- [ ] Lock: the popup shows the lock screen. A wrong passphrase is refused; the right one shows the clips.
+- [ ] While locked, automatic saving and Alt+Shift+S still save; the clips appear after unlocking.
+- [ ] Lock the computer, or wait past **Lock again after**: Copyhold is locked when reopened.
+- [ ] Turn off the lock: clips are still there and searchable.
+
+**Categories, tags, and the editor**
+- [ ] In the editor, type text, a category, a subcategory, and two tags: "Saved" appears without pressing anything, and Escape keeps everything.
+- [ ] Suggestions list existing categories, subcategories for the chosen category, and tags.
+- [ ] Filter by a category, a subcategory, and two tags; the chips under the toolbar remove each filter. `#tag` in search also filters.
+- [ ] Select a tag on a row: the list filters by it.
+- [ ] In Settings, rename a tag to an existing one (they merge) and delete a category (clips stay).
 
 **Popup**
 - [ ] Open with Alt+Shift+Y (Option+Shift+Y on macOS). Search is focused.
@@ -62,8 +87,9 @@ Load it with **Load unpacked** on `chrome://extensions` and `edge://extensions`.
 
 Load `dist/firefox/manifest.json` from `about:debugging#/runtime/this-firefox`.
 
-- [ ] No automatic-saving prompt or setting appears.
-- [ ] **Save clipboard** saves the current clipboard text.
+- [ ] The automatic-saving prompt appears, and turning it on saves copied text with the popup closed.
+- [ ] **Save clipboard**, Alt+Shift+S, and **Save selection to Copyhold** save.
+- [ ] The passphrase lock works, including after restarting Firefox (it's locked again).
 - [ ] Copy, search, keyboard navigation, Alt+1 to Alt+9, menus, editor, expiry, and backups work as in Chrome.
 - [ ] Run the add-on through the AMO validator by uploading the zip as an unlisted version, and fix any warnings.
 
@@ -76,5 +102,5 @@ Load `dist/firefox/manifest.json` from `about:debugging#/runtime/this-firefox`.
 
 ## GitHub release
 
-- [ ] Commit, tag `v<version>`, and push.
-- [ ] Run `gh release create v<version> dist/copyhold-chromium.zip --title "Copyhold <version>"` with release notes. The website's download button always serves the latest release's `copyhold-chromium.zip`.
+- [ ] Commit, tag `v<version>`, and push the tag. The Release workflow checks the tag matches the manifest, runs the checks, and publishes the release with all three zips and the changelog section as notes.
+- [ ] Run `npm run screenshots` if the popup changed, and commit the new `site/screenshots`. The website's download button always serves the latest release's `copyhold-chromium.zip`.

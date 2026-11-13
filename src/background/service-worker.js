@@ -1,85 +1,52 @@
+// Chrome and Edge background. A service worker can't read the clipboard, so an offscreen document does.
 import "./expiry.js";
-import { getSettings, updateSettings } from "../lib/settings.js";
-import { skipCurrentClipboard } from "../lib/store.js";
+import "./lock-timer.js";
+import { setUpMonitor } from "./monitor.js";
+import { setUpShortcuts } from "./shortcuts.js";
+import { t } from "../lib/i18n.js";
 
 const offscreenPage = "offscreen/offscreen.html";
-const resumeAlarm = "copyhold-resume-capture";
-const watchdog = "copyhold-capture-watchdog";
-// Alarm names registered before the rename to Copyhold.
-const legacyAlarms = ["clipfile-resume-capture", "clipfile-capture-watchdog"];
-// Nothing can be copied without input, so the monitor stops after a minute of inactivity.
-const idleSeconds = 60;
-let pending = Promise.resolve();
 
-function updateMonitor({ enabled, pause, retry } = {}) {
-  const update = pending.then(async () => {
-    const saved = await getSettings();
-    const autoCapture = enabled ?? saved.autoCapture;
-    const pausedUntil = !autoCapture || pause === "resume" ? 0
-      : pause === "pause" ? Date.now() + 15 * 60_000
-      : saved.pausedUntil > Date.now() ? saved.pausedUntil : 0;
-    const changed = autoCapture !== saved.autoCapture || pausedUntil !== saved.pausedUntil;
-    const active = await chrome.idle.queryState(idleSeconds) === "active";
-    const shouldRun = autoCapture && !pausedUntil && active;
-    const contexts = await chrome.runtime.getContexts({
-      contextTypes: ["OFFSCREEN_DOCUMENT"],
-      documentUrls: [chrome.runtime.getURL(offscreenPage)],
-    });
-    const stop = contexts.length && (!shouldRun || retry === true);
-    if (changed || stop) {
-      // Hold the clipboard lock so the monitor cannot capture between these steps.
-      await navigator.locks.request("copyhold-clipboard", async () => {
-        // Skip what is on the clipboard now: it was copied while capture was off or before it was turned on.
-        if (changed && (pause === "pause" || autoCapture !== saved.autoCapture)) await skipCurrentClipboard();
-        if (changed) await updateSettings({ autoCapture, pausedUntil });
-        if (stop) await chrome.offscreen.closeDocument();
-      });
-    }
-
-    if (pause === "pause") await chrome.alarms.create(resumeAlarm, { when: pausedUntil });
-    else if (!pausedUntil && saved.pausedUntil) await chrome.alarms.clear(resumeAlarm);
-    if (shouldRun && (!contexts.length || retry === true)) {
-      await chrome.offscreen.createDocument({
-        url: offscreenPage,
-        reasons: ["CLIPBOARD"],
-        justification: "Save clipboard text locally while automatic capture is enabled.",
-      });
-    }
-    return { enabled: autoCapture, pausedUntil };
+function offscreenContexts() {
+  return chrome.runtime.getContexts({
+    contextTypes: ["OFFSCREEN_DOCUMENT"],
+    documentUrls: [chrome.runtime.getURL(offscreenPage), chrome.runtime.getURL(`${offscreenPage}?monitor`)],
   });
-  pending = update.catch((error) => console.error("Clipboard monitor:", error));
-  return update;
 }
 
-async function startMonitor() {
-  try {
-    await Promise.all(legacyAlarms.map((name) => chrome.alarms.clear(name)));
-    if (!await chrome.alarms.get(watchdog)) {
-      await chrome.alarms.create(watchdog, { periodInMinutes: 1 });
-    }
-    const { pausedUntil } = await updateMonitor();
-    if (pausedUntil && !await chrome.alarms.get(resumeAlarm)) {
-      await chrome.alarms.create(resumeAlarm, { when: pausedUntil });
-    }
-  } catch (error) {
-    console.error("Clipboard monitor startup:", error);
-  }
+function createDocument(url) {
+  return chrome.offscreen.createDocument({
+    url,
+    reasons: ["CLIPBOARD"],
+    justification: "Read the clipboard to save it locally, when the user turns on automatic capture or uses the Save clipboard shortcut.",
+  });
 }
 
-chrome.idle.setDetectionInterval(idleSeconds);
-chrome.idle.onStateChanged.addListener(startMonitor);
-chrome.runtime.onStartup.addListener(startMonitor);
-chrome.runtime.onInstalled.addListener(startMonitor);
-chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name === watchdog || alarm.name === resumeAlarm) return startMonitor();
-});
+/** @type {import("./monitor.js").Driver} */
+const offscreenDriver = {
+  async isRunning() {
+    return (await offscreenContexts()).some((context) => context.documentUrl.endsWith("?monitor"));
+  },
+  async start() {
+    // A document opened for a single save doesn't monitor, so it is replaced.
+    if ((await offscreenContexts()).length) await chrome.offscreen.closeDocument();
+    await createDocument(`${offscreenPage}?monitor`);
+  },
+  async stop() {
+    if ((await offscreenContexts()).length) await chrome.offscreen.closeDocument();
+  },
+  async saveClipboard() {
+    const opened = !(await offscreenContexts()).length;
+    if (opened) await createDocument(offscreenPage);
+    try {
+      const response = await chrome.runtime.sendMessage({ type: "copyhold-save-clipboard" });
+      if (!response) throw new Error(t("errorReadClipboard"));
+      return response;
+    } finally {
+      if (opened) await chrome.offscreen.closeDocument();
+    }
+  },
+};
 
-chrome.runtime.onMessage.addListener((message, sender, respond) => {
-  const url = sender.url?.split("?")[0];
-  if (message?.type !== "copyhold-auto-capture" || url !== chrome.runtime.getURL("popup/popup.html")) return;
-  updateMonitor(message).then(
-    respond,
-    () => respond({ error: "Could not update automatic capture." }),
-  );
-  return true;
-});
+const monitor = setUpMonitor(offscreenDriver);
+setUpShortcuts(monitor.saveClipboard);

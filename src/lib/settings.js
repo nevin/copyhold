@@ -11,6 +11,11 @@ export const defaultSettings = {
   historyLimit: 0,
   density: "comfortable",
   hidePreviews: false,
+  // What automatic capture does with text that looks like a password, key, or card number: mask, skip, or keep.
+  sensitiveClips: "mask",
+  captureImages: false,
+  // Minutes without opening Copyhold before the lock closes again; 0 waits until the browser closes.
+  lockAfterMinutes: 15,
 };
 const settingsChannel = "copyhold-settings";
 const themeKey = "copyhold-theme";

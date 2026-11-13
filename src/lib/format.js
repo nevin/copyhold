@@ -1,5 +1,8 @@
+import { t, tn } from "./i18n.js";
+
 const segmenter = new Intl.Segmenter();
 const relativeFormat = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" });
+/** @type {[Intl.RelativeTimeFormatUnit, number][]} */
 const relativeUnits = [
   ["year", 31_536_000],
   ["month", 2_592_000],
@@ -37,11 +40,10 @@ function maskedPreview(text) {
 
 export function clipPreview(text, visibility) {
   if (visibility === "hidden") {
-    const count = displayLength(text);
-    return `Hidden · ${count} ${count === 1 ? "character" : "characters"}`;
+    return tn("hiddenPreview", displayLength(text));
   }
   if (visibility === "masked") return maskedPreview(text);
-  return text.trim() ? text : "(spaces only)";
+  return text.trim() ? text : t("spacesOnly");
 }
 
 export function clipType(text) {
@@ -69,19 +71,19 @@ export function displayUrl(text) {
 // A short age such as "8m", "2h", "3d", or "2w" for compact lists.
 export function shortAge(timestamp, now = Date.now()) {
   const minutes = Math.max(0, (now - Date.parse(timestamp)) / 60_000);
-  if (minutes < 1) return "now";
-  if (minutes < 60) return `${Math.floor(minutes)}m`;
+  if (minutes < 1) return t("ageNow");
+  if (minutes < 60) return t("ageMinutes", Math.floor(minutes));
   const hours = minutes / 60;
-  if (hours < 24) return `${Math.floor(hours)}h`;
+  if (hours < 24) return t("ageHours", Math.floor(hours));
   const days = hours / 24;
-  if (days < 7) return `${Math.floor(days)}d`;
-  if (days < 35) return `${Math.floor(days / 7)}w`;
+  if (days < 7) return t("ageDays", Math.floor(days));
+  if (days < 35) return t("ageWeeks", Math.floor(days / 7));
   return shortDate.format(new Date(timestamp));
 }
 
 export function relativeTime(timestamp, now = Date.now()) {
   const seconds = (Date.parse(timestamp) - now) / 1000;
-  if (Math.abs(seconds) < 60) return seconds < 0 ? "just now" : "in under a minute";
+  if (Math.abs(seconds) < 60) return seconds < 0 ? t("justNow") : t("inUnderAMinute");
   // A little slack lets values just under a unit, such as a day set a moment ago, read as that unit.
   for (const [unit, size] of relativeUnits) {
     if (Math.abs(seconds) >= size * 0.97) return relativeFormat.format(Math.round(seconds / size), unit);

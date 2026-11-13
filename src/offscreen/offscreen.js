@@ -1,50 +1,59 @@
-import { captureAutomatically } from "../lib/clipboard.js";
+import { describeSave, saveContent, withClipboardLock } from "../lib/clipboard.js";
+import { getSettings, onSettingsChange } from "../lib/settings.js";
+import { createPoller } from "../lib/poller.js";
+import { t } from "../lib/i18n.js";
 
 const clipboard = document.getElementById("clipboard");
-const changes = new BroadcastChannel("copyhold-entries");
-const pollInterval = 1000;
-let delay = pollInterval;
-let lastSuccess = 0;
-let failed = false;
+// The service worker opens this document with ?monitor to capture continuously, or without it
+// for a single Save clipboard from the keyboard shortcut.
+const monitoring = new URLSearchParams(location.search).has("monitor");
+let captureImages = false;
 
-chrome.runtime.onMessage.addListener((message, sender, respond) => {
-  if (message?.type === "copyhold-capture-health" &&
-      sender.url?.split("?")[0] === chrome.runtime.getURL("popup/popup.html")) {
-    respond({ lastSuccess, failed });
-  }
-});
-
-function readText() {
+// A service worker can't read the clipboard, so this document pastes into a text area instead.
+function readClipboard({ images = captureImages } = {}) {
   const pasteRead = new AbortController();
-  let text;
+  let content;
   clipboard.addEventListener("paste", (event) => {
     event.preventDefault();
-    text = event.clipboardData.getData("text/plain");
+    const text = event.clipboardData.getData("text/plain");
+    const image = !text && images
+      ? [...event.clipboardData.files].find((file) => file.type.startsWith("image/"))
+      : undefined;
+    content = image ? { image } : { text };
   }, { once: true, signal: pasteRead.signal });
   try {
     clipboard.focus();
     document.execCommand("paste");
-    return text;
+    return content;
   } finally {
     pasteRead.abort();
   }
 }
 
-async function capture() {
-  try {
-    const added = await captureAutomatically(readText);
-    if (added === null) throw new Error("Clipboard read did not complete.");
-    lastSuccess = Date.now();
-    failed = false;
-    if (added) changes.postMessage("updated");
-    delay = pollInterval;
-  } catch (error) {
-    console.error("Could not capture clipboard text:", error);
-    failed = true;
-    delay = Math.min(delay * 2, 30_000);
-  } finally {
-    setTimeout(capture, delay);
-  }
-}
+const poller = createPoller(() => readClipboard());
 
-capture();
+chrome.runtime.onMessage.addListener((message, sender, respond) => {
+  const from = sender.url?.split("?")[0];
+  if (message?.type === "copyhold-capture-health" && from === chrome.runtime.getURL("popup/popup.html")) {
+    respond(poller.health);
+  } else if (message?.type === "copyhold-save-clipboard" && from === chrome.runtime.getURL("background/service-worker.js")) {
+    withClipboardLock(async () => {
+      const content = readClipboard({ images: true });
+      if (!content) throw new Error(t("errorReadClipboard"));
+      if (!content.text && !content.image) return { message: t("clipboardEmpty") };
+      const result = await saveContent(content, "manual");
+      return { ...result, message: describeSave(result) };
+    }).then(respond, (error) => respond({ error: error.message }));
+    return true;
+  }
+});
+
+if (monitoring) {
+  getSettings().then((settings) => {
+    captureImages = settings.captureImages;
+    poller.start();
+  });
+  onSettingsChange((changes) => {
+    if ("captureImages" in changes) captureImages = changes.captureImages;
+  });
+}
