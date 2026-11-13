@@ -256,6 +256,22 @@ test("the Preview button on a row shows the whole clip", async () => {
   await page.waitForFunction(() => !document.querySelector("#clip-preview").open);
 });
 
+test("Escape closes the preview first, then the popup", async () => {
+  const popup = await browser.newPage();
+  await popup.goto(`${origin}/popup/popup.html`);
+  await popup.waitForFunction(() => document.querySelectorAll(".clip").length > 0);
+  await popup.evaluate(() => document.querySelector(".clip .show-preview").click());
+  await popup.waitForSelector("#clip-preview[open]");
+  assert.match(await popup.$eval("#clip-preview-details", (details) => details.textContent), /Saved/);
+  await popup.keyboard.press("Escape");
+  await popup.waitForFunction(() => !document.querySelector("#clip-preview").open);
+  assert.equal(popup.isClosed(), false);
+  const closed = new Promise((resolve) => popup.once("close", resolve));
+  await popup.keyboard.press("Escape");
+  await Promise.race([closed, wait(3000).then(() => { throw new Error("The popup didn't close"); })]);
+  await page.bringToFront();
+});
+
 test("deleting a clip can be undone", async () => {
   const before = (await storedClips()).length;
   await page.hover(".clip");

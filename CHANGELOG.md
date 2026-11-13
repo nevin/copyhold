@@ -3,6 +3,9 @@
 ## 1.3.1
 
 - **Title, content, and description.** Each clip shows its title, its content, and its description, with the category and tags after the description, so descriptions you write are visible in the list.
+- **Expiry at a glance.** Clips that delete themselves show a small clock beside their age, amber in their last hour, instead of a line of text. Point at the age for the date, or open Preview.
+- **More in Preview.** Preview lists the category, subcategory, tags, expiry, when the clip was saved and last copied, how many times it was copied, its length, how it's shown, and the page it came from.
+- **Escape steps back.** The first Escape closes Preview or whatever is open; the next closes the popup.
 - **Preview from the row.** Pointing at a clip, or highlighting it, now shows a Preview button beside Pin, Edit, and Delete, so you can read the whole clip without copying it or opening the menu.
 
 ## 1.3.0

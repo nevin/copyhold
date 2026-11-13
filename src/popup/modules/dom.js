@@ -32,6 +32,7 @@ export const iconPaths = {
   shield: "M12 3 5 6v5c0 4.5 3 8.5 7 10 4-1.5 7-5.5 7-10V6l-7-3Z",
   image: "M4 5h16v14H4ZM4 16l5-5 4 4 2-2 5 5M15 9h.01",
   lock: "M7 11V8a5 5 0 0 1 10 0v3M5 11h14v10H5Z",
+  clock: "M12 7v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z",
 };
 
 /**

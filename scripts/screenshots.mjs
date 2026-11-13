@@ -24,7 +24,7 @@ const fakeApiKey = ["sk", "live", "51HxQexampleexampleexample00"].join("_");
 // Sample clips only: nothing here comes from a real clipboard.
 const samples = [
   { text: "https://developer.chrome.com/docs/extensions/reference/api/offscreen", minutesAgo: 2, category: "Work", subcategory: "Research", tags: ["docs", "chrome"] },
-  { text: "Thanks for the quick turnaround! I'll review the draft this afternoon and send notes by Friday.", minutesAgo: 9, category: "Work", subcategory: "Email", tags: ["reply"] },
+  { text: "Thanks for the quick turnaround! I'll review the draft this afternoon and send notes by Friday.", minutesAgo: 9, expiresInMinutes: 40, category: "Work", subcategory: "Email", tags: ["reply"] },
   { text: "#4334A3", minutesAgo: 25, category: "Design", tags: ["brand"] },
   { text: "const total = items.reduce((sum, item) => sum + item.price, 0);", minutesAgo: 48, category: "Work", subcategory: "Code", tags: ["snippet", "js"] },
   { text: fakeApiKey, minutesAgo: 70, visibility: "masked", sensitive: "apiKey" },
@@ -32,7 +32,7 @@ const samples = [
   { text: "221B Baker Street, London NW1 6XE", minutesAgo: 60 * 26, title: "Office address", description: "For deliveries and invoices", pinned: true, category: "Personal", tags: ["address"] },
   { text: "Meeting notes: ship 1.2 on Thursday, update store listing, refresh screenshots.", minutesAgo: 60 * 50 },
   { text: "Hi {clipboard}, thanks for reaching out. I'll get back to you by {weekday}.", minutesAgo: 60 * 30, title: "Quick reply", description: "Fills in the name from the clipboard", template: true, category: "Work", subcategory: "Email", tags: ["reply"] },
-  { text: "npm run package", minutesAgo: 60 * 75, title: "Build command", description: "Builds the store packages in dist", pinned: true, category: "Work", subcategory: "Code", tags: ["snippet", "cli"] },
+  { text: "npm run package", minutesAgo: 60 * 75, title: "Build command", expiresInMinutes: 60 * 24 * 3, description: "Builds the store packages in dist", pinned: true, category: "Work", subcategory: "Code", tags: ["snippet", "cli"] },
 ];
 
 async function seed(page, { image = true } = {}) {
@@ -43,8 +43,11 @@ async function seed(page, { image = true } = {}) {
     const { updateSettings } = await import("/lib/settings.js");
     await store.removeMany((await store.list()).map(({ id }) => id));
     const now = Date.now();
-    const clips = samples.map(({ minutesAgo, ...fields }) =>
-      createEntry({ ...fields, createdAt: new Date(now - minutesAgo * minute).toISOString() }));
+    const clips = samples.map(({ minutesAgo, expiresInMinutes, ...fields }) => createEntry({
+      ...fields,
+      createdAt: new Date(now - minutesAgo * minute).toISOString(),
+      expiresAt: expiresInMinutes ? new Date(now + expiresInMinutes * minute).toISOString() : null,
+    }));
     if (image) {
       const canvas = new OffscreenCanvas(640, 360);
       const context = canvas.getContext("2d");
@@ -138,6 +141,15 @@ try {
   await page.evaluate(() => [...document.querySelectorAll("#filter-panel .filter-option")].find((item) => item.textContent.startsWith("Work")).click());
   await page.hover("#filter-panel");
   await shot("popup-filter");
+  await page.keyboard.press("Escape");
+
+  await open({ height: 640 });
+  await page.evaluate(() => {
+    const row = [...document.querySelectorAll(".clip")].find((item) => item.textContent.includes("Build command"));
+    row.querySelector(".show-preview").click();
+  });
+  await page.waitForSelector("#clip-preview[open]");
+  await shot("popup-preview");
   await page.keyboard.press("Escape");
 
   await open({ height: 640 });

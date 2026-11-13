@@ -1322,5 +1322,47 @@
   },
   "import": {
     "message": "Import"
+  },
+  "expiresAt": {
+    "message": "Expires $1 ($2)"
+  },
+  "detailNone": {
+    "message": "None"
+  },
+  "detailExpires": {
+    "message": "Expires"
+  },
+  "detailDefaultExpiry": {
+    "message": "from your default retention"
+  },
+  "detailSaved": {
+    "message": "Saved"
+  },
+  "detailLastCopied": {
+    "message": "Last copied"
+  },
+  "detailNeverCopied": {
+    "message": "Never copied from Copyhold"
+  },
+  "timesCopied_one": {
+    "message": "$1 time"
+  },
+  "timesCopied_other": {
+    "message": "$1 times"
+  },
+  "detailLength": {
+    "message": "Length"
+  },
+  "detailSize": {
+    "message": "Size"
+  },
+  "detailTemplate": {
+    "message": "Fills in placeholders when copied"
+  },
+  "detailSource": {
+    "message": "Saved from"
+  },
+  "detailVisibility": {
+    "message": "Shown as"
   }
 }

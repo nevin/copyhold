@@ -1021,3 +1021,27 @@ textarea { resize: vertical; }
 .clip-third-line .clip-labels { flex: 0 2 auto; flex-wrap: nowrap; min-inline-size: 0; margin: 0; overflow: hidden; white-space: nowrap; }
 .clip-third-line .description + .clip-labels::before { content: "·"; color: var(--control); }
 .compact .clip-third-line { display: none; }
+
+/* A clock beside the age marks clips that delete themselves; amber in their last hour. */
+.clip-age { display: inline-flex; align-items: center; gap: 3px; }
+.clips:not(.compact) .clip-age { display: inline-flex; }
+.expiry-icon { inline-size: 12px; block-size: 12px; color: var(--muted); }
+.clip-age.expiry-soon .expiry-icon, .clip-age.expiry-soon { color: var(--warning); }
+.compact .clip-age.has-expiry { min-inline-size: 44px; }
+.preview-details {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 4px 14px;
+  margin: 4px 0 0;
+  padding: 10px 0 0;
+  border-block-start: 1px solid var(--line);
+  font-size: .86rem;
+}
+.preview-details dt { color: var(--muted); }
+.preview-details dd { margin: 0; overflow-wrap: anywhere; }
+.preview-details .category-dot { margin-inline-end: 6px; }
+.detail-none { color: var(--muted); }
+.detail-expiry { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 5px; }
+.detail-expiry.expiry-soon .expiry-icon { color: var(--warning); }
+.detail-note { color: var(--muted); font-size: .8rem; }
+:root:not(.full-tab) body:has(#clip-preview[open]) { min-block-size: 520px; }

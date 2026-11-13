@@ -5,7 +5,7 @@ import { sensitiveLabel } from "../../lib/sensitive.js";
 import { updateSettings } from "../../lib/settings.js";
 import * as store from "../../lib/store.js";
 import { copyEntry, deleteEntry, openClipPreview, togglePin } from "./actions.js";
-import { byId, icon, iconPaths, run, status, textLine, timeElement } from "./dom.js";
+import { byId, dateFormat, icon, iconPaths, run, status, textLine, timeElement } from "./dom.js";
 import { openEditor } from "./editor.js";
 import { filterByTag, showActiveFilters } from "./filters.js";
 import { menuIsOpen, openMenu, openMenuForActive, recentlyClosedFor } from "./menu.js";
@@ -34,7 +34,10 @@ let copiedFeedbackTimer;
 
 setInterval(() => {
   for (const time of clipList.querySelectorAll("time")) time.textContent = relativeTime(time.dateTime);
-  for (const age of clipList.querySelectorAll(".clip-age")) age.textContent = shortAge(age.dataset.time);
+  for (const age of clipList.querySelectorAll(".clip-age")) {
+    age.querySelector(".age-text").textContent = shortAge(age.dataset.time);
+    if (age.dataset.expires) age.classList.toggle("expiry-soon", expiresSoon(age.dataset.expires));
+  }
 }, 60_000);
 
 export function clipName(entry) {
@@ -143,7 +146,7 @@ function hostOf(url) {
 // The category, tags, template badge, and source page under a clip. Selecting a tag filters by it.
 function labelsFor(entry) {
   const tags = entry.tags ?? [];
-  if (!entry.category && !tags.length && !entry.template && !entry.sourceUrl && !entry.expiresAt && !entry.sensitive) return null;
+  if (!entry.category && !tags.length && !entry.template && !entry.sourceUrl && !entry.sensitive) return null;
   const labels = document.createElement("div");
   labels.className = "clip-labels";
   // The chips and link are for pointers; screen readers get the same facts as text, since options can't hold controls.
@@ -177,12 +180,6 @@ function labelsFor(entry) {
     chip.addEventListener("click", () => filterByTag(tag));
     labels.append(chip);
   }
-  if (entry.expiresAt) {
-    const expiry = document.createElement("span");
-    expiry.className = "label-expiry";
-    appendMessage(expiry, "metaExpires", timeElement(entry.expiresAt));
-    labels.append(expiry);
-  }
   if (entry.sourceUrl) {
     const source = textLine("span", "source-link", t("fromSite", hostOf(entry.sourceUrl)));
     source.title = entry.sourceTitle ? `${entry.sourceTitle}\n${entry.sourceUrl}` : entry.sourceUrl;
@@ -199,6 +196,18 @@ function describeLabels(entry) {
   if (entry.tags?.length) parts.push(t("tagsDescription", entry.tags.join(", ")));
   if (entry.sourceUrl) parts.push(t("fromSite", hostOf(entry.sourceUrl)));
   return parts.join(". ");
+}
+
+function expiresSoon(expiresAt) {
+  return Date.parse(expiresAt) - Date.now() < 3_600_000;
+}
+
+/** When the clip was saved or copied, how long it is, and when it expires, in one line. */
+export function clipSummary(entry) {
+  const usedAt = entry.lastUsedAt ?? entry.createdAt;
+  const parts = [t(entry.lastUsedAt ? "metaCopied" : "metaSaved", relativeTime(usedAt)), sizeLabel(entry)];
+  if (entry.expiresAt) parts.push(t("expiresAt", relativeTime(entry.expiresAt), dateFormat.format(new Date(entry.expiresAt))));
+  return parts.join(" · ");
 }
 
 function sizeLabel(entry) {
@@ -219,11 +228,20 @@ function itemFor(entry) {
   key.className = "clip-key";
   key.setAttribute("aria-hidden", "true");
   const usedAt = entry.lastUsedAt ?? entry.createdAt;
-  const age = textLine("span", Date.now() - Date.parse(usedAt) < 3_600_000 ? "clip-age is-fresh" : "clip-age", shortAge(usedAt));
+  const age = document.createElement("span");
+  age.className = Date.now() - Date.parse(usedAt) < 3_600_000 ? "clip-age is-fresh" : "clip-age";
   age.dataset.time = usedAt;
+  // Clips that delete themselves show a clock beside their age, amber in the last hour; the details are in the tooltip and Preview.
+  if (entry.expiresAt) {
+    age.dataset.expires = entry.expiresAt;
+    age.classList.add("has-expiry");
+    age.classList.toggle("expiry-soon", expiresSoon(entry.expiresAt));
+    age.append(icon("clock", "action-icon expiry-icon"));
+  }
+  age.append(textLine("span", "age-text", shortAge(usedAt)));
   age.setAttribute("aria-hidden", "true");
   // The details line is gone from view; the age's tooltip keeps when it was used and how long it is.
-  age.title = `${t(entry.lastUsedAt ? "metaCopied" : "metaSaved", relativeTime(usedAt))} · ${sizeLabel(entry)}`;
+  age.title = clipSummary(entry);
   const label = sizeLabel(entry);
   const size = textLine("span", "clip-size", entry.kind === "image" ? t("imageShort") : displayLength(entry.text).toLocaleString());
   size.title = label;

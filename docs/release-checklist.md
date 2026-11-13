@@ -68,6 +68,8 @@ Load it with **Load unpacked** on `chrome://extensions` and `edge://extensions`.
 - [ ] Turn off **Close the popup after copying**: Enter copies and the popup stays open.
 - [ ] Alt+1 to Alt+9 copy by position; holding Alt shows the numbers.
 - [ ] Shift+Enter opens the actions menu; each letter shortcut works; Escape returns to search.
+- [ ] Open Preview and press Escape: Preview closes and the popup stays. Press Escape again: the popup closes.
+- [ ] A clip with an expiry shows a clock by its age (amber in the last hour), and Preview lists its expiry, category, tags, and dates.
 - [ ] Pin, mask, show, edit, select, and delete work; Undo restores deleted clips and pausing over the undo bar stops its countdown.
 - [ ] A link clip shows **Open link**, which opens the page in a new tab.
 

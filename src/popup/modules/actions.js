@@ -1,13 +1,14 @@
 import { copyClip } from "../../lib/clipboard.js";
 import { isExpired } from "../../lib/entries.js";
-import { clipPreview } from "../../lib/format.js";
+import { clipPreview, displayLength, relativeTime } from "../../lib/format.js";
+import { sensitiveLabel } from "../../lib/sensitive.js";
 import * as store from "../../lib/store.js";
 import { transformLabel } from "../../lib/transforms.js";
-import { byId, fullTab, run } from "./dom.js";
-import { refresh, showCopyFeedback } from "./list.js";
+import { byId, dateFormat, fullTab, icon, run, textLine } from "./dom.js";
+import { categoryDot, refresh, showCopyFeedback } from "./list.js";
 import { offerUndo } from "./undo.js";
 import { state } from "./state.js";
-import { t } from "../../lib/i18n.js";
+import { t, tn } from "../../lib/i18n.js";
 
 const previewDialog = byId("clip-preview");
 const previewText = byId("clip-preview-text");
@@ -88,6 +89,56 @@ function showPreviewContent(reveal) {
   previewText.textContent = reveal ? entry.text : clipPreview(entry.text, entry.visibility);
 }
 
+// Everything Copyhold knows about the clip, as label and value pairs under its content.
+function showDetails(entry) {
+  const rows = [];
+  const add = (label, ...values) => {
+    const value = document.createElement("dd");
+    value.append(...values);
+    rows.push(textLine("dt", "", label), value);
+  };
+  const none = () => textLine("span", "detail-none", t("detailNone"));
+  const dated = (timestamp) => `${dateFormat.format(new Date(timestamp))} (${relativeTime(timestamp)})`;
+
+  const category = document.createElement("span");
+  if (entry.category) {
+    const dot = categoryDot(entry.category);
+    if (dot) category.append(dot);
+    category.append(entry.category);
+  }
+  add(t("category"), entry.category ? category : none());
+  add(t("subcategory"), entry.subcategory || none());
+  add(t("tags"), entry.tags?.length ? entry.tags.map((tag) => `#${tag}`).join("  ") : none());
+
+  const expiry = document.createElement("span");
+  if (entry.expiresAt) {
+    expiry.className = Date.parse(entry.expiresAt) - Date.now() < 3_600_000 ? "detail-expiry expiry-soon" : "detail-expiry";
+    expiry.append(icon("clock", "action-icon expiry-icon"), dated(entry.expiresAt));
+    if (entry.defaultExpiry) expiry.append(textLine("span", "detail-note", t("detailDefaultExpiry")));
+  }
+  add(t("detailExpires"), entry.expiresAt ? expiry : t("noExpiry"));
+  add(t("detailSaved"), dated(entry.createdAt));
+  add(t("detailLastCopied"), entry.lastUsedAt
+    ? `${dated(entry.lastUsedAt)} · ${tn("timesCopied", entry.useCount ?? 0)}`
+    : t("detailNeverCopied"));
+  add(entry.kind === "image" ? t("detailSize") : t("detailLength"), entry.kind === "image"
+    ? t("imageDimensions", entry.width, entry.height)
+    : tn("characters", displayLength(entry.text)));
+  const visibility = { visible: t("visibilityShown"), masked: t("visibilityMasked"), hidden: t("visibilityHidden") }[entry.visibility];
+  add(t("detailVisibility"), entry.sensitive ? `${visibility} · ${t("maskedAutomatically", sensitiveLabel(entry.sensitive))}` : visibility);
+  if (entry.template) add(t("templateLabel"), t("detailTemplate"));
+  if (entry.sourceUrl) {
+    const link = document.createElement("a");
+    link.href = entry.sourceUrl;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = entry.sourceTitle || entry.sourceUrl;
+    link.title = entry.sourceUrl;
+    add(t("detailSource"), link);
+  }
+  byId("clip-preview-details").replaceChildren(...rows);
+}
+
 function setRevealed(revealed) {
   revealPreview.dataset.revealed = String(revealed);
   revealPreview.textContent = revealed ? t("conceal") : t("reveal");
@@ -105,6 +156,7 @@ export function openClipPreview(entry) {
     element.textContent = value;
     element.hidden = !value;
   }
+  showDetails(entry);
   revealPreview.hidden = entry.visibility === "visible";
   setRevealed(revealPreview.hidden);
   previewDialog.showModal();
