@@ -1,11 +1,11 @@
 import { removeExpired } from "./store.js";
 
-const alarmName = "clipfile-expiry";
+const alarmName = "copyhold-expiry";
 
 async function cleanUp() {
   try {
     if (await removeExpired()) {
-      const changes = new BroadcastChannel("clipfile-entries");
+      const changes = new BroadcastChannel("copyhold-entries");
       changes.postMessage("updated");
       changes.close();
     }
@@ -16,6 +16,7 @@ async function cleanUp() {
 
 async function startExpiry() {
   try {
+    await chrome.alarms.clear("clipfile-expiry");
     if (!await chrome.alarms.get(alarmName)) {
       await chrome.alarms.create(alarmName, { periodInMinutes: 1 });
     }

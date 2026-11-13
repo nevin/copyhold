@@ -5,7 +5,7 @@ export const supportsAutoCapture = Boolean(globalThis.chrome?.storage?.local &&
   chrome.runtime.getManifest().background?.service_worker);
 
 function withClipboardLock(work) {
-  return navigator.locks.request("clipfile-clipboard", work);
+  return navigator.locks.request("copyhold-clipboard", work);
 }
 
 function newEntry(text) {

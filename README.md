@@ -1,6 +1,6 @@
-# Clipfile
+# Copyhold
 
-Clipfile is a standalone Manifest V3 clipboard manager for desktop Chrome, Edge, and Firefox. It saves plain-text clips in the current browser profile.
+Copyhold is a standalone Manifest V3 clipboard manager for desktop Chrome, Edge, and Firefox. It saves plain-text clips in the current browser profile.
 
 ## Install locally
 
@@ -8,7 +8,7 @@ Clipfile is a standalone Manifest V3 clipboard manager for desktop Chrome, Edge,
 - **Edge** · Build the same Chromium target, then open `edge://extensions`, enable **Developer mode**, select **Load unpacked**, and choose `dist/chromium`.
 - **Firefox 142 or later** · Run `npm run build -- firefox`. Open `about:debugging#/runtime/this-firefox`, select **Load Temporary Add-on**, and choose `dist/firefox/manifest.json`. Temporary installations last until Firefox restarts.
 
-Open **Clipfile** from the browser’s extensions menu. Use **Open in tab** for more room.
+Open **Copyhold** from the browser’s extensions menu. Use **Open in tab** for more room.
 
 ## Build and package
 
@@ -21,22 +21,22 @@ npm run package
 
 The build creates `dist/chromium` for Chrome and Edge and `dist/firefox` for Firefox. Load the Chromium folder as an unpacked extension or select `dist/firefox/manifest.json` as a temporary add-on.
 
-Packaging rebuilds the extension and writes `dist/clipfile-<version>-chromium.zip` and `dist/clipfile-<version>-firefox.zip` for store submission. The version comes from `manifest.json`. To build or package one target, append `-- chromium` or `-- firefox` to either command.
+Packaging rebuilds the extension and writes `dist/copyhold-<version>-chromium.zip` and `dist/copyhold-<version>-firefox.zip` for store submission. The version comes from `manifest.json`. To build or package one target, append `-- chromium` or `-- firefox` to either command.
 
-## Use Clipfile
+## Use Copyhold
 
 - Open the popup with **Alt+Shift+Y** (**Option+Shift+Y** on macOS) if the shortcut is available. Search is focused when the popup opens.
 - Type to filter, use **Up** and **Down** to highlight a clip, and press **Enter** to copy it. **Alt+1** through **Alt+9** (**Option** on macOS) copy the clip at that position; hold **Alt** to see the numbers. By default the popup closes after a copy. Turn this off under **Close the popup after copying** in **Settings and backups**. The full-tab view stays open.
-- Click a clip row or its **Copy** button to copy the original text and record when it was used. Pinned clips appear first under **Pinned**, and the rest are sorted by recent use, or by creation time if they have never been copied from Clipfile.
+- Click a clip row or its **Copy** button to copy the original text and record when it was used. Pinned clips appear first under **Pinned**, and the rest are sorted by recent use, or by creation time if they have never been copied from Copyhold.
 - Each clip's **More actions** button (**⋯**) opens **Preview**, **Open link** for web addresses, **Mask text** or **Show text**, **Pin**, **Edit**, **Select**, and **Delete**. From search, press **Shift+Enter** to open the menu for the highlighted clip, then press the letter shown next to an action. Right-clicking a row opens the same menu.
 - To delete several clips, choose **Select** from the menu or Shift-click a row. While selecting, **Enter** selects or clears the highlighted clip, and **Escape** or **Done** ends selection.
 - After deleting one or more clips, **Undo** restores the most recent deletion for 12 seconds while the view stays open. Pointing at or focusing the undo bar pauses the countdown. Clips that have expired remain deleted.
-- Select **Save clipboard** to save the current clipboard text. If the same text is already saved, Clipfile shows a message. Use **New clip** to type or paste text with an optional title and description. In the editor, press **Cmd+Enter** (**Ctrl+Enter** elsewhere) to save.
+- Select **Save clipboard** to save the current clipboard text. If the same text is already saved, Copyhold shows a message. Use **New clip** to type or paste text with an optional title and description. In the editor, press **Cmd+Enter** (**Ctrl+Enter** elsewhere) to save.
 - Clips show what kind of text they contain: links show their address without `https://`, code and commands use a monospace font, and colors show a swatch. Times are relative, such as "2 hours ago"; point at a time to see the exact date.
 
 ### Expiry and privacy
 
-In the editor, open **Expiry and privacy** to set **Delete automatically**. Pick **1 hour**, **1 day**, **1 week**, or a date and time, or choose **Never** to keep the clip. Clipfile checks for expired clips about once a minute while the browser is running and cleans up overdue clips when it starts.
+In the editor, open **Expiry and privacy** to set **Delete automatically**. Pick **1 hour**, **1 day**, **1 week**, or a date and time, or choose **Never** to keep the clip. Copyhold checks for expired clips about once a minute while the browser is running and cleans up overdue clips when it starts.
 
 In **Settings and backups**, choose a default retention period for new clips you create or capture. The default starts at creation, leaves existing clips and imported backups as they are, and is cleared when you pin the clip. An expiry you set manually still applies to a pinned clip.
 
@@ -44,12 +44,12 @@ In **Settings and backups**, choose a default retention period for new clips you
 
 ### Automatic capture
 
-In Chrome and Edge, Clipfile automatically saves plain text from the clipboard while the browser is running, even when the Clipfile window is closed. The bar under the header shows whether automatic saving is on. **Pause** stops it for 15 minutes; choose **Resume** to restart sooner. The monitor skips the clipboard contents it first sees on resume. **Save clipboard** is available during a pause. **Retry capture** restarts the monitor if the popup cannot confirm a recent successful read.
+In Chrome and Edge, Copyhold automatically saves plain text from the clipboard while the browser is running, even when the Copyhold window is closed. The bar under the header shows whether automatic saving is on. **Pause** stops it for 15 minutes; choose **Resume** to restart sooner. The monitor skips the clipboard contents it first sees on resume. **Save clipboard** is available during a pause. **Retry capture** restarts the monitor if the popup cannot confirm a recent successful read.
 
-To turn automatic saving off, open **Settings and backups** and uncheck **Automatically save copied text**. Clipfile checks for changes about once per second and can miss text that is replaced between checks. Firefox supports **Save clipboard** for manual capture.
+To turn automatic saving off, open **Settings and backups** and uncheck **Automatically save copied text**. Copyhold checks for changes about once per second and can miss text that is replaced between checks. Firefox supports **Save clipboard** for manual capture.
 
 ### Backups
 
-**Export** downloads a JSON backup. **Import** appends the backup entries with fresh IDs, preserving duplicate content, display preferences, stars, and timestamps. Import opens the full-tab view to keep the file picker open. In the full-tab view you can also drop a backup file onto the page.
+**Export** downloads a JSON backup. **Import** appends the backup entries with fresh IDs, preserving duplicate content, display preferences, stars, and timestamps. Backups exported under the extension's earlier name, Clipfile, import too. Import opens the full-tab view to keep the file picker open. In the full-tab view you can also drop a backup file onto the page.
 
-Clipfile stores entries locally and makes no network requests. Masking and hiding affect only the preview. The original text remains available to edit and copy, and exports contain it in plain text.
+Copyhold stores entries locally and makes no network requests. Masking and hiding affect only the preview. The original text remains available to edit and copy, and exports contain it in plain text.

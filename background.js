@@ -3,8 +3,10 @@ import { getSettings, updateSettings } from "./settings.js";
 import { skipCurrentClipboard } from "./store.js";
 
 const offscreenPage = "offscreen.html";
-const resumeAlarm = "clipfile-resume-capture";
-const watchdog = "clipfile-capture-watchdog";
+const resumeAlarm = "copyhold-resume-capture";
+const watchdog = "copyhold-capture-watchdog";
+// Alarm names registered before the rename to Copyhold.
+const legacyAlarms = ["clipfile-resume-capture", "clipfile-capture-watchdog"];
 let pending = Promise.resolve();
 
 function updateMonitor({ enabled, pause, retry } = {}) {
@@ -23,7 +25,7 @@ function updateMonitor({ enabled, pause, retry } = {}) {
     const stop = contexts.length && (!shouldRun || retry === true);
     if (changed || stop) {
       // Hold the clipboard lock so the monitor cannot capture between these steps.
-      await navigator.locks.request("clipfile-clipboard", async () => {
+      await navigator.locks.request("copyhold-clipboard", async () => {
         if (changed && (pause === "pause" || !autoCapture)) await skipCurrentClipboard();
         if (changed) await updateSettings({ autoCapture, pausedUntil });
         if (stop) await chrome.offscreen.closeDocument();
@@ -47,6 +49,7 @@ function updateMonitor({ enabled, pause, retry } = {}) {
 
 async function startMonitor() {
   try {
+    await Promise.all(legacyAlarms.map((name) => chrome.alarms.clear(name)));
     if (!await chrome.alarms.get(watchdog)) {
       await chrome.alarms.create(watchdog, { periodInMinutes: 1 });
     }
@@ -67,7 +70,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
 chrome.runtime.onMessage.addListener((message, sender, respond) => {
   const url = sender.url?.split("?")[0];
-  if (message?.type !== "clipfile-auto-capture" || url !== chrome.runtime.getURL("manager.html")) return;
+  if (message?.type !== "copyhold-auto-capture" || url !== chrome.runtime.getURL("manager.html")) return;
   updateMonitor(message).then(
     respond,
     () => respond({ error: "Could not update automatic capture." }),

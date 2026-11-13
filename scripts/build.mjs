@@ -65,7 +65,7 @@ async function build() {
       await writeFile(join(output, "manifest.json"), `${JSON.stringify(browserManifest, null, 2)}\n`);
 
       if (zip) {
-        const archive = `clipfile-${manifest.version}-${browser}.zip`;
+        const archive = `copyhold-${manifest.version}-${browser}.zip`;
         execFileSync("zip", ["-q", "-X", join(staging, archive), "manifest.json", ...browserFiles], {
           cwd: output,
           stdio: "inherit",

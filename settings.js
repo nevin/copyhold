@@ -1,8 +1,9 @@
 import * as store from "./store.js";
 
 export const defaultSettings = { autoCapture: true, pausedUntil: 0, retentionDays: 0, closeAfterCopy: true };
-const settingsChannel = "clipfile-settings";
-const themeKey = "clipfile-theme";
+const settingsChannel = "copyhold-settings";
+const themeKey = "copyhold-theme";
+const legacyThemeKey = "clipfile-theme";
 let migration;
 
 // Earlier builds kept capture settings in chrome.storage.local, which offscreen documents and
@@ -42,6 +43,11 @@ export function onSettingsChange(listener) {
 
 // The theme is read synchronously so each view opens in the right colors without a flash.
 export function getTheme() {
+  const legacy = localStorage.getItem(legacyThemeKey);
+  if (legacy !== null) {
+    if (localStorage.getItem(themeKey) === null) localStorage.setItem(themeKey, legacy);
+    localStorage.removeItem(legacyThemeKey);
+  }
   const theme = localStorage.getItem(themeKey);
   return theme === "light" || theme === "dark" ? theme : "system";
 }

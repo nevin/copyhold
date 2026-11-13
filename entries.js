@@ -30,7 +30,7 @@ export function compareEntries(first, second) {
 }
 
 export function exportEntries(entries) {
-  return JSON.stringify({ format: "clipfile", version: 1, entries }, null, 2);
+  return JSON.stringify({ format: "copyhold", version: 1, entries }, null, 2);
 }
 
 function isTimestamp(value) {
@@ -48,8 +48,9 @@ export function importEntries(json) {
   } catch {
     throw new Error("This file does not contain valid JSON.");
   }
-  if (backup?.format !== "clipfile" || backup.version !== 1 || !Array.isArray(backup.entries)) {
-    throw new Error("Choose a Clipfile JSON backup.");
+  // Backups made before the rename to Copyhold use the "clipfile" format name.
+  if (!["copyhold", "clipfile"].includes(backup?.format) || backup.version !== 1 || !Array.isArray(backup.entries)) {
+    throw new Error("Choose a Copyhold JSON backup.");
   }
   return backup.entries.map((entry, index) => {
     if (!entry || typeof entry.text !== "string" || !entry.text ||

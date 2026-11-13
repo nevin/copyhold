@@ -1,14 +1,14 @@
 import { captureAutomatically } from "./clipboard.js";
 
 const clipboard = document.getElementById("clipboard");
-const changes = new BroadcastChannel("clipfile-entries");
+const changes = new BroadcastChannel("copyhold-entries");
 const pollInterval = 1000;
 let delay = pollInterval;
 let lastSuccess = 0;
 let failed = false;
 
 chrome.runtime.onMessage.addListener((message, sender, respond) => {
-  if (message?.type === "clipfile-capture-health" &&
+  if (message?.type === "copyhold-capture-health" &&
       sender.url?.split("?")[0] === chrome.runtime.getURL("manager.html")) {
     respond({ lastSuccess, failed });
   }

@@ -20,7 +20,7 @@ const expiryInput = byId("expires-at");
 const confirmation = byId("confirmation");
 const file = byId("file");
 const fullTab = new URLSearchParams(location.search).get("view") === "tab";
-const changes = new BroadcastChannel("clipfile-entries");
+const changes = new BroadcastChannel("copyhold-entries");
 const autoCapture = byId("auto-capture");
 const closeAfterCopyInput = byId("close-after-copy");
 const capturePause = byId("capture-pause");
@@ -469,9 +469,9 @@ function updateEmptyState(hasQuery) {
     const hints = [autoCaptureEnabled ? "Text you copy is saved here automatically."
       : supportsAutoCapture ? "Copy some text, then select Save clipboard. You can turn on automatic saving in Settings."
       : "Copy some text, then select Save clipboard."];
-    if (openShortcut) hints.push(`Open Clipfile anytime with ${openShortcut}.`);
+    if (openShortcut) hints.push(`Open Copyhold anytime with ${openShortcut}.`);
     hints.push("Clips stay in this browser profile and are never sent anywhere.");
-    setEmptyState("Welcome to Clipfile", hints, false);
+    setEmptyState("Welcome to Copyhold", hints, false);
   }
 }
 
@@ -803,14 +803,14 @@ function showAutoCapture(enabled, pausedUntil = 0) {
 }
 
 async function configureAutoCapture(options = {}) {
-  const response = await chrome.runtime.sendMessage({ type: "clipfile-auto-capture", ...options });
+  const response = await chrome.runtime.sendMessage({ type: "copyhold-auto-capture", ...options });
   if (!response || response.error) throw new Error(response?.error || "Could not reach the clipboard monitor.");
   showAutoCapture(response.enabled, response.pausedUntil);
 }
 
 async function checkCaptureHealth() {
   if (!autoCapture.checked || capturePausedUntil || updatingCapture) return;
-  const health = await chrome.runtime.sendMessage({ type: "clipfile-capture-health" }).catch(() => null);
+  const health = await chrome.runtime.sendMessage({ type: "copyhold-capture-health" }).catch(() => null);
   if (!autoCapture.checked || capturePausedUntil || updatingCapture) return;
   captureHealthy = Boolean(health && !health.failed && Date.now() - health.lastSuccess < 10_000);
   if (captureHealthy && document.activeElement === captureRetry) capturePause.focus();
@@ -1017,7 +1017,7 @@ byId("capture").addEventListener("click", () => run(async () => {
 
 byId("import-hint").textContent = fullTab
   ? "You can also drop a backup file onto this page."
-  : "Import opens Clipfile in a tab so the file picker stays open.";
+  : "Import opens Copyhold in a tab so the file picker stays open.";
 
 byId("import").addEventListener("click", () => {
   if (fullTab) {
@@ -1062,7 +1062,7 @@ byId("export").addEventListener("click", () => run(async () => {
   const url = URL.createObjectURL(new Blob([exportEntries((await store.list()).sort(compareEntries))], { type: "application/json" }));
   const download = document.createElement("a");
   download.href = url;
-  download.download = `clipfile-${new Date().toISOString().slice(0, 10)}.json`;
+  download.download = `copyhold-${new Date().toISOString().slice(0, 10)}.json`;
   download.click();
   setTimeout(() => URL.revokeObjectURL(url), 30_000);
   status("Export started.");
@@ -1071,7 +1071,7 @@ byId("export").addEventListener("click", () => run(async () => {
 changes.addEventListener("message", () => run(render));
 if (new URLSearchParams(location.search).has("import")) {
   settings.open = true;
-  status("Select Import backup to choose a Clipfile backup.");
+  status("Select Import backup to choose a Copyhold backup.");
   byId("import").focus();
 }
 run(render);

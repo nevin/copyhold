@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Clipfile",
+  "name": "Copyhold",
   "version": "1.0",
   "description": "Save, organize, and reuse text from your clipboard.",
   "permissions": [
@@ -16,7 +16,7 @@
     "type": "module"
   },
   "action": {
-    "default_title": "Clipfile",
+    "default_title": "Copyhold",
     "default_popup": "manager.html",
     "default_icon": {
       "16": "icons/16.png",
@@ -36,7 +36,7 @@
   },
   "browser_specific_settings": {
     "gecko": {
-      "id": "clipfile@local-extension",
+      "id": "copyhold@local-extension",
       "strict_min_version": "142.0",
       "data_collection_permissions": {
         "required": [

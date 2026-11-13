@@ -4,6 +4,7 @@ let database;
 
 function openDatabase() {
   database ??= new Promise((resolve, reject) => {
+    // The database keeps its pre-rename name; renaming it would orphan existing clips.
     const request = indexedDB.open("clipfile", 4);
     request.onupgradeneeded = ({ oldVersion }) => {
       if (oldVersion < 1) request.result.createObjectStore("entries", { keyPath: "id" });
