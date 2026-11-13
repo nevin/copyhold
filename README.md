@@ -62,3 +62,7 @@ The bar under the header shows whether automatic saving is on. **Pause** stops i
 **Export** downloads a JSON backup. **Import** appends the backup entries with fresh IDs, preserving duplicate content, display preferences, stars, and timestamps. Backups exported under the extension's earlier name, Clipfile, import too. Import opens the full-tab view to keep the file picker open. In the full-tab view you can also drop a backup file onto the page.
 
 Copyhold stores entries locally and makes no network requests. See [PRIVACY.md](PRIVACY.md) for the full privacy policy. Masking and hiding affect only the preview. The original text remains available to edit and copy, and exports contain it in plain text.
+
+## License
+
+Copyhold is released under the [MIT License](LICENSE).
