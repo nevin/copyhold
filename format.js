@@ -8,12 +8,18 @@ const relativeUnits = [
   ["hour", 3_600],
   ["minute", 60],
 ];
+const shortDate = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" });
 const shellCommand = /^(?:\$ )?(?:sudo|ssh|scp|git|npm|npx|pnpm|yarn|docker|kubectl|curl|wget|cd|ls|cat|grep|python3?|node|brew|make|cargo|go)\s/;
 
 export function characterCount(text) {
   let count = 0;
   for (const _ of segmenter.segment(text)) count++;
   return count;
+}
+
+// Counting graphemes is exact but slow for very long text, where code units are close enough.
+export function displayLength(text) {
+  return text.length > 20_000 ? text.length : characterCount(text);
 }
 
 function maskedPreview(text) {
@@ -31,7 +37,7 @@ function maskedPreview(text) {
 
 export function clipPreview(text, visibility) {
   if (visibility === "hidden") {
-    const count = characterCount(text);
+    const count = displayLength(text);
     return `Hidden · ${count} ${count === 1 ? "character" : "characters"}`;
   }
   if (visibility === "masked") return maskedPreview(text);
@@ -58,6 +64,19 @@ export function displayUrl(text) {
   const url = new URL(text.trim());
   const path = url.pathname === "/" ? "" : url.pathname;
   return `${url.host}${path}${url.search}${url.hash}`;
+}
+
+// A short age such as "8m", "2h", "3d", or "2w" for compact lists.
+export function shortAge(timestamp, now = Date.now()) {
+  const minutes = Math.max(0, (now - Date.parse(timestamp)) / 60_000);
+  if (minutes < 1) return "now";
+  if (minutes < 60) return `${Math.floor(minutes)}m`;
+  const hours = minutes / 60;
+  if (hours < 24) return `${Math.floor(hours)}h`;
+  const days = hours / 24;
+  if (days < 7) return `${Math.floor(days)}d`;
+  if (days < 35) return `${Math.floor(days / 7)}w`;
+  return shortDate.format(new Date(timestamp));
 }
 
 export function relativeTime(timestamp, now = Date.now()) {

@@ -37,6 +37,13 @@ Load it with **Load unpacked** on `chrome://extensions` and `edge://extensions`.
 - [ ] Pin, mask, show, edit, select, and delete work; Undo restores deleted clips and pausing over the undo bar stops its countdown.
 - [ ] A link clip shows **Open link**, which opens the page in a new tab.
 
+**Row actions, bulk actions, and views**
+- [ ] Pointing at a row shows Pin, Edit, and Delete; Delete removes the clip at once and Undo restores it.
+- [ ] The header switch turns automatic saving on and off and matches the Settings checkbox.
+- [ ] The checkbox beside the filters selects every shown clip; Copy, Pin, and Delete act on the selection.
+- [ ] Compact density shows one line per clip with its age and length, in both themes.
+- [ ] The eye button hides all clip text and remembers the choice the next time the popup opens.
+
 **History size and long lists**
 - [ ] With more than 200 clips, the list shows 200 and a **Show more** row; Down at the last row loads more.
 - [ ] Set **History size** below the number of unpinned clips: a confirmation names how many will be deleted, and **Cancel** keeps the old setting.

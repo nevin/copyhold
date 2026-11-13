@@ -9,6 +9,8 @@ export const defaultSettings = {
   closeAfterCopy: true,
   // 0 keeps every clip.
   historyLimit: 0,
+  density: "comfortable",
+  hidePreviews: false,
 };
 const settingsChannel = "copyhold-settings";
 const themeKey = "copyhold-theme";

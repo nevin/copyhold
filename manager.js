@@ -2,7 +2,7 @@ import {
   compareEntries, createEntry, exportEntries, importEntries, isExpired, withDefaultRetention,
 } from "./entries.js";
 import { copyToClipboard, saveClipboard, supportsAutoCapture } from "./clipboard.js";
-import { clipPreview, clipType, displayUrl, relativeTime } from "./format.js";
+import { clipPreview, clipType, displayLength, displayUrl, relativeTime, shortAge } from "./format.js";
 import {
   getSettings, getTheme, onSettingsChange, onThemeChange, setTheme, updateSettings,
 } from "./settings.js";
@@ -73,6 +73,12 @@ const renderStep = 200;
 let renderLimit = renderStep;
 let hiddenMatches = 0;
 const showMore = byId("show-more");
+const captureSwitch = byId("capture-switch");
+const hidePreviewsButton = byId("hide-previews");
+const copySelected = byId("copy-selected");
+const pinSelected = byId("pin-selected");
+// Shown in place of every visible clip's text, for screen sharing; rows rebuild when it changes.
+let hidePreviews = false;
 const historyLimit = byId("history-limit");
 
 document.documentElement.classList.toggle("full-tab", fullTab);
@@ -175,6 +181,7 @@ function timeElement(timestamp) {
 
 setInterval(() => {
   for (const time of clipList.querySelectorAll("time")) time.textContent = relativeTime(time.dateTime);
+  for (const age of clipList.querySelectorAll(".clip-age")) age.textContent = shortAge(age.dataset.time);
 }, 60_000);
 
 function clipName(entry) {
@@ -242,7 +249,7 @@ function toggleMask(entry) {
 
 function deleteEntry(entry) {
   run(async () => {
-    if (!await confirmAction("Delete clip?", `“${clipName(entry)}” will be removed from your saved clips.`, "Delete", true)) return;
+    // Undo replaces a confirmation, so deleting one clip takes one step.
     offerUndo(await store.remove(entry.id));
     await refresh();
   });
@@ -388,8 +395,18 @@ function itemFor(entry) {
   const key = document.createElement("kbd");
   key.className = "clip-key";
   key.setAttribute("aria-hidden", "true");
+  const usedAt = entry.lastUsedAt ?? entry.createdAt;
+  const age = textLine("span", Date.now() - Date.parse(usedAt) < 3_600_000 ? "clip-age is-fresh" : "clip-age", shortAge(usedAt));
+  age.dataset.time = usedAt;
+  age.setAttribute("aria-hidden", "true");
+  const length = displayLength(entry.text);
+  const lengthLabel = `${length.toLocaleString()} ${length === 1 ? "character" : "characters"}`;
+  const size = textLine("span", "clip-size", length.toLocaleString());
+  size.title = lengthLabel;
+  size.setAttribute("aria-hidden", "true");
 
-  const visible = entry.visibility === "visible";
+  const visibility = hidePreviews && entry.visibility === "visible" ? "masked" : entry.visibility;
+  const visible = visibility === "visible";
   const type = visible ? clipType(entry.text) : "text";
   const details = document.createElement("div");
   details.className = "clip-details";
@@ -398,7 +415,7 @@ function itemFor(entry) {
   const preview = textLine(
     "p",
     `preview${placeholder ? " protected" : ""}${type === "code" ? " code" : ""}`,
-    type === "link" ? displayUrl(entry.text) : clipPreview(entry.text, entry.visibility),
+    type === "link" ? displayUrl(entry.text) : clipPreview(entry.text, visibility),
   );
   if (type === "color" && CSS.supports("color", entry.text.trim())) {
     const swatch = document.createElement("span");
@@ -414,12 +431,23 @@ function itemFor(entry) {
   meta.className = "meta";
   meta.append(entry.lastUsedAt ? "Copied " : "Saved ", timeElement(entry.lastUsedAt ?? entry.createdAt));
   if (entry.expiresAt) meta.append(" · Expires ", timeElement(entry.expiresAt));
+  if (entry.visibility !== "hidden") meta.append(` · ${lengthLabel}`);
   details.append(meta);
 
   const actions = document.createElement("div");
   actions.className = "clip-actions";
   actions.setAttribute("aria-hidden", "true");
+  const pin = rowButton("pin", entry.pinned ? "Unpin" : "Pin", () => togglePin(entry));
+  pin.classList.add("quick");
+  pin.classList.toggle("is-on", entry.pinned);
+  const edit = rowButton("edit", "Edit", () => openEditor(entry));
+  edit.classList.add("quick");
+  const remove = rowButton("delete", "Delete", () => deleteEntry(entry));
+  remove.classList.add("quick");
   actions.append(
+    pin,
+    edit,
+    remove,
     rowButton("copy", "Copy", () => copyEntry(entry)),
     rowButton("more", "More actions", (event) => {
       // The click that light-dismissed this entry's menu should not reopen it.
@@ -428,7 +456,7 @@ function itemFor(entry) {
       openMenu(entry, event.currentTarget);
     }),
   );
-  item.append(check, key, details, actions);
+  item.append(check, age, details, size, key, actions);
 
   item.addEventListener("mousedown", (event) => {
     if (event.shiftKey) event.preventDefault();
@@ -508,6 +536,9 @@ function updateItemStates() {
   selectVisible.indeterminate = count > 0 && count < shownClips.length;
   selectVisible.disabled = shownClips.length === 0;
   deleteSelected.disabled = count === 0;
+  copySelected.disabled = count === 0;
+  pinSelected.disabled = count === 0;
+  pinSelected.textContent = count && selectedEntries().every((clip) => clip.pinned) ? "Unpin" : "Pin";
   updateSearchHint();
 }
 
@@ -559,6 +590,34 @@ selectVisible.addEventListener("change", () => {
   if (selectVisible.checked) for (const { id } of shownClips) selectedIds.add(id);
   updateItemStates();
 });
+
+// Selected clips in list order.
+function selectedEntries() {
+  return clips.filter((clip) => selectedIds.has(clip.id));
+}
+
+byId("select-all").addEventListener("change", (event) => {
+  event.target.checked = false;
+  for (const { id } of shownClips) selectedIds.add(id);
+  startSelection();
+});
+
+copySelected.addEventListener("click", () => run(async () => {
+  const entries = selectedEntries().filter((clip) => !isExpired(clip));
+  if (!entries.length) return;
+  await copyToClipboard(entries.map((clip) => clip.text).join("\n"));
+  const label = entries.length === 1 ? "1 clip" : `${entries.length} clips`;
+  byId("copy-status").textContent = `Copied ${label}.`;
+  status(`Copied ${label}, one per line.`);
+}));
+
+pinSelected.addEventListener("click", () => run(async () => {
+  const entries = selectedEntries();
+  const pinning = entries.some((clip) => !clip.pinned);
+  for (const clip of entries) if (clip.pinned !== pinning) await store.update(clip.id, { pinned: pinning });
+  const label = entries.length === 1 ? "1 clip" : `${entries.length} clips`;
+  await refresh(`${pinning ? "Pinned" : "Unpinned"} ${label}.`);
+}));
 
 deleteSelected.addEventListener("click", () => run(async () => {
   const ids = [...selectedIds];
@@ -661,7 +720,7 @@ function renderList(resetActive = false) {
   }
   const rows = { pinned: [], recent: [] };
   shown.forEach((entry, index) => {
-    const revision = entry.revision ?? 0;
+    const revision = `${entry.revision ?? 0}:${hidePreviews}`;
     let cached = clipItems.get(entry.id);
     if (cached?.revision !== revision) {
       cached?.item.remove();
@@ -798,6 +857,7 @@ function showAutoCapture(enabled, pausedUntil = 0) {
   capturePausedUntil = pausedUntil;
   autoCaptureEnabled = enabled && !pausedUntil && captureHealthy;
   autoCapture.checked = enabled;
+  captureSwitch.setAttribute("aria-checked", String(enabled));
   const captureState = byId("capture-state");
   captureState.textContent = !enabled ? "Auto-save off" : pausedUntil ? "Auto-save paused"
     : captureHealthy ? "Auto-save on" : "Auto-save needs attention";
@@ -905,6 +965,10 @@ if (supportsAutoCapture) {
   autoCapture.addEventListener("click", (event) => {
     if (updatingCapture) event.preventDefault();
   });
+  // The header switch goes through the Settings checkbox so both stay in step.
+  captureSwitch.addEventListener("click", () => {
+    if (!autoCapture.disabled && !updatingCapture) autoCapture.click();
+  });
   autoCapture.addEventListener("change", () => run(async () => {
     const enabled = autoCapture.checked;
     updatingCapture = true;
@@ -924,8 +988,37 @@ if (supportsAutoCapture) {
   }));
 }
 
+function applyDensity(density) {
+  clipList.classList.toggle("compact", density === "compact");
+  for (const option of settings.querySelectorAll('[name="density"]')) option.checked = option.value === density;
+}
+
+function applyHidePreviews(hidden) {
+  hidePreviews = hidden;
+  hidePreviewsButton.setAttribute("aria-pressed", String(hidden));
+  const label = hidden ? "Show clip previews" : "Hide clip previews";
+  hidePreviewsButton.title = label;
+  hidePreviewsButton.setAttribute("aria-label", label);
+  hidePreviewsButton.querySelector("path").setAttribute("d", iconPaths[hidden ? "eye" : "eyeOff"]);
+  renderList();
+}
+
+settings.addEventListener("change", (event) => {
+  if (event.target.name !== "density") return;
+  applyDensity(event.target.value);
+  run(() => updateSettings({ density: event.target.value }));
+});
+hidePreviewsButton.addEventListener("mousedown", (event) => event.preventDefault());
+hidePreviewsButton.addEventListener("click", () => {
+  applyHidePreviews(!hidePreviews);
+  status(hidePreviews ? "Clip previews hidden." : "Clip previews shown.");
+  run(() => updateSettings({ hidePreviews }));
+});
+
 run(async () => {
   const saved = await getSettings();
+  applyDensity(saved.density);
+  if (saved.hidePreviews) applyHidePreviews(true);
   retentionDays.value = String(saved.retentionDays);
   retentionDays.disabled = false;
   savedHistoryLimit = saved.historyLimit;
@@ -938,6 +1031,8 @@ run(async () => {
 onSettingsChange((changes) => {
   if ("retentionDays" in changes) retentionDays.value = String(changes.retentionDays);
   if ("closeAfterCopy" in changes) closeAfterCopyInput.checked = closeAfterCopy = changes.closeAfterCopy;
+  if ("density" in changes) applyDensity(changes.density);
+  if ("hidePreviews" in changes && changes.hidePreviews !== hidePreviews) applyHidePreviews(changes.hidePreviews);
   if ("historyLimit" in changes) historyLimit.value = String(savedHistoryLimit = changes.historyLimit);
 });
 retentionDays.addEventListener("change", () => run(async () => {
