@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Copyhold",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Save, organize, and reuse text from your clipboard.",
   "permissions": [
     "clipboardRead",
