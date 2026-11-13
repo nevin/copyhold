@@ -77,6 +77,7 @@ Pushes to `main` run the checks and browser tests in GitHub Actions, and changes
 - Edits in the clip editor save as you type; **Done**, **Escape**, or **Cmd+Enter** (**Ctrl+Enter** elsewhere) closes it.
 - Select **Save clipboard** to save the current clipboard text, or the image on it when there's no text. If the same content is already saved, Copyhold moves that clip to the top instead of saving it again.
 - Press **Alt+Shift+S** to save the clipboard without opening Copyhold, or right-click selected text on a page and choose **Save selection to Copyhold**. A check mark on the toolbar icon confirms the save. Change the shortcuts at `chrome://extensions/shortcuts`. Use **New clip** to type or paste text with an optional title, description, category, subcategory, and tags.
+- Select the **Pinned** heading to fold the pinned clips away, and again to show them. Folded clips leave the list and keyboard navigation; the **Pinned** filter still shows them. Copyhold remembers the choice.
 - The list shows 200 clips at a time; select **Show more** or keep pressing **Down** to see more.
 - Clips show what kind of text they contain: links show their address without `https://`, code and commands use a monospace font, and colors show a swatch. Times are relative, such as "2 hours ago"; point at a time to see the exact date.
 
@@ -118,7 +119,7 @@ The switch in the bar under the header turns automatic saving on or off. **Pause
 
 ### Backups
 
-**Export** downloads a JSON backup, with images as data URLs. **Import** appends the backup entries with fresh IDs, preserving duplicate content, display preferences, pins, and timestamps. Backups exported under the extension's earlier name, Clipfile, import too. Import opens the full-tab view to keep the file picker open. In the full-tab view you can also drop a backup file onto the page.
+**Import backup** and **Export backup** are in the bar under the clip list. **Export** downloads a JSON backup, with images as data URLs. **Import** appends the backup entries with fresh IDs, preserving duplicate content, display preferences, pins, and timestamps. Backups exported under the extension's earlier name, Clipfile, import too. Import opens the full-tab view to keep the file picker open. In the full-tab view you can also drop a backup file onto the page.
 
 Copyhold stores entries locally and makes no network requests. See [PRIVACY.md](PRIVACY.md) for the full privacy policy. Masking and hiding affect only the preview. The original text remains available to edit and copy, and exports contain it unencrypted.
 

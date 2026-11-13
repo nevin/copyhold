@@ -299,7 +299,8 @@ button:disabled { cursor: default; opacity: .55; }
   display: grid;
   grid-template-columns: auto auto minmax(0, 1fr) auto auto auto auto;
   grid-template-areas: "check age details tags size key actions";
-  align-items: center;
+  /* Buttons line up with the first line of text, so they stay put when a clip wraps or has labels. */
+  align-items: start;
   padding: 8px 8px 8px 12px;
   scroll-margin-block: 32px 4px;
   cursor: pointer;
@@ -366,7 +367,7 @@ button:disabled { cursor: default; opacity: .55; }
 #delete-selected:not(:disabled) { color: var(--danger); border-color: currentColor; }
 #finish-selection { color: var(--accent); }
 .clip-details { min-inline-size: 0; display: grid; gap: 2px; }
-.clip-actions { display: flex; align-items: center; gap: 2px; }
+.clip-actions { display: flex; align-items: center; gap: 2px; margin-block: -6px; }
 .clip-actions button { min-block-size: 30px; min-inline-size: 30px; padding: 3px; border-color: transparent; background: transparent; color: var(--muted); border-radius: 7px; }
 .clip-actions button:hover { background: color-mix(in srgb, var(--text) 8%, transparent); color: var(--text); }
 :is(.clip:hover, .panel:has(#search:focus) .clip.is-active) .copy { color: var(--accent); }
@@ -421,7 +422,8 @@ button:disabled { cursor: default; opacity: .55; }
 .hint { font-size: .9rem; }
 /* One line with an ellipsis, so an icon or the row actions never push the text out of view. */
 :root:not(.full-tab) .clip .preview { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.compact .clip { padding-block: 5px; }
+.compact .clip { padding-block: 5px; align-items: center; }
+.compact .clip-actions { margin-block: 0; }
 .compact .clip-details { display: flex; align-items: baseline; gap: 8px; }
 .compact .clip-title { flex: none; max-inline-size: 45%; }
 .compact :is(.clip-title, .preview) { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -761,3 +763,33 @@ textarea { resize: vertical; }
 .setting-label { font-weight: 600; }
 :root:not(.full-tab) body:has(#manage-dialog[open]) { min-block-size: 520px; }
 :root:not(.full-tab) body:has(#filter-panel:popover-open) { min-block-size: 600px; }
+
+.group-toggle {
+  display: inline-flex;
+  gap: 4px;
+  min-block-size: 22px;
+  margin: -2px 0 0 -6px;
+  padding: 0 6px 0 2px;
+  border-radius: 6px;
+  color: inherit;
+  font: inherit;
+}
+.group-toggle:hover { background: var(--subtle); color: var(--text); }
+.group-toggle .chevron { inline-size: 14px; block-size: 14px; transition: transform .15s; }
+.group-toggle[aria-expanded="false"] .chevron { transform: rotate(-90deg); }
+@media (prefers-reduced-motion: reduce) { .group-toggle .chevron { transition: none; } }
+.group-count { min-inline-size: 18px; padding: 0 5px; border-radius: 999px; background: var(--subtle); font-variant-numeric: tabular-nums; }
+.list-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 6px;
+  border-block-start: 1px solid var(--line);
+}
+.list-footer button { gap: 6px; min-block-size: 30px; padding: 3px 8px; color: var(--muted); font-size: .86rem; }
+.list-footer button:hover:not(:disabled) { color: var(--text); }
+.list-footer .action-icon { inline-size: 15px; block-size: 15px; }
+.list-footer-hint { margin-inline-start: auto; padding-inline-end: 6px; color: var(--muted); font-size: .78rem; }
+:root:not(.full-tab) .list-footer-hint { display: none; }
+:is(.panel:has(#search:focus), body:has(#clip-menu:popover-open)) .clip.is-active .clip-labels .tag { background: var(--surface); }

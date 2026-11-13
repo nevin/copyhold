@@ -124,12 +124,6 @@
                 <button id="lock-remove" class="secondary" type="button" hidden data-i18n="turnOffLock">Turn off lock</button>
               </div>
             </fieldset>
-            <div class="actions">
-              <button id="import" class="secondary" type="button" aria-describedby="import-hint" data-i18n="importBackup">Import backup</button>
-              <button id="export" class="secondary" type="button" data-i18n="exportBackup">Export backup</button>
-              <input id="file" type="file" accept=".json,application/json" hidden>
-            </div>
-            <p id="import-hint" class="hint"></p>
           </div>
         </details>
       </div>
@@ -215,7 +209,13 @@
       <p id="copy-status" class="sr-only" role="status" aria-atomic="true"></p>
       <div id="entries" class="clips" role="listbox" aria-label="Saved clips" data-i18n-aria-label="savedClips">
         <div id="pinned-group" class="clip-group" role="group" aria-labelledby="pinned-heading" hidden>
-          <div id="pinned-heading" class="group-heading" role="presentation" data-i18n="pinned">Pinned</div>
+          <div id="pinned-heading" class="group-heading" role="presentation">
+            <button id="pinned-toggle" class="group-toggle" type="button" aria-expanded="true" aria-controls="pinned-group">
+              <svg class="action-icon chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
+              <span data-i18n="pinned">Pinned</span>
+              <span id="pinned-count" class="group-count"></span>
+            </button>
+          </div>
         </div>
         <div id="recent-group" class="clip-group" role="group" aria-labelledby="recent-heading" hidden>
           <div id="recent-heading" class="group-heading" role="presentation" data-i18n="recent">Recent</div>
@@ -227,6 +227,18 @@
         <div id="empty-hints"></div>
         <button id="reset-filters" class="secondary" type="button" hidden data-i18n="showAllClips">Show all clips</button>
       </div>
+      <footer class="list-footer">
+        <button id="import" class="quiet" type="button" aria-describedby="import-hint">
+          <svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 15V4m0 0L8 8m4-4 4 4M5 15v4h14v-4"/></svg>
+          <span data-i18n="importBackup">Import backup</span>
+        </button>
+        <button id="export" class="quiet" type="button">
+          <svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 15v4h14v-4"/></svg>
+          <span data-i18n="exportBackup">Export backup</span>
+        </button>
+        <input id="file" type="file" accept=".json,application/json" hidden>
+        <span id="import-hint" class="list-footer-hint"></span>
+      </footer>
     </section>
   </main>
   <div id="undo-bar" class="undo-bar" hidden>

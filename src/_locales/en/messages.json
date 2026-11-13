@@ -995,5 +995,11 @@
   },
   "deleteTagMessage_other": {
     "message": "The tag is removed from $1 clips. The clips aren't deleted."
+  },
+  "expandPinned": {
+    "message": "Show pinned clips"
+  },
+  "collapsePinned": {
+    "message": "Hide pinned clips"
   }
 }

@@ -2,6 +2,7 @@ import { sortEntries } from "../../lib/entries.js";
 import { clipPreview, clipType, displayLength, displayUrl, relativeTime, shortAge } from "../../lib/format.js";
 import { emptyFilter, isFiltering, matchesFilter, matchesTagTerms, matchesText, parseQuery } from "../../lib/organize.js";
 import { sensitiveLabel } from "../../lib/sensitive.js";
+import { updateSettings } from "../../lib/settings.js";
 import * as store from "../../lib/store.js";
 import { copyEntry, deleteEntry, togglePin } from "./actions.js";
 import { byId, icon, iconPaths, run, status, textLine, timeElement } from "./dom.js";
@@ -346,10 +347,14 @@ export function renderList(resetActive = false) {
   const matches = clips.filter((clip) => (!pinnedOnly || clip.pinned) &&
     matchesText(clip, text) && matchesTagTerms(clip, tags) && (!filtering || matchesFilter(clip, state.filter)));
   const hadFocus = clipList.contains(document.activeElement);
+  const pinnedMatches = matches.filter((clip) => clip.pinned).length;
+  // The Pinned filter shows only pinned clips, so folding them away there would empty the list.
+  const collapsed = state.pinnedCollapsed && !pinnedOnly;
+  const listed = collapsed ? matches.filter((clip) => !clip.pinned) : matches;
 
   if (resetActive) renderLimit = renderStep;
-  const shown = matches.slice(0, renderLimit);
-  hiddenMatches = matches.length - shown.length;
+  const shown = listed.slice(0, renderLimit);
+  hiddenMatches = listed.length - shown.length;
   const visibleIds = new Set(shown.map(({ id }) => id));
   state.shownClips = shown;
   for (const id of selectedIds) if (!visibleIds.has(id)) selectedIds.delete(id);
@@ -377,15 +382,19 @@ export function renderList(resetActive = false) {
   });
   for (const [name, group] of Object.entries(groups)) {
     group.replaceChildren(group.querySelector(".group-heading"), ...rows[name]);
-    group.hidden = rows[name].length === 0;
+    group.hidden = name === "pinned" ? pinnedMatches === 0 : rows[name].length === 0;
   }
   byId("pinned-heading").hidden = pinnedOnly;
-  byId("recent-heading").hidden = rows.pinned.length === 0;
+  byId("recent-heading").hidden = pinnedMatches === 0 || pinnedOnly;
+  const toggle = byId("pinned-toggle");
+  toggle.setAttribute("aria-expanded", String(!collapsed));
+  toggle.title = collapsed ? t("expandPinned") : t("collapsePinned");
+  byId("pinned-count").textContent = pinnedMatches.toLocaleString();
   showMore.hidden = hiddenMatches === 0;
   showMore.textContent = t("showMore", Math.min(renderStep, hiddenMatches).toLocaleString(), hiddenMatches.toLocaleString());
   if (hadFocus && !clipList.contains(document.activeElement)) search.focus({ preventScroll: true });
 
-  if (resetActive || !visibleIds.has(state.activeId)) state.activeId = matches[0]?.id;
+  if (resetActive || !visibleIds.has(state.activeId)) state.activeId = listed[0]?.id;
   updateItemStates();
   if (resetActive) clipList.scrollTop = 0;
 
@@ -499,6 +508,17 @@ document.addEventListener("keyup", (event) => {
   if (event.key === "Alt") clipList.classList.remove("show-keys");
 });
 addEventListener("blur", () => clipList.classList.remove("show-keys"));
+
+export function setPinnedCollapsed(collapsed) {
+  state.pinnedCollapsed = collapsed;
+  renderList();
+}
+
+byId("pinned-toggle").addEventListener("mousedown", (event) => event.preventDefault());
+byId("pinned-toggle").addEventListener("click", () => {
+  setPinnedCollapsed(!state.pinnedCollapsed);
+  run(() => updateSettings({ pinnedCollapsed: state.pinnedCollapsed }));
+});
 
 for (const filter of [allClips, pinnedClips]) {
   filter.addEventListener("change", () => renderList(true));

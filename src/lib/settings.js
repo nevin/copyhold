@@ -11,6 +11,7 @@ export const defaultSettings = {
   historyLimit: 0,
   density: "comfortable",
   hidePreviews: false,
+  pinnedCollapsed: false,
   // What automatic capture does with text that looks like a password, key, or card number: mask, skip, or keep.
   sensitiveClips: "mask",
   captureImages: false,

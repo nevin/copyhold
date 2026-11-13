@@ -4,14 +4,12 @@ import * as store from "../../lib/store.js";
 import { byId, fullTab, run, status } from "./dom.js";
 import { confirmAction } from "./editor.js";
 import { loaders, refresh } from "./list.js";
-import { settings } from "./settings-panel.js";
 import { t, tn } from "../../lib/i18n.js";
 
 const file = byId("file");
 
-byId("import-hint").textContent = fullTab
-  ? t("importHintTab")
-  : t("importHintPopup");
+byId("import-hint").textContent = fullTab ? t("importHintTab") : t("importHintPopup");
+if (!fullTab) byId("import").title = t("importHintPopup");
 
 byId("import").addEventListener("click", () => {
   if (fullTab) file.click();
@@ -65,7 +63,6 @@ byId("export").addEventListener("click", () => run(async () => {
 }));
 
 if (new URLSearchParams(location.search).has("import")) {
-  settings.open = true;
   status(t("importPrompt"));
   byId("import").focus();
 }

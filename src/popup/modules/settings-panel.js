@@ -4,7 +4,7 @@ import {
 import * as store from "../../lib/store.js";
 import { byId, iconPaths, run, status } from "./dom.js";
 import { confirmAction } from "./editor.js";
-import { clipList, refresh, renderList } from "./list.js";
+import { clipList, refresh, renderList, setPinnedCollapsed } from "./list.js";
 import { state } from "./state.js";
 import { t, tn } from "../../lib/i18n.js";
 
@@ -81,6 +81,7 @@ run(async () => {
   const saved = await getSettings();
   applyDensity(saved.density);
   if (saved.hidePreviews) applyHidePreviews(true);
+  if (saved.pinnedCollapsed) setPinnedCollapsed(true);
   for (const [input, key] of [[retentionDays, "retentionDays"], [historyLimit, "historyLimit"], [sensitiveClips, "sensitiveClips"]]) {
     input.value = String(saved[key]);
     input.disabled = false;
@@ -98,6 +99,7 @@ onSettingsChange((changes) => {
   if ("captureImages" in changes) captureImages.checked = changes.captureImages;
   if ("closeAfterCopy" in changes) closeAfterCopyInput.checked = state.closeAfterCopy = changes.closeAfterCopy;
   if ("density" in changes) applyDensity(changes.density);
+  if ("pinnedCollapsed" in changes && changes.pinnedCollapsed !== state.pinnedCollapsed) setPinnedCollapsed(changes.pinnedCollapsed);
   if ("hidePreviews" in changes && changes.hidePreviews !== state.hidePreviews) applyHidePreviews(changes.hidePreviews);
   if ("historyLimit" in changes) historyLimit.value = String(savedHistoryLimit = changes.historyLimit);
 });

@@ -15,6 +15,8 @@ export const state = {
   selectedIds: new Set(),
   // Shown in place of every visible clip's text, for screen sharing; rows rebuild when it changes.
   hidePreviews: false,
+  // The pinned group is folded away; its clips leave the list and keyboard navigation until it opens.
+  pinnedCollapsed: false,
   autoCaptureEnabled: false,
   closeAfterCopy: true,
   openShortcut: "",

@@ -244,6 +244,41 @@ test("deleting a clip can be undone", async () => {
   assert.equal((await storedClips()).length, before);
 });
 
+test("the pinned group collapses, stays collapsed, and leaves keyboard navigation", async () => {
+  await page.evaluate(() => {
+    const row = [...document.querySelectorAll("#recent-group .clip")].find((item) => item.textContent.includes("first clip"));
+    row.querySelector(".pin").click();
+  });
+  await page.waitForFunction(() => document.querySelectorAll("#pinned-group .clip").length === 1);
+  assert.equal(await text("#pinned-count"), "1");
+  await page.click("#pinned-toggle");
+  await page.waitForFunction(() => document.querySelectorAll("#pinned-group .clip").length === 0);
+  assert.equal(await page.$eval("#pinned-toggle", (toggle) => toggle.getAttribute("aria-expanded")), "false");
+  assert.equal(await page.$eval("#pinned-group", (group) => group.hidden), false);
+  // The first shown clip is now the first recent one, for arrows, Enter, and Alt+1.
+  const firstShown = await page.$eval(".clip", (item) => item.closest("#recent-group") !== null);
+  assert.equal(firstShown, true);
+
+  await page.waitForFunction(async () =>
+    (await (await import("/lib/settings.js")).getSettings()).pinnedCollapsed === true);
+  await openPopup();
+  await page.waitForFunction(() => document.querySelector("#pinned-toggle").getAttribute("aria-expanded") === "false");
+  assert.equal(await page.$$eval("#pinned-group .clip", (rows) => rows.length), 0);
+  // The Pinned filter still lists pinned clips.
+  await page.click("#pinned-clips");
+  await page.waitForFunction(() => document.querySelectorAll("#pinned-group .clip").length === 1);
+  await page.click("#all-clips");
+  await page.click("#pinned-toggle");
+  await page.waitForFunction(() => document.querySelectorAll("#pinned-group .clip").length === 1);
+});
+
+test("import and export are in the footer, outside Settings", async () => {
+  assert.equal(await page.$eval("#settings", (settings) => settings.open), false);
+  for (const id of ["#import", "#export"]) {
+    assert.equal(await page.$eval(id, (button) => button.closest(".list-footer") !== null && button.checkVisibility()), true);
+  }
+});
+
 test("automatic saving captures copied text with the popup closed", async () => {
   await page.click("#capture-switch");
   await page.waitForFunction(() => document.querySelector("#capture-switch").getAttribute("aria-checked") === "true");

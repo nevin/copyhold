@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.1
+
+- **Import and Export are easier to reach.** They're now in a bar under the clip list instead of inside Settings.
+- **Fold away pinned clips.** Select the Pinned heading to collapse or expand the group; Copyhold remembers your choice. The heading shows how many pinned clips there are.
+- Row buttons such as Pin, Edit, and Delete line up with the first line of each clip, so they stay in place when a clip has a title, labels, or several lines.
+
 ## 1.2.0
 
 To install, download **copyhold-chromium.zip**, unzip it, open `chrome://extensions`, turn on **Developer mode**, select **Load unpacked**, and choose the `copyhold` folder. To update, replace the folder's files and select the reload button on Copyhold's card. Your clips are kept.
