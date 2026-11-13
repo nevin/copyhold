@@ -13,6 +13,7 @@ const assets = [
   "manager.css",
   "manager.html",
   "manager.js",
+  "settings.js",
   "store.js",
   "icons/48.png",
 ];

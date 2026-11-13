@@ -1,4 +1,6 @@
 import "./expiry.js";
+import { getSettings, updateSettings } from "./settings.js";
+import { skipCurrentClipboard } from "./store.js";
 
 const offscreenPage = "offscreen.html";
 const resumeAlarm = "clipfile-resume-capture";
@@ -7,27 +9,29 @@ let pending = Promise.resolve();
 
 function updateMonitor({ enabled, pause, retry } = {}) {
   const update = pending.then(async () => {
-    const saved = await chrome.storage.local.get({ autoCapture: true, pausedUntil: 0 });
+    const saved = await getSettings();
     const autoCapture = enabled ?? saved.autoCapture;
     const pausedUntil = !autoCapture || pause === "resume" ? 0
       : pause === "pause" ? Date.now() + 15 * 60_000
       : saved.pausedUntil > Date.now() ? saved.pausedUntil : 0;
-    if (autoCapture !== saved.autoCapture || pausedUntil !== saved.pausedUntil) {
-      const settings = { autoCapture, pausedUntil };
-      if (pause === "pause" || !autoCapture) settings.skipCurrentClipboard = crypto.randomUUID();
-      await navigator.locks.request("clipfile-baseline-state", () => chrome.storage.local.set(settings));
-    }
-
-    if (pause === "pause") await chrome.alarms.create(resumeAlarm, { when: pausedUntil });
-    else if (!pausedUntil && saved.pausedUntil) await chrome.alarms.clear(resumeAlarm);
+    const changed = autoCapture !== saved.autoCapture || pausedUntil !== saved.pausedUntil;
+    const shouldRun = autoCapture && !pausedUntil;
     const contexts = await chrome.runtime.getContexts({
       contextTypes: ["OFFSCREEN_DOCUMENT"],
       documentUrls: [chrome.runtime.getURL(offscreenPage)],
     });
-    const shouldRun = autoCapture && !pausedUntil;
-    if (contexts.length && (!shouldRun || retry === true)) {
-      await navigator.locks.request("clipfile-clipboard", () => chrome.offscreen.closeDocument());
+    const stop = contexts.length && (!shouldRun || retry === true);
+    if (changed || stop) {
+      // Hold the clipboard lock so the monitor cannot capture between these steps.
+      await navigator.locks.request("clipfile-clipboard", async () => {
+        if (changed && (pause === "pause" || !autoCapture)) await skipCurrentClipboard();
+        if (changed) await updateSettings({ autoCapture, pausedUntil });
+        if (stop) await chrome.offscreen.closeDocument();
+      });
     }
+
+    if (pause === "pause") await chrome.alarms.create(resumeAlarm, { when: pausedUntil });
+    else if (!pausedUntil && saved.pausedUntil) await chrome.alarms.clear(resumeAlarm);
     if (shouldRun && (!contexts.length || retry === true)) {
       await chrome.offscreen.createDocument({
         url: offscreenPage,
@@ -63,17 +67,6 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
 chrome.runtime.onMessage.addListener((message, sender, respond) => {
   const url = sender.url?.split("?")[0];
-  if (url === chrome.runtime.getURL(offscreenPage) && message?.type === "clipfile-baseline") {
-    const operation = navigator.locks.request("clipfile-baseline-state", async () => {
-      const settings = await chrome.storage.local.get({ skipCurrentClipboard: false });
-      if (message.done && message.done === settings.skipCurrentClipboard) {
-        await chrome.storage.local.set({ skipCurrentClipboard: false });
-      }
-      return settings;
-    });
-    operation.then(respond, () => respond({ error: true }));
-    return true;
-  }
   if (message?.type !== "clipfile-auto-capture" || url !== chrome.runtime.getURL("manager.html")) return;
   updateMonitor(message).then(
     respond,

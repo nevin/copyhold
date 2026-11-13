@@ -1,4 +1,4 @@
-import { createEntry } from "./entries.js";
+import { createEntry, withDefaultRetention } from "./entries.js";
 import * as store from "./store.js";
 
 export const supportsAutoCapture = Boolean(globalThis.chrome?.storage?.local &&
@@ -8,13 +8,22 @@ function withClipboardLock(work) {
   return navigator.locks.request("clipfile-clipboard", work);
 }
 
-export function captureAutomatically(readText, { baseline = false } = {}) {
+function newEntry(text) {
+  return (retentionDays) => withDefaultRetention(createEntry({ text }), retentionDays);
+}
+
+// Only the offscreen monitor captures automatically, so this is the text it last recorded.
+let lastCaptured;
+
+export function captureAutomatically(readText) {
   return withClipboardLock(async () => {
     const text = readText();
     if (text === undefined) return null;
-    if (baseline || !text) return store.observeClipboard(text);
-    const entry = await store.applyDefaultRetention(createEntry({ text }));
-    return store.observeClipboard(text, () => entry);
+    // Polls usually see unchanged text, so skip hashing and storage until it changes.
+    if (text === lastCaptured) return false;
+    const added = await store.observeClipboard(text, text ? newEntry(text) : undefined, { automatic: true });
+    lastCaptured = text;
+    return added;
   });
 }
 
@@ -28,8 +37,7 @@ export async function saveClipboard() {
     }
     if (!text) throw new Error("The clipboard has no text to save.");
 
-    const entry = await store.applyDefaultRetention(createEntry({ text }));
-    return store.observeClipboard(text, () => entry, { manual: true });
+    return store.observeClipboard(text, newEntry(text), { manual: true });
   }
 
   return supportsAutoCapture ? withClipboardLock(save) : save();

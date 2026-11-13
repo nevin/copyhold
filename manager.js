@@ -1,5 +1,10 @@
-import { compareEntries, createEntry, exportEntries, importEntries, isExpired } from "./entries.js";
+import {
+  compareEntries, createEntry, exportEntries, importEntries, isExpired, withDefaultRetention,
+} from "./entries.js";
 import { copyToClipboard, saveClipboard, supportsAutoCapture } from "./clipboard.js";
+import {
+  getSettings, getTheme, onSettingsChange, onThemeChange, setTheme, updateSettings,
+} from "./settings.js";
 import * as store from "./store.js";
 
 const byId = (id) => document.getElementById(id);
@@ -37,7 +42,6 @@ let selecting = false;
 let shownClips = [];
 const settings = document.querySelector(".settings");
 const themeOptions = settings.querySelectorAll('[name="theme"]');
-const themeKey = "clipfile-theme";
 const systemTheme = matchMedia("(prefers-color-scheme: dark)");
 const dateFormat = new Intl.DateTimeFormat(undefined, {
   dateStyle: fullTab ? "medium" : "short",
@@ -56,22 +60,19 @@ const clipItems = new Map();
 document.documentElement.classList.toggle("full-tab", fullTab);
 byId("open-tab").hidden = fullTab;
 
-function applyTheme(value) {
-  const theme = value === "light" || value === "dark" ? value : "system";
+function applyTheme(theme) {
   document.documentElement.dataset.theme = theme === "system" ? (systemTheme.matches ? "dark" : "light") : theme;
   for (const option of themeOptions) option.checked = option.value === theme;
 }
 
-applyTheme(localStorage.getItem(themeKey));
-systemTheme.addEventListener("change", () => applyTheme(localStorage.getItem(themeKey)));
+applyTheme(getTheme());
+systemTheme.addEventListener("change", () => applyTheme(getTheme()));
 settings.addEventListener("change", (event) => {
   if (event.target.name !== "theme") return;
-  localStorage.setItem(themeKey, event.target.value);
-  applyTheme(event.target.value);
+  setTheme(event.target.value);
+  applyTheme(getTheme());
 });
-window.addEventListener("storage", (event) => {
-  if (event.key === themeKey || event.key === null) applyTheme(localStorage.getItem(themeKey));
-});
+onThemeChange(applyTheme);
 
 document.addEventListener("click", (event) => {
   if (settings.open && !settings.contains(event.target)) settings.open = false;
@@ -578,10 +579,10 @@ async function checkCaptureHealth() {
 
 if (supportsAutoCapture) {
   byId("auto-capture-setting").hidden = false;
-  chrome.storage.onChanged.addListener((changes, area) => {
-    if (area !== "local" || (!changes.autoCapture && !changes.pausedUntil)) return;
+  onSettingsChange((changes) => {
+    if (!("autoCapture" in changes) && !("pausedUntil" in changes)) return;
     run(async () => {
-      const saved = await chrome.storage.local.get({ autoCapture: true, pausedUntil: 0 });
+      const saved = await getSettings();
       showAutoCapture(saved.autoCapture, saved.pausedUntil);
     });
   });
@@ -625,7 +626,7 @@ if (supportsAutoCapture) {
       await configureAutoCapture({ enabled });
       status(enabled ? "Automatic capture is on." : "Automatic capture is off.");
     } catch (error) {
-      const saved = await chrome.storage.local.get({ autoCapture: true, pausedUntil: 0 });
+      const saved = await getSettings();
       showAutoCapture(saved.autoCapture, saved.pausedUntil);
       throw error;
     } finally {
@@ -636,11 +637,14 @@ if (supportsAutoCapture) {
 }
 
 run(async () => {
-  retentionDays.value = String(await store.getRetentionDays());
+  retentionDays.value = String((await getSettings()).retentionDays);
   retentionDays.disabled = false;
 });
+onSettingsChange((changes) => {
+  if ("retentionDays" in changes) retentionDays.value = String(changes.retentionDays);
+});
 retentionDays.addEventListener("change", () => run(async () => {
-  await store.setRetentionDays(Number(retentionDays.value));
+  await updateSettings({ retentionDays: Number(retentionDays.value) });
 }));
 
 function localExpiryValue(timestamp) {
@@ -714,7 +718,7 @@ editForm.addEventListener("submit", async (event) => {
   const id = editedEntry?.id;
   try {
     if (id) await store.update(id, data);
-    else await store.add([await store.applyDefaultRetention(createEntry(data))]);
+    else await store.add([withDefaultRetention(createEntry(data), (await getSettings()).retentionDays)]);
   } catch (error) {
     byId("form-status").textContent = error.message || "Could not save the entry.";
     return;

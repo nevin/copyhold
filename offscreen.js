@@ -4,7 +4,6 @@ const clipboard = document.getElementById("clipboard");
 const changes = new BroadcastChannel("clipfile-entries");
 const pollInterval = 1000;
 let delay = pollInterval;
-let baseline;
 let lastSuccess = 0;
 let failed = false;
 
@@ -33,18 +32,8 @@ function readText() {
 
 async function capture() {
   try {
-    if (baseline === undefined) {
-      const settings = await chrome.runtime.sendMessage({ type: "clipfile-baseline" });
-      if (!settings || settings.error) throw new Error("Could not read capture settings.");
-      baseline = settings.skipCurrentClipboard;
-    }
-    const added = await captureAutomatically(readText, { baseline });
+    const added = await captureAutomatically(readText);
     if (added === null) throw new Error("Clipboard read did not complete.");
-    if (baseline) {
-      const response = await chrome.runtime.sendMessage({ type: "clipfile-baseline", done: baseline });
-      if (!response || response.error) throw new Error("Could not record clipboard baseline.");
-      baseline = false;
-    }
     lastSuccess = Date.now();
     failed = false;
     if (added) changes.postMessage("updated");

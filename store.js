@@ -4,13 +4,15 @@ let database;
 
 function openDatabase() {
   database ??= new Promise((resolve, reject) => {
-    const request = indexedDB.open("clipfile", 3);
+    const request = indexedDB.open("clipfile", 4);
     request.onupgradeneeded = ({ oldVersion }) => {
       if (oldVersion < 1) request.result.createObjectStore("entries", { keyPath: "id" });
       if (oldVersion < 2) request.result.createObjectStore("clipboard");
       if (oldVersion < 3) {
         request.transaction.objectStore("entries").createIndex("expiresAt", "expiresAt");
       }
+      // The store holds settings and capture state, not clipboard contents.
+      if (oldVersion < 4) request.transaction.objectStore("clipboard").name = "meta";
     };
     request.onsuccess = () => {
       const db = request.result;
@@ -38,7 +40,7 @@ async function transact(mode, work, stores = ["entries"]) {
   });
   let request;
   try {
-    request = work(transaction.objectStore("entries"), transaction);
+    request = work(transaction.objectStore(stores[0]), transaction);
   } catch (error) {
     transaction.abort();
     await complete.catch(() => {});
@@ -53,24 +55,34 @@ export function list() {
     .then((entries) => entries.filter((entry) => !isExpired(entry)));
 }
 
-export async function getRetentionDays() {
-  const days = await transact("readonly", (_, transaction) =>
-    transaction.objectStore("clipboard").get("retentionDays"), ["entries", "clipboard"]);
-  return days ?? 0;
+export async function getMeta(keys) {
+  const requests = new Map();
+  await transact("readonly", (meta) => {
+    for (const key of keys) requests.set(key, meta.get(key));
+  }, ["meta"]);
+  return Object.fromEntries([...requests]
+    .filter(([, request]) => request.result !== undefined)
+    .map(([key, request]) => [key, request.result]));
 }
 
-export function setRetentionDays(days) {
-  return transact("readwrite", (_, transaction) =>
-    transaction.objectStore("clipboard").put(days, "retentionDays"), ["entries", "clipboard"]);
+export function setMeta(values, { keepExisting = false } = {}) {
+  return transact("readwrite", (meta) => {
+    for (const [key, value] of Object.entries(values)) {
+      if (!keepExisting) {
+        meta.put(value, key);
+        continue;
+      }
+      const existing = meta.get(key);
+      existing.onsuccess = () => {
+        if (existing.result === undefined) meta.put(value, key);
+      };
+    }
+  }, ["meta"]);
 }
 
-export async function applyDefaultRetention(entry) {
-  const days = await getRetentionDays();
-  if (days && !entry.pinned && !entry.expiresAt) {
-    entry.expiresAt = new Date(Date.now() + days * 86_400_000).toISOString();
-    entry.defaultExpiry = true;
-  }
-  return entry;
+// The next automatic capture records the clipboard without saving it.
+export function skipCurrentClipboard() {
+  return setMeta({ skipClipboard: true });
 }
 
 export async function removeExpired() {
@@ -94,37 +106,44 @@ export function add(entries) {
   });
 }
 
-export async function observeClipboard(text, makeEntry, { manual = false } = {}) {
+// makeEntry receives the default retention in days and returns the entry to save.
+export async function observeClipboard(text, makeEntry, { manual = false, automatic = false } = {}) {
   // Hash UTF-16 code units to distinguish all JavaScript strings without storing another copy.
   const units = Uint16Array.from({ length: text.length }, (_, index) => text.charCodeAt(index));
   const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", units));
   const fingerprint = btoa(String.fromCharCode(...digest));
   let added = false;
   await transact("readwrite", (entries, transaction) => {
-    const clipboard = transaction.objectStore("clipboard");
-    const previous = clipboard.get("fingerprint");
-    previous.onsuccess = () => {
+    const meta = transaction.objectStore("meta");
+    const previous = meta.get("fingerprint");
+    const skip = meta.get("skipClipboard");
+    const retentionDays = meta.get("retentionDays");
+    // Requests in one transaction succeed in order, so all three results are ready here.
+    retentionDays.onsuccess = () => {
       const changed = previous.result !== fingerprint;
-      if (changed) clipboard.put(fingerprint, "fingerprint");
+      if (changed) meta.put(fingerprint, "fingerprint");
+      if (automatic && skip.result) {
+        meta.delete("skipClipboard");
+        return;
+      }
       if (!makeEntry) return;
+      const save = () => {
+        entries.add(makeEntry(retentionDays.result ?? 0));
+        added = true;
+      };
       if (manual) {
         // Check and insert in the same transaction so concurrent saves see each other.
         const cursorRequest = entries.openCursor();
         cursorRequest.onsuccess = () => {
           const cursor = cursorRequest.result;
-          if (!cursor) {
-            entries.add(makeEntry());
-            added = true;
-          } else if (cursor.value.text !== text || isExpired(cursor.value)) {
-            cursor.continue();
-          }
+          if (!cursor) save();
+          else if (cursor.value.text !== text || isExpired(cursor.value)) cursor.continue();
         };
       } else if (changed) {
-        entries.add(makeEntry());
-        added = true;
+        save();
       }
     };
-  }, ["entries", "clipboard"]);
+  }, ["entries", "meta"]);
   return added;
 }
 

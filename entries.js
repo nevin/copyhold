@@ -15,6 +15,14 @@ export function createEntry(fields) {
   };
 }
 
+export function withDefaultRetention(entry, days, now = Date.now()) {
+  if (days && !entry.pinned && !entry.expiresAt) {
+    entry.expiresAt = new Date(now + days * 86_400_000).toISOString();
+    entry.defaultExpiry = true;
+  }
+  return entry;
+}
+
 export function compareEntries(first, second) {
   return Number(second.pinned) - Number(first.pinned) ||
     Date.parse(second.lastUsedAt ?? second.createdAt) - Date.parse(first.lastUsedAt ?? first.createdAt) ||
