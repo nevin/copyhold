@@ -28,8 +28,11 @@ export async function updateSettings(changes) {
 }
 
 // The listener receives the changed settings, including changes made in this view.
+// Returns a function that stops listening.
 export function onSettingsChange(listener) {
-  new BroadcastChannel(settingsChannel).addEventListener("message", ({ data }) => listener(data));
+  const channel = new BroadcastChannel(settingsChannel);
+  channel.addEventListener("message", ({ data }) => listener(data));
+  return () => channel.close();
 }
 
 // The theme is read synchronously so each view opens in the right colors without a flash.

@@ -5,6 +5,13 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",
-    "package": "node scripts/build.mjs --zip"
+    "package": "node scripts/build.mjs --zip",
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "fake-indexeddb": "^6.0.0"
+  },
+  "engines": {
+    "node": ">=24"
   }
 }

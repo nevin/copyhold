@@ -12,12 +12,12 @@
   ],
   "minimum_chrome_version": "116",
   "background": {
-    "service_worker": "background.js",
+    "service_worker": "background/service-worker.js",
     "type": "module"
   },
   "action": {
     "default_title": "Copyhold",
-    "default_popup": "manager.html",
+    "default_popup": "popup/popup.html",
     "default_icon": {
       "16": "icons/16.png",
       "32": "icons/32.png"

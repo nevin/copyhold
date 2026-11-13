@@ -18,16 +18,40 @@ Open **Copyhold** from the browser’s extensions menu. Use **Open in tab** for 
 
 ## Build and package
 
-The build uses Node.js and npm and has no npm dependencies. Packaging also requires the `zip` command on your PATH.
+The build needs Node.js 24 or later and npm. Packaging also requires the `zip` command on your PATH. Run `npm install` once to get the test dependency.
 
 ```sh
+npm install
+npm test
 npm run build
 npm run package
 ```
 
-The build creates `dist/chromium` for Chrome and Edge and `dist/firefox` for Firefox. Load the Chromium folder as an unpacked extension or select `dist/firefox/manifest.json` as a temporary add-on.
+The build creates `dist/chromium` for Chrome and Edge and `dist/firefox` for Firefox. Packaging also writes:
 
-Packaging rebuilds the extension and writes `dist/copyhold-<version>-chromium.zip` and `dist/copyhold-<version>-firefox.zip` for store submission. The version comes from `manifest.json`. To build or package one target, append `-- chromium` or `-- firefox` to either command.
+- `dist/copyhold-<version>-chromium.zip` and `dist/copyhold-<version>-firefox.zip` for store submission, with `manifest.json` at the root.
+- `dist/copyhold-chromium.zip`, which unzips to a `copyhold` folder, for GitHub releases.
+
+The version comes from `src/manifest.json`. To build or package one target, append `-- chromium` or `-- firefox` to either command.
+
+## Project structure
+
+```
+src/                  The extension, copied into each build
+  manifest.json       Chromium manifest; the build derives the Firefox one
+  background/         Service worker (automatic capture) and expiry alarm
+  offscreen/          Clipboard monitor page (Chrome and Edge only)
+  popup/              Popup and full-tab view: popup.html, popup.js, popup.css
+  lib/                Shared modules: storage, settings, clips, formatting, clipboard access
+  icons/              Extension icons
+assets/icon/          SVG sources for the icons
+test/                 Node tests for the shared modules (npm test)
+scripts/build.mjs     Builds and packages dist/
+site/                 Website published to GitHub Pages
+docs/                 Release checklist and store listing drafts
+```
+
+Pushes to `main` run the tests and a build in GitHub Actions, and changes under `site/` redeploy the website.
 
 ## Use Copyhold
 

@@ -4,8 +4,9 @@ Run through this with the built packages before each store submission. Use a fre
 
 ## Build
 
-- [ ] Bump `version` in `manifest.json`.
-- [ ] Run `npm run package` and confirm `dist/copyhold-<version>-chromium.zip` and `dist/copyhold-<version>-firefox.zip` exist.
+- [ ] Bump `version` in `src/manifest.json`.
+- [ ] Run `npm test`.
+- [ ] Run `npm run package` and confirm `dist/copyhold-<version>-chromium.zip`, `dist/copyhold-<version>-firefox.zip`, and `dist/copyhold-chromium.zip` exist.
 - [ ] Unzip each package and check it contains only the extension files: no SVG sources, docs, or `.DS_Store`.
 
 ## Chrome and Edge (`dist/chromium`)
@@ -72,3 +73,8 @@ Load `dist/firefox/manifest.json` from `about:debugging#/runtime/this-firefox`.
 - [ ] Paste the listing text and privacy answers from `docs/store-listing.md`.
 - [ ] Upload screenshots and the promo tile made with sample text only.
 - [ ] Check that the name "Copyhold" is still free in the stores and in trademark searches.
+
+## GitHub release
+
+- [ ] Commit, tag `v<version>`, and push.
+- [ ] Run `gh release create v<version> dist/copyhold-chromium.zip --title "Copyhold <version>"` with release notes. The website's download button always serves the latest release's `copyhold-chromium.zip`.

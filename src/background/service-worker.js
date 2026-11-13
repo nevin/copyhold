@@ -1,8 +1,8 @@
 import "./expiry.js";
-import { getSettings, updateSettings } from "./settings.js";
-import { skipCurrentClipboard } from "./store.js";
+import { getSettings, updateSettings } from "../lib/settings.js";
+import { skipCurrentClipboard } from "../lib/store.js";
 
-const offscreenPage = "offscreen.html";
+const offscreenPage = "offscreen/offscreen.html";
 const resumeAlarm = "copyhold-resume-capture";
 const watchdog = "copyhold-capture-watchdog";
 // Alarm names registered before the rename to Copyhold.
@@ -76,7 +76,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
 chrome.runtime.onMessage.addListener((message, sender, respond) => {
   const url = sender.url?.split("?")[0];
-  if (message?.type !== "copyhold-auto-capture" || url !== chrome.runtime.getURL("manager.html")) return;
+  if (message?.type !== "copyhold-auto-capture" || url !== chrome.runtime.getURL("popup/popup.html")) return;
   updateMonitor(message).then(
     respond,
     () => respond({ error: "Could not update automatic capture." }),

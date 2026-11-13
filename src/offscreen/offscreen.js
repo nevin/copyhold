@@ -1,4 +1,4 @@
-import { captureAutomatically } from "./clipboard.js";
+import { captureAutomatically } from "../lib/clipboard.js";
 
 const clipboard = document.getElementById("clipboard");
 const changes = new BroadcastChannel("copyhold-entries");
@@ -9,7 +9,7 @@ let failed = false;
 
 chrome.runtime.onMessage.addListener((message, sender, respond) => {
   if (message?.type === "copyhold-capture-health" &&
-      sender.url?.split("?")[0] === chrome.runtime.getURL("manager.html")) {
+      sender.url?.split("?")[0] === chrome.runtime.getURL("popup/popup.html")) {
     respond({ lastSuccess, failed });
   }
 });

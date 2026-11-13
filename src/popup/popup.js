@@ -1,12 +1,12 @@
 import {
   compareEntries, createEntry, exportEntries, importEntries, isExpired, withDefaultRetention,
-} from "./entries.js";
-import { copyToClipboard, saveClipboard, supportsAutoCapture } from "./clipboard.js";
-import { clipPreview, clipType, displayLength, displayUrl, relativeTime, shortAge } from "./format.js";
+} from "../lib/entries.js";
+import { copyToClipboard, saveClipboard, supportsAutoCapture } from "../lib/clipboard.js";
+import { clipPreview, clipType, displayLength, displayUrl, relativeTime, shortAge } from "../lib/format.js";
 import {
   getSettings, getTheme, onSettingsChange, onThemeChange, setTheme, updateSettings,
-} from "./settings.js";
-import * as store from "./store.js";
+} from "../lib/settings.js";
+import * as store from "../lib/store.js";
 
 const byId = (id) => document.getElementById(id);
 const editor = byId("editor");
@@ -1189,7 +1189,7 @@ byId("import").addEventListener("click", () => {
   if (fullTab) {
     file.click();
   } else {
-    window.open("manager.html?view=tab&import=1", "_blank", "noopener");
+    window.open("popup.html?view=tab&import=1", "_blank", "noopener");
   }
 });
 

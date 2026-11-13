@@ -62,7 +62,7 @@ Certify all three statements:
 
 | Asset | Size | Notes |
 |---|---|---|
-| Store icon | 128×128 | `icons/128.png`, already in the package |
+| Store icon | 128×128 | `src/icons/128.png`, already in the package |
 | Screenshots | 1280×800 or 640×400, 1 to 5 | The popup with a few clips, the actions menu, the editor's Expiry and privacy section, the first-run prompt, and the full-tab view. Use sample text, never real clipboard contents. |
 | Small promo tile | 440×280 | The icon with the name and summary on the purple background |
 | Marquee promo tile (optional) | 1400×560 | Only needed if the store features the extension |

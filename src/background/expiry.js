@@ -1,5 +1,5 @@
-import { getSettings } from "./settings.js";
-import { removeExpired, trimHistory } from "./store.js";
+import { getSettings } from "../lib/settings.js";
+import { removeExpired, trimHistory } from "../lib/store.js";
 
 const alarmName = "copyhold-expiry";
 
