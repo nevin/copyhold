@@ -303,7 +303,11 @@ button:disabled { cursor: default; opacity: .55; }
   padding: 8px 8px 8px 12px;
   scroll-margin-block: 32px 4px;
   cursor: pointer;
+  /* Rows outside the scroll view skip layout and paint until they come close. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 66px;
 }
+.compact .clip { contain-intrinsic-size: auto 36px; }
 .clip-check { grid-area: check; }
 .clip-details { grid-area: details; }
 .clip-key { grid-area: key; }

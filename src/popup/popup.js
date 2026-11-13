@@ -1,5 +1,5 @@
 import {
-  compareEntries, createEntry, exportEntries, importEntries, isExpired, withDefaultRetention,
+  createEntry, exportEntries, importEntries, isExpired, sortEntries, withDefaultRetention,
 } from "../lib/entries.js";
 import { copyToClipboard, saveClipboard, supportsAutoCapture } from "../lib/clipboard.js";
 import { clipPreview, clipType, displayLength, displayUrl, relativeTime, shortAge } from "../lib/format.js";
@@ -762,19 +762,34 @@ function renderList(resetActive = false) {
 
 async function render() {
   const version = ++renderVersion;
-  const entries = (await store.list()).sort(compareEntries);
+  const entries = sortEntries(await store.list());
   if (version !== renderVersion) return;
   clips = entries;
   renderList();
 }
 
-search.addEventListener("input", () => renderList(true));
+// Fast typing renders once per frame; keys that act on the list flush a pending render first.
+let pendingSearchFrame = 0;
+function flushSearch() {
+  if (!pendingSearchFrame) return;
+  cancelAnimationFrame(pendingSearchFrame);
+  pendingSearchFrame = 0;
+  renderList(true);
+}
+search.addEventListener("input", () => {
+  if (pendingSearchFrame) return;
+  pendingSearchFrame = requestAnimationFrame(() => {
+    pendingSearchFrame = 0;
+    renderList(true);
+  });
+});
 showMore.addEventListener("click", () => {
   renderLimit += renderStep;
   renderList();
 });
 search.addEventListener("keydown", (event) => {
   if (event.isComposing) return;
+  flushSearch();
   const index = shownClips.findIndex(({ id }) => id === activeId);
   const move = { ArrowDown: 1, ArrowUp: -1, PageDown: 5, PageUp: -5 }[event.key];
   if (move > 0 && hiddenMatches && index + move >= shownClips.length) {
@@ -1225,7 +1240,7 @@ if (fullTab) {
 
 byId("export").addEventListener("click", () => run(async () => {
   if (!await confirmAction("Export clips?", "The JSON backup contains all saved text in plain text, including masked and hidden entries.", "Export")) return;
-  const url = URL.createObjectURL(new Blob([exportEntries((await store.list()).sort(compareEntries))], { type: "application/json" }));
+  const url = URL.createObjectURL(new Blob([exportEntries(sortEntries(await store.list()))], { type: "application/json" }));
   const download = document.createElement("a");
   download.href = url;
   download.download = `copyhold-${new Date().toISOString().slice(0, 10)}.json`;

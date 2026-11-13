@@ -29,6 +29,19 @@ export function compareEntries(first, second) {
     Date.parse(second.createdAt) - Date.parse(first.createdAt);
 }
 
+// Same order as compareEntries, but parses each date once instead of in every comparison.
+export function sortEntries(entries) {
+  return entries
+    .map((entry) => ({
+      entry,
+      pinned: Number(entry.pinned),
+      used: Date.parse(entry.lastUsedAt ?? entry.createdAt),
+      created: Date.parse(entry.createdAt),
+    }))
+    .sort((first, second) => second.pinned - first.pinned || second.used - first.used || second.created - first.created)
+    .map(({ entry }) => entry);
+}
+
 export function exportEntries(entries) {
   return JSON.stringify({ format: "copyhold", version: 1, entries }, null, 2);
 }

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { compareEntries, createEntry, exportEntries, importEntries, withDefaultRetention } from "../src/lib/entries.js";
+import { compareEntries, createEntry, exportEntries, importEntries, sortEntries, withDefaultRetention } from "../src/lib/entries.js";
 
 const entry = {
   text: "hi", title: "", description: "", visibility: "visible", pinned: false,
@@ -42,4 +42,14 @@ test("pinned clips sort first, then by most recent use", () => {
   const used = createEntry({ text: "used", createdAt: "2025-01-01T00:00:00.000Z", lastUsedAt: "2026-06-01T00:00:00.000Z" });
   const pinned = createEntry({ text: "pinned", pinned: true, createdAt: "2024-01-01T00:00:00.000Z" });
   assert.deepEqual([old, used, pinned].sort(compareEntries).map((e) => e.text), ["pinned", "used", "old"]);
+});
+
+test("sortEntries matches compareEntries", () => {
+  const clips = Array.from({ length: 50 }, (_, index) => createEntry({
+    text: `clip ${index}`,
+    pinned: index % 7 === 0,
+    createdAt: new Date(Date.UTC(2026, 0, 1 + (index * 13) % 40)).toISOString(),
+    lastUsedAt: index % 3 ? null : new Date(Date.UTC(2026, 1, 1 + (index * 7) % 20)).toISOString(),
+  }));
+  assert.deepEqual(sortEntries(clips).map((entry) => entry.id), [...clips].sort(compareEntries).map((entry) => entry.id));
 });
