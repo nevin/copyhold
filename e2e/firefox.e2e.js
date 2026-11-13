@@ -42,8 +42,18 @@ before(async () => {
   await browser.installExtension(copy);
   page = (await browser.pages())[0];
   page.on("pageerror", (error) => { throw error; });
-  await page.evaluate((url) => { location.href = url; }, `moz-extension://${uuid}/popup/popup.html?view=tab`);
-  await page.waitForSelector("#capture-prompt:not([hidden])");
+  // A freshly installed add-on can take a moment to serve its pages, so opening the popup is retried.
+  const url = `moz-extension://${uuid}/popup/popup.html?view=tab`;
+  for (let attempt = 1; ; attempt++) {
+    try {
+      await page.evaluate((url) => { location.href = url; }, url).catch(() => {});
+      await page.waitForSelector("#capture-prompt:not([hidden])", { timeout: 5000 });
+      break;
+    } catch (error) {
+      if (attempt === 6) throw error;
+      await wait(1000);
+    }
+  }
 });
 
 after(async () => {
