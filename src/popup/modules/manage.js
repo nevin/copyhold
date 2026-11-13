@@ -1,5 +1,6 @@
 import { t, tn } from "../../lib/i18n.js";
 import { cleanName, cleanTags, collectOrganization } from "../../lib/organize.js";
+import { getSettings, updateSettings } from "../../lib/settings.js";
 import * as store from "../../lib/store.js";
 import { byId, run, textLine } from "./dom.js";
 import { confirmAction } from "./editor.js";
@@ -18,7 +19,28 @@ async function updateClips(select, change, message) {
   render();
 }
 
-function renameCategory(from, to) {
+export const colorNames = ["purple", "blue", "teal", "green", "amber", "orange", "red", "pink", "gray"];
+
+// Colours are keyed by category name, so renaming moves the colour and deleting forgets it.
+async function moveColor(from, to) {
+  const colors = { ...(await getSettings()).categoryColors };
+  const color = colors[from.toLocaleLowerCase()];
+  delete colors[from.toLocaleLowerCase()];
+  if (color && to) colors[to.toLocaleLowerCase()] = color;
+  await updateSettings({ categoryColors: colors });
+}
+
+async function setColor(category, color) {
+  const colors = { ...(await getSettings()).categoryColors };
+  if (color) colors[category.toLocaleLowerCase()] = color;
+  else delete colors[category.toLocaleLowerCase()];
+  await updateSettings({ categoryColors: colors });
+  state.categoryColors = colors;
+  render();
+}
+
+async function renameCategory(from, to) {
+  await moveColor(from, to);
   return updateClips((clip) => same(clip.category, from), () => ({ category: to }), "renamedInClips");
 }
 
@@ -32,7 +54,8 @@ function renameTag(from, to) {
     (clip) => ({ tags: cleanTags(clip.tags.map((tag) => (same(tag, from) ? to : tag))) }), "renamedInClips");
 }
 
-function deleteCategory(name) {
+async function deleteCategory(name) {
+  await moveColor(name, "");
   return updateClips((clip) => same(clip.category, name), () => ({ category: "", subcategory: "" }), "removedFromClips");
 }
 
@@ -80,9 +103,58 @@ function startRename(item, current, onRename) {
   input.select();
 }
 
-function row({ label, count, className = "manage-item", onRename, onDelete, deleteTitle, deleteMessage }) {
+// A colour button opens a row of swatches under the category.
+function colorButton(item, category) {
+  const current = state.categoryColors[category.toLocaleLowerCase()];
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "quiet color-button";
+  button.title = t("chooseColor", category);
+  button.setAttribute("aria-label", t("chooseColor", category));
+  button.setAttribute("aria-expanded", "false");
+  const dot = document.createElement("span");
+  dot.className = "category-dot";
+  if (current) dot.dataset.color = current;
+  button.append(dot);
+  button.addEventListener("click", () => {
+    const open = item.nextElementSibling?.classList.contains("color-row");
+    if (open) {
+      item.nextElementSibling.remove();
+      button.setAttribute("aria-expanded", "false");
+      return;
+    }
+    const swatches = document.createElement("li");
+    swatches.className = "color-row";
+    const options = [["", t("noColor")], ...colorNames.map((name) => [name, t(`color_${name}`)])];
+    for (const [name, label] of options) {
+      const swatch = document.createElement("button");
+      swatch.type = "button";
+      swatch.className = "color-swatch";
+      swatch.title = label;
+      swatch.setAttribute("aria-label", label);
+      swatch.setAttribute("aria-pressed", String((current ?? "") === name));
+      const sample = document.createElement("span");
+      sample.className = "category-dot";
+      if (name) sample.dataset.color = name;
+      swatch.append(sample);
+      swatch.addEventListener("click", () => run(() => setColor(category, name)));
+      swatches.append(swatch);
+    }
+    item.after(swatches);
+    button.setAttribute("aria-expanded", "true");
+    /** @type {HTMLElement} */ (swatches.querySelector('[aria-pressed="true"]'))?.focus();
+  });
+  return button;
+}
+
+/**
+ * @param {{ label: string, count: number, className?: string, onRename: (name: string) => Promise<void>,
+ *   onDelete: () => Promise<void>, deleteTitle: string, deleteMessage: string, color?: string }} options
+ */
+function row({ label, count, className = "manage-item", onRename, onDelete, deleteTitle, deleteMessage, color }) {
   const item = document.createElement("li");
   item.className = className;
+  if (color) item.append(colorButton(item, color));
   item.append(textLine("span", "name", label), textLine("span", "count", count.toLocaleString()));
   item.append(
     actionButton(t("rename"), () => startRename(item, label.replace(/^#/, ""), onRename)),
@@ -99,6 +171,7 @@ function render() {
   for (const category of categories) {
     categoryRows.push(row({
       label: category.name,
+      color: category.name,
       count: category.count,
       onRename: (name) => renameCategory(category.name, name),
       onDelete: () => deleteCategory(category.name),

@@ -54,6 +54,14 @@ Load it with **Load unpacked** on `chrome://extensions` and `edge://extensions`.
 - [ ] Select a tag on a row: the list filters by it.
 - [ ] In Settings, rename a tag to an existing one (they merge) and delete a category (clips stay).
 
+**Organizing, rules, templates, and the palette**
+- [ ] Select several clips, choose **Organize**, set a category and add a tag: every selected clip changes.
+- [ ] Add a rule for a site, save a selection from that site with the context menu: the clip gets the rule's category and tags and shows "from site".
+- [ ] Give a category a colour; rows show the dot. Sort by **Most used** and **A–Z**.
+- [ ] A template with `{date}` and `{clipboard}` pastes the date and what was on the clipboard. **Copy as** → **UPPERCASE** works.
+- [ ] Cmd+K or Ctrl+K opens the palette; typing a tag name and pressing Enter filters by it.
+- [ ] **Storage** in Settings shows clip and image counts and sizes.
+
 **Popup**
 - [ ] Open with Alt+Shift+Y (Option+Shift+Y on macOS). Search is focused.
 - [ ] Type to filter, use Up and Down, press Enter: the clip is copied and the popup closes.

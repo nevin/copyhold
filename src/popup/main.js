@@ -12,6 +12,10 @@ import "./modules/editor.js";
 import "./modules/capture.js";
 import "./modules/settings-panel.js";
 import "./modules/backup.js";
+import "./modules/bulk.js";
+import "./modules/rules-dialog.js";
+import "./modules/storage.js";
+import "./modules/palette.js";
 import { initLock } from "./modules/lock.js";
 
 document.documentElement.classList.toggle("full-tab", fullTab);

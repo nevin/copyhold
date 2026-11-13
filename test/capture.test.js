@@ -109,3 +109,13 @@ test("a selection from the context menu is saved without touching the clipboard 
   assert.equal((await clipboard.saveSelection("selected on a page")).added, true);
   assert.equal((await store.getMeta(["fingerprint"])).fingerprint, fingerprint);
 });
+
+test("auto-tag rules categorize and tag new clips, and selections keep their page", async () => {
+  await settings.updateSettings({
+    rules: [{ id: "r1", kind: "domain", value: "example.com", category: "Work", subcategory: "Links", tags: ["web"] }],
+  });
+  assert.equal((await clipboard.saveSelection("read this later", { url: "https://docs.example.com/page", title: "Docs" })).added, true);
+  const saved = (await store.list()).find((entry) => entry.text === "read this later");
+  assert.deepEqual([saved.category, saved.subcategory, saved.tags, saved.sourceTitle], ["Work", "Links", ["web"], "Docs"]);
+  await settings.updateSettings({ rules: [] });
+});

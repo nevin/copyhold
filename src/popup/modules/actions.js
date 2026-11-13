@@ -2,6 +2,7 @@ import { copyClip } from "../../lib/clipboard.js";
 import { isExpired } from "../../lib/entries.js";
 import { clipPreview } from "../../lib/format.js";
 import * as store from "../../lib/store.js";
+import { transformLabel } from "../../lib/transforms.js";
 import { byId, fullTab, run } from "./dom.js";
 import { refresh, showCopyFeedback } from "./list.js";
 import { offerUndo } from "./undo.js";
@@ -14,20 +15,24 @@ const previewImage = byId("clip-preview-image");
 const revealPreview = byId("clip-preview-reveal");
 let previewEntry;
 
-export function copyEntry(entry) {
+/**
+ * @param {any} entry
+ * @param {string} [transform] A transform id, such as "upper", to change the text as it is copied.
+ */
+export function copyEntry(entry, transform) {
   return run(async () => {
     if (isExpired(entry)) {
       await refresh(t("clipExpired"));
       return;
     }
-    await copyClip(entry);
+    await copyClip(entry, { transform });
     showCopyFeedback(entry.id);
     try {
-      await store.update(entry.id, { lastUsedAt: new Date().toISOString() });
+      await store.update(entry.id, { lastUsedAt: new Date().toISOString(), useCount: (entry.useCount ?? 0) + 1 });
     } catch {
       throw new Error(t("errorLastUsed"));
     }
-    await refresh();
+    await refresh(transform ? t("copiedAs", transformLabel(transform)) : undefined);
     // Leave the confirmation on screen briefly so closing does not feel abrupt.
     if (!fullTab && state.closeAfterCopy) setTimeout(() => window.close(), 400);
   });
@@ -54,6 +59,10 @@ export function deleteEntry(entry) {
     offerUndo(await store.remove(entry.id));
     await refresh();
   });
+}
+
+export function openSource(entry) {
+  window.open(entry.sourceUrl, "_blank", "noopener,noreferrer");
 }
 
 export function openLink(entry) {

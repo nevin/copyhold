@@ -1,6 +1,7 @@
 import { copyClips } from "../../lib/clipboard.js";
 import { isExpired } from "../../lib/entries.js";
 import * as store from "../../lib/store.js";
+import { openOrganize } from "./bulk.js";
 import { confirmAction } from "./editor.js";
 import { byId, run, status } from "./dom.js";
 import { refresh, search, updateItemStates } from "./list.js";
@@ -71,6 +72,8 @@ byId("pin-selected").addEventListener("click", () => run(async () => {
   for (const clip of entries) if (clip.pinned !== pinning) await store.update(clip.id, { pinned: pinning });
   await refresh(tn(pinning ? "pinnedClips" : "unpinnedClips", entries.length));
 }));
+
+byId("organize-selected").addEventListener("click", () => openOrganize(selectedEntries()));
 
 byId("delete-selected").addEventListener("click", () => run(async () => {
   const ids = [...state.selectedIds];

@@ -118,6 +118,7 @@ function readForm() {
   data.category = cleanName(categoryInput.value);
   data.subcategory = data.category ? cleanName(subcategoryInput.value) : "";
   data.tags = [...editorTags];
+  data.template = byId("template").checked;
   return data;
 }
 
@@ -196,6 +197,8 @@ export function openEditor(entry) {
   categoryInput.value = entry?.category ?? "";
   subcategoryInput.value = entry?.subcategory ?? "";
   editorTags = [...entry?.tags ?? []];
+  byId("template").checked = entry?.template === true;
+  byId("template").closest(".template-field").hidden = image;
   tagInput.value = "";
   renderTags();
   expiryInput.value = localExpiryValue(entry?.expiresAt);

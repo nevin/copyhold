@@ -71,12 +71,11 @@ export function showCopyFeedback(id) {
   }, 1800);
 }
 
-// Row buttons are for pointers; keyboard users reach the same actions from search.
+// Row actions are for pointers; keyboard users reach the same actions from search and the actions menu.
+// They aren't buttons because a list option may not contain focusable controls.
 function rowButton(action, label, handler) {
-  const button = document.createElement("button");
-  button.type = "button";
-  button.tabIndex = -1;
-  button.className = action === "copy" ? "secondary copy" : `quiet ${action}`;
+  const button = document.createElement("span");
+  button.className = `row-action ${action}`;
   button.dataset.action = action;
   button.title = label;
   button.append(icon(action));
@@ -122,21 +121,47 @@ function imagePreviewFor(entry, visibility) {
   return preview;
 }
 
-// The category and tags under a clip. Selecting a tag filters the list by it.
+/** A coloured dot for a category, or null when the category has no colour. */
+export function categoryDot(category, className = "category-dot") {
+  const color = category && state.categoryColors[category.toLocaleLowerCase()];
+  if (!color) return null;
+  const dot = document.createElement("span");
+  dot.className = className;
+  dot.dataset.color = color;
+  dot.setAttribute("aria-hidden", "true");
+  return dot;
+}
+
+function hostOf(url) {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return "";
+  }
+}
+
+// The category, tags, template badge, and source page under a clip. Selecting a tag filters by it.
 function labelsFor(entry) {
   const tags = entry.tags ?? [];
-  if (!entry.category && !tags.length) return null;
+  if (!entry.category && !tags.length && !entry.template && !entry.sourceUrl) return null;
   const labels = document.createElement("div");
   labels.className = "clip-labels";
+  // The chips and link are for pointers; screen readers get the same facts as text, since options can't hold controls.
+  labels.setAttribute("aria-hidden", "true");
+  if (entry.template) {
+    const badge = textLine("span", "template-badge", t("templateLabel"));
+    badge.title = t("templateHint");
+    labels.append(badge);
+  }
   if (entry.category) {
     const category = textLine("span", "category", entry.subcategory
       ? t("categoryPath", entry.category, entry.subcategory) : entry.category);
+    const dot = categoryDot(entry.category);
+    if (dot) category.prepend(dot);
     labels.append(category);
   }
   for (const tag of tags) {
-    const chip = document.createElement("button");
-    chip.type = "button";
-    chip.tabIndex = -1;
+    const chip = document.createElement("span");
     chip.className = "tag";
     chip.textContent = `#${tag}`;
     chip.title = t("filterByTag", tag);
@@ -144,7 +169,22 @@ function labelsFor(entry) {
     chip.addEventListener("click", () => filterByTag(tag));
     labels.append(chip);
   }
+  if (entry.sourceUrl) {
+    const source = textLine("span", "source-link", t("fromSite", hostOf(entry.sourceUrl)));
+    source.title = entry.sourceTitle ? `${entry.sourceTitle}\n${entry.sourceUrl}` : entry.sourceUrl;
+    source.addEventListener("click", () => window.open(entry.sourceUrl, "_blank", "noopener,noreferrer"));
+    labels.append(source);
+  }
   return labels;
+}
+
+function describeLabels(entry) {
+  const parts = [];
+  if (entry.template) parts.push(t("templateLabel"));
+  if (entry.category) parts.push(t("categoryDescription", entry.subcategory ? t("categoryPath", entry.category, entry.subcategory) : entry.category));
+  if (entry.tags?.length) parts.push(t("tagsDescription", entry.tags.join(", ")));
+  if (entry.sourceUrl) parts.push(t("fromSite", hostOf(entry.sourceUrl)));
+  return parts.join(". ");
 }
 
 function sizeLabel(entry) {
@@ -180,7 +220,7 @@ function itemFor(entry) {
   details.append(entry.kind === "image" ? imagePreviewFor(entry, visibility) : previewFor(entry, visibility));
   if (entry.description) details.append(textLine("p", "description", entry.description));
   const labels = labelsFor(entry);
-  if (labels) details.append(labels);
+  if (labels) details.append(labels, textLine("span", "sr-only", describeLabels(entry)));
   const meta = document.createElement("p");
   meta.className = "meta";
   appendMessage(meta, entry.lastUsedAt ? "metaCopied" : "metaSaved", timeElement(entry.lastUsedAt ?? entry.createdAt));
@@ -218,6 +258,8 @@ function itemFor(entry) {
     }),
   );
   item.append(check, age, details, size, key, actions);
+  const dot = categoryDot(entry.category, "category-dot clip-dot");
+  if (dot) details.prepend(dot);
   // Compact rows have no room for tags, so they show how many there are.
   if (entry.tags?.length) {
     const count = textLine("span", "clip-tag-count", `#${entry.tags.length}`);
@@ -230,7 +272,7 @@ function itemFor(entry) {
     if (event.shiftKey) event.preventDefault();
   });
   item.addEventListener("click", (event) => {
-    if (/** @type {Element} */ (event.target).closest("button")) return;
+    if (/** @type {Element} */ (event.target).closest(".row-action, .tag, .source-link")) return;
     const selection = window.getSelection();
     if (selection && !selection.isCollapsed && selection.containsNode(item, true)) return;
     setActive(entry.id);
@@ -312,7 +354,7 @@ export function updateItemStates() {
   selectVisible.checked = count > 0 && count === shownClips.length;
   selectVisible.indeterminate = count > 0 && count < shownClips.length;
   selectVisible.disabled = shownClips.length === 0;
-  for (const id of ["delete-selected", "copy-selected", "pin-selected"]) byId(id).disabled = count === 0;
+  for (const id of ["delete-selected", "copy-selected", "pin-selected", "organize-selected"]) byId(id).disabled = count === 0;
   byId("pin-selected").textContent = count && state.clips.filter((clip) => selectedIds.has(clip.id)).every((clip) => clip.pinned)
     ? t("unpin") : t("pin");
   updateSearchHint();
@@ -366,7 +408,7 @@ export function renderList(resetActive = false) {
   }
   const rows = { pinned: [], recent: [] };
   shown.forEach((entry, index) => {
-    const revision = `${entry.revision ?? 0}:${state.hidePreviews}`;
+    const revision = `${entry.revision ?? 0}:${state.hidePreviews}:${state.colorsVersion}`;
     let cached = clipItems.get(entry.id);
     if (cached?.revision !== revision) {
       cached?.item.remove();
@@ -387,8 +429,12 @@ export function renderList(resetActive = false) {
   byId("pinned-heading").hidden = pinnedOnly;
   byId("recent-heading").hidden = pinnedMatches === 0 || pinnedOnly;
   const toggle = byId("pinned-toggle");
-  toggle.setAttribute("aria-expanded", String(!collapsed));
+  toggle.dataset.expanded = String(!collapsed);
   toggle.title = collapsed ? t("expandPinned") : t("collapsePinned");
+  const accessibleToggle = byId("pinned-toggle-sr");
+  accessibleToggle.hidden = pinnedMatches === 0 || pinnedOnly;
+  accessibleToggle.setAttribute("aria-expanded", String(!collapsed));
+  accessibleToggle.textContent = `${collapsed ? t("expandPinned") : t("collapsePinned")} (${pinnedMatches.toLocaleString()})`;
   byId("pinned-count").textContent = pinnedMatches.toLocaleString();
   showMore.hidden = hiddenMatches === 0;
   showMore.textContent = t("showMore", Math.min(renderStep, hiddenMatches).toLocaleString(), hiddenMatches.toLocaleString());
@@ -422,7 +468,8 @@ export const loaders = {
 // The first screenful comes from an index, so the popup paints before a large history finishes loading.
 export async function render({ quick = false } = {}) {
   const version = ++renderVersion;
-  if (quick) {
+  // The index holds clips in recent order, so other orders wait for the whole history.
+  if (quick && state.sortOrder === "recent") {
     const first = await loaders.prepare(await store.listRecent(renderStep));
     if (version !== renderVersion) return;
     state.clips = first;
@@ -430,7 +477,7 @@ export async function render({ quick = false } = {}) {
     renderList();
     if (!state.partial) return;
   }
-  const entries = sortEntries(await loaders.prepare(await store.list()));
+  const entries = sortEntries(await loaders.prepare(await store.list()), state.sortOrder);
   if (version !== renderVersion) return;
   state.clips = entries;
   state.partial = false;
@@ -509,16 +556,37 @@ document.addEventListener("keyup", (event) => {
 });
 addEventListener("blur", () => clipList.classList.remove("show-keys"));
 
+export function setSortOrder(order) {
+  state.sortOrder = order;
+  byId("sort-order").value = order;
+  state.clips = sortEntries(state.clips, order);
+  renderList(true);
+}
+
+export function setCategoryColors(colors) {
+  state.categoryColors = colors ?? {};
+  // Rows are cached by revision, so a new colors version rebuilds them.
+  state.colorsVersion++;
+  renderList();
+}
+
+byId("sort-order").addEventListener("change", (event) => {
+  setSortOrder(event.target.value);
+  run(() => updateSettings({ sortOrder: state.sortOrder }));
+});
+
 export function setPinnedCollapsed(collapsed) {
   state.pinnedCollapsed = collapsed;
   renderList();
 }
 
 byId("pinned-toggle").addEventListener("mousedown", (event) => event.preventDefault());
-byId("pinned-toggle").addEventListener("click", () => {
-  setPinnedCollapsed(!state.pinnedCollapsed);
-  run(() => updateSettings({ pinnedCollapsed: state.pinnedCollapsed }));
-});
+for (const id of ["pinned-toggle", "pinned-toggle-sr"]) {
+  byId(id).addEventListener("click", () => {
+    setPinnedCollapsed(!state.pinnedCollapsed);
+    run(() => updateSettings({ pinnedCollapsed: state.pinnedCollapsed }));
+  });
+}
 
 for (const filter of [allClips, pinnedClips]) {
   filter.addEventListener("change", () => renderList(true));

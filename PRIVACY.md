@@ -6,9 +6,9 @@ Copyhold is a clipboard manager for Chrome, Edge, and Firefox. This policy expla
 
 ## What Copyhold stores
 
-- **Clips:** the text and images you save, with any title, description, category, subcategory, tags, pin, display setting, expiry date, and the times you created and last copied each clip. Images are stored with a small thumbnail.
+- **Clips:** the text and images you save, with any title, description, category, subcategory, tags, template setting, how many times you've copied it, the page it was selected on (for **Save selection to Copyhold**), pin, display setting, expiry date, and the times you created and last copied each clip. Images are stored with a small thumbnail.
 - **Hashes of clips:** a one-way SHA-256 hash of each clip and of the last clipboard content Copyhold saw, so it can find a clip you copy again instead of saving a duplicate. The content can't be recovered from a hash. With the passphrase lock on, clips have no hash, and the clipboard hash is strengthened with PBKDF2 so it's slow to guess.
-- **Settings:** your theme, list density, whether previews are hidden, default retention period, history size, how to handle sensitive text, whether automatic saving of text and images is on, how soon the lock closes again, and whether the popup closes after copying.
+- **Settings:** your theme, list density, whether previews are hidden, default retention period, history size, how to handle sensitive text, whether automatic saving of text and images is on, how soon the lock closes again, whether the popup closes after copying, your sort order, category colours, and auto-tag rules.
 - **The passphrase lock, if you set one up:** an encryption key pair. The private key is itself encrypted with your passphrase; Copyhold never stores the passphrase. While Copyhold is unlocked, the private key is kept in the browser's session storage, which is held in memory and cleared when the browser closes.
 
 Everything is stored in your browser profile on your device, using the browser's own storage. Copyhold has no servers and no accounts.
@@ -21,11 +21,11 @@ Copied text can include passwords and other secrets. Copyhold checks each copy, 
 
 ## Passphrase lock
 
-If you set up a passphrase, Copyhold encrypts the text, title, description, category, subcategory, tags, and image of every clip with AES-GCM, using keys derived with ECDH (P-256) and PBKDF2-SHA-256. Pins, dates, and expiry stay unencrypted so clean-up keeps working. Copyhold keeps saving while locked, locks again after the time you choose without use and whenever the computer locks, and asks for the passphrase to show clips. If you forget the passphrase, nobody can decrypt your clips, including the developer.
+If you set up a passphrase, Copyhold encrypts the text, title, description, category, subcategory, tags, source page, and image of every clip with AES-GCM, using keys derived with ECDH (P-256) and PBKDF2-SHA-256. Pins, dates, expiry, and use counts stay unencrypted so clean-up and sorting keep working; settings such as auto-tag rules and category colours are not encrypted. Copyhold keeps saving while locked, locks again after the time you choose without use and whenever the computer locks, and asks for the passphrase to show clips. If you forget the passphrase, nobody can decrypt your clips, including the developer.
 
 ## Saving without opening Copyhold
 
-The **Save the clipboard** keyboard shortcut and the **Save selection to Copyhold** menu item save what you choose at that moment. The menu item receives only the text you selected and right-clicked; Copyhold can't read web pages otherwise.
+The **Save the clipboard** keyboard shortcut and the **Save selection to Copyhold** menu item save what you choose at that moment. The menu item receives only the text you selected and the address and title of that page, which Copyhold keeps with the clip; it can't read web pages otherwise.
 
 ## What Copyhold never does
 

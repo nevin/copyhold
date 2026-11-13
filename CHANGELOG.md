@@ -1,10 +1,23 @@
 # Changelog
 
-## 1.2.1
+## 1.3.0
 
-- **Import and Export are easier to reach.** They're now in a bar under the clip list instead of inside Settings.
-- **Fold away pinned clips.** Select the Pinned heading to collapse or expand the group; Copyhold remembers your choice. The heading shows how many pinned clips there are.
-- Row buttons such as Pin, Edit, and Delete line up with the first line of each clip, so they stay in place when a clip has a title, labels, or several lines.
+**New**
+- **Organize many clips at once.** Select clips, choose **Organize**, and set or remove a category, or add and remove tags, for all of them.
+- **Auto-tag rules.** In Settings, add rules such as "links to github.com go to Work › Code" or "text containing invoice gets #billing". New clips are organized as they're saved, and **Apply to existing clips** tidies your history.
+- **Category colours.** Give each category a colour in **Manage categories and tags**; rows and compact view show it.
+- **Sort your clips** by most recent, most used, oldest, or A–Z. Pinned clips stay on top.
+- **Templates.** Mark a clip as a template and copying it fills in `{date}`, `{isodate}`, `{time}`, `{datetime}`, `{weekday}`, and `{clipboard}`.
+- **Copy as…** Copy a clip trimmed, as a single line, in upper, lower, or title case, as formatted or compact JSON, or URL-encoded or decoded. Press C in the actions menu, then the letter.
+- **Source pages.** Text saved with **Save selection to Copyhold** remembers the page it came from, with a link back.
+- **Command palette.** Press Cmd+K (Ctrl+K) to find any action, view, category, or tag by typing.
+- **Storage overview.** Settings shows how many clips and images you have and how much space they use, warns when storage is nearly full, and can delete image clips.
+- **Import and Export** are now in a bar under the clip list instead of inside Settings.
+- **Fold away pinned clips.** Select the Pinned heading to collapse or expand it; Copyhold remembers your choice.
+
+**Improved**
+- Row buttons line up with the first line of each clip.
+- Screen readers get a clearer list: categories, tags, and the source page are read with each clip, and the pinned toggle is reachable. Automated accessibility checks now run on every view.
 
 ## 1.2.0
 

@@ -20,7 +20,16 @@ export function createEntry(fields) {
     // A subcategory belongs to the category, so it is dropped when there is none.
     subcategory: fields.category ? cleanName(fields.subcategory) : "",
     tags: cleanTags(fields.tags),
+    // How many times the clip was copied from Copyhold, for sorting by use.
+    useCount: Number.isInteger(fields.useCount) && fields.useCount > 0 ? fields.useCount : 0,
+    // A template fills in placeholders such as {date} when it is copied.
+    template: fields.template === true,
   };
+  // The page a selection was saved from.
+  if (fields.sourceUrl && /^https?:\/\//i.test(fields.sourceUrl)) {
+    entry.sourceUrl = String(fields.sourceUrl).slice(0, 2048);
+    entry.sourceTitle = String(fields.sourceTitle ?? "").slice(0, 200);
+  }
   // Set when the clip was masked because it looked like a secret; describes what it looked like.
   if (fields.sensitive) entry.sensitive = fields.sensitive;
   if (entry.kind === "image") {
@@ -43,16 +52,34 @@ export function compareEntries(first, second) {
     Date.parse(second.createdAt) - Date.parse(first.createdAt);
 }
 
-// Same order as compareEntries, but parses each date once instead of in every comparison.
-export function sortEntries(entries) {
-  return entries
-    .map((entry) => ({
-      entry,
-      pinned: Number(entry.pinned),
-      used: Date.parse(entry.lastUsedAt ?? entry.createdAt),
-      created: Date.parse(entry.createdAt),
-    }))
-    .sort((first, second) => second.pinned - first.pinned || second.used - first.used || second.created - first.created)
+export const sortOrders = ["recent", "used", "oldest", "name"];
+const collator = new Intl.Collator(undefined, { sensitivity: "base", numeric: true });
+
+/**
+ * Pinned clips first, then by the chosen order. Keys are computed once per clip, not in every comparison.
+ * "recent" matches compareEntries.
+ * @param {any[]} entries
+ * @param {string} [order]
+ */
+export function sortEntries(entries, order = "recent") {
+  const keyed = entries.map((entry) => ({
+    entry,
+    pinned: Number(entry.pinned),
+    used: Date.parse(entry.lastUsedAt ?? entry.createdAt),
+    created: Date.parse(entry.createdAt),
+    count: entry.useCount ?? 0,
+    name: order === "name" ? (entry.title || entry.text || "").trim() : "",
+  }));
+  const recent = (first, second) => second.used - first.used || second.created - first.created;
+  const byOrder = {
+    recent,
+    used: (first, second) => second.count - first.count || recent(first, second),
+    oldest: (first, second) => first.created - second.created,
+    // Clips without a title or text, such as untitled images, go after named ones.
+    name: (first, second) => Number(!first.name) - Number(!second.name) || collator.compare(first.name, second.name) || recent(first, second),
+  }[order] ?? recent;
+  return keyed
+    .sort((first, second) => second.pinned - first.pinned || byOrder(first, second))
     .map(({ entry }) => entry);
 }
 
@@ -66,7 +93,7 @@ async function dataUrl(blob) {
 }
 
 const exportedFields = [
-  "kind", "text", "title", "description", "category", "subcategory", "tags",
+  "kind", "text", "title", "description", "category", "subcategory", "tags", "useCount", "template", "sourceUrl", "sourceTitle",
   "visibility", "pinned", "createdAt", "lastUsedAt", "expiresAt", "defaultExpiry",
 ];
 
@@ -117,7 +144,8 @@ export async function importEntries(json, describeImage) {
       (entry.expiresAt != null && !isTimestamp(entry.expiresAt)) ||
       (entry.category != null && typeof entry.category !== "string") ||
       (entry.subcategory != null && typeof entry.subcategory !== "string") ||
-      (entry.tags != null && (!Array.isArray(entry.tags) || entry.tags.some((tag) => typeof tag !== "string")))) {
+      (entry.tags != null && (!Array.isArray(entry.tags) || entry.tags.some((tag) => typeof tag !== "string"))) ||
+      (entry.sourceUrl != null && typeof entry.sourceUrl !== "string")) {
       throw new Error(t("errorInvalidEntry", index + 1));
     }
     const fields = { ...entry, expiresAt: entry.expiresAt == null ? null : new Date(entry.expiresAt).toISOString() };

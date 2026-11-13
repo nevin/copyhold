@@ -1001,5 +1001,317 @@
   },
   "collapsePinned": {
     "message": "Hide pinned clips"
+  },
+  "sortClips": {
+    "message": "Sort clips"
+  },
+  "sortRecent": {
+    "message": "Recent"
+  },
+  "sortUsed": {
+    "message": "Most used"
+  },
+  "sortOldest": {
+    "message": "Oldest"
+  },
+  "sortName": {
+    "message": "A–Z"
+  },
+  "organize": {
+    "message": "Organize"
+  },
+  "organizeClips": {
+    "message": "Organize clips"
+  },
+  "organizeCount_one": {
+    "message": "Organize $1 clip"
+  },
+  "organizeCount_other": {
+    "message": "Organize $1 clips"
+  },
+  "organizeHint": {
+    "message": "Empty fields leave each clip as it is."
+  },
+  "removeCategory": {
+    "message": "Remove the category"
+  },
+  "addTags": {
+    "message": "Add tags"
+  },
+  "removeTags": {
+    "message": "Remove tags"
+  },
+  "tagsPlaceholder": {
+    "message": "work, urgent"
+  },
+  "apply": {
+    "message": "Apply"
+  },
+  "organizeNothing": {
+    "message": "Choose a category or tags to change."
+  },
+  "organized_one": {
+    "message": "Organized $1 clip."
+  },
+  "organized_other": {
+    "message": "Organized $1 clips."
+  },
+  "templateLabel": {
+    "message": "Template"
+  },
+  "templateHint": {
+    "message": "When copied, fills in {date}, {isodate}, {time}, {datetime}, {weekday}, and {clipboard}."
+  },
+  "autoTagRules": {
+    "message": "Auto-tag rules"
+  },
+  "rulesHint": {
+    "message": "When Copyhold saves new text, matching rules set its category if it has none and add their tags."
+  },
+  "newRule": {
+    "message": "New rule"
+  },
+  "editRule": {
+    "message": "Edit rule"
+  },
+  "ruleWhen": {
+    "message": "When the text"
+  },
+  "ruleContains": {
+    "message": "contains"
+  },
+  "ruleDomain": {
+    "message": "links to the site"
+  },
+  "rulePattern": {
+    "message": "matches the pattern"
+  },
+  "ruleValue": {
+    "message": "Words, site, or pattern"
+  },
+  "setCategory": {
+    "message": "Set category"
+  },
+  "cancelEdit": {
+    "message": "Cancel edit"
+  },
+  "addRule": {
+    "message": "Add rule"
+  },
+  "saveRule": {
+    "message": "Save rule"
+  },
+  "applyRulesToExisting": {
+    "message": "Apply to existing clips"
+  },
+  "noRulesYet": {
+    "message": "No rules yet. Add one below."
+  },
+  "deleteRuleTitle": {
+    "message": "Delete this rule?"
+  },
+  "ruleSaved": {
+    "message": "Rule saved. It applies to clips saved from now on."
+  },
+  "rulesApplied_one": {
+    "message": "Rules updated $1 clip."
+  },
+  "rulesApplied_other": {
+    "message": "Rules updated $1 clips."
+  },
+  "ruleSummary_contains": {
+    "message": "Text contains “$1”"
+  },
+  "ruleSummary_domain": {
+    "message": "Links to $1"
+  },
+  "ruleSummary_pattern": {
+    "message": "Matches /$1/"
+  },
+  "ruleNeedsValue": {
+    "message": "Enter the words, site, or pattern to look for."
+  },
+  "ruleBadPattern": {
+    "message": "That pattern isn't a valid regular expression."
+  },
+  "ruleNeedsAction": {
+    "message": "Choose a category or at least one tag."
+  },
+  "storage": {
+    "message": "Storage"
+  },
+  "sizeKilobytes": {
+    "message": "$1 KB"
+  },
+  "sizeGigabytes": {
+    "message": "$1 GB"
+  },
+  "imageCount_one": {
+    "message": "$1 image"
+  },
+  "imageCount_other": {
+    "message": "$1 images"
+  },
+  "imagesUsing": {
+    "message": "$1 ($2)"
+  },
+  "storageUsage": {
+    "message": "$1 of $2 available used"
+  },
+  "deleteImageClips": {
+    "message": "Delete image clips"
+  },
+  "deleteImageCount_one": {
+    "message": "Delete $1 image clip"
+  },
+  "deleteImageCount_other": {
+    "message": "Delete all $1 image clips"
+  },
+  "deleteImagesTitle_one": {
+    "message": "Delete $1 image clip?"
+  },
+  "deleteImagesTitle_other": {
+    "message": "Delete $1 image clips?"
+  },
+  "deleteImagesMessage": {
+    "message": "This frees about $1. You can undo it right after."
+  },
+  "storageAlmostFull": {
+    "message": "Copyhold's storage is almost full. Delete image clips or lower the history size in Settings."
+  },
+  "chooseColor": {
+    "message": "Colour for $1"
+  },
+  "noColor": {
+    "message": "No colour"
+  },
+  "color_purple": {
+    "message": "Purple"
+  },
+  "color_blue": {
+    "message": "Blue"
+  },
+  "color_teal": {
+    "message": "Teal"
+  },
+  "color_green": {
+    "message": "Green"
+  },
+  "color_amber": {
+    "message": "Amber"
+  },
+  "color_orange": {
+    "message": "Orange"
+  },
+  "color_red": {
+    "message": "Red"
+  },
+  "color_pink": {
+    "message": "Pink"
+  },
+  "color_gray": {
+    "message": "Grey"
+  },
+  "copyAs": {
+    "message": "Copy as…"
+  },
+  "menuKeyCopyAs": {
+    "message": "C"
+  },
+  "openSource": {
+    "message": "Open source page"
+  },
+  "menuKeySource": {
+    "message": "G"
+  },
+  "back": {
+    "message": "Back"
+  },
+  "menuKeyBack": {
+    "message": "B"
+  },
+  "copiedAs": {
+    "message": "Copied as $1."
+  },
+  "fromSite": {
+    "message": "from $1"
+  },
+  "transform_trim": {
+    "message": "Trimmed"
+  },
+  "transform_singleLine": {
+    "message": "Single line"
+  },
+  "transform_upper": {
+    "message": "UPPERCASE"
+  },
+  "transform_lower": {
+    "message": "lowercase"
+  },
+  "transform_title": {
+    "message": "Title Case"
+  },
+  "transform_jsonPretty": {
+    "message": "Formatted JSON"
+  },
+  "transform_jsonMinify": {
+    "message": "Compact JSON"
+  },
+  "transform_urlEncode": {
+    "message": "URL-encoded"
+  },
+  "transform_urlDecode": {
+    "message": "URL-decoded"
+  },
+  "commands": {
+    "message": "Commands"
+  },
+  "paletteHint": {
+    "message": "Type a command, category, or tag"
+  },
+  "paletteActions": {
+    "message": "Action"
+  },
+  "paletteView": {
+    "message": "View"
+  },
+  "paletteFilter": {
+    "message": "Filter"
+  },
+  "noCommands": {
+    "message": "No matching commands"
+  },
+  "selectClipsCommand": {
+    "message": "Select clips"
+  },
+  "turnOnAutoSave": {
+    "message": "Turn on automatic saving"
+  },
+  "turnOffAutoSave": {
+    "message": "Turn off automatic saving"
+  },
+  "showPinnedOnly": {
+    "message": "Show pinned clips only"
+  },
+  "densityCommand": {
+    "message": "Density: $1"
+  },
+  "themeCommand": {
+    "message": "Theme: $1"
+  },
+  "sortCommand": {
+    "message": "Sort by $1"
+  },
+  "filterCategoryCommand": {
+    "message": "Filter by category $1"
+  },
+  "filterTagCommand": {
+    "message": "Filter by tag #$1"
+  },
+  "categoryDescription": {
+    "message": "Category: $1"
+  },
+  "tagsDescription": {
+    "message": "Tags: $1"
   }
 }

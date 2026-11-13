@@ -8,7 +8,9 @@ import { t } from "./i18n.js";
 //   and the lock's public key. Each sealed field stores that ephemeral public key so it can be decrypted.
 // - Dates, pin state, and other metadata stay unencrypted so expiry and history limits keep working.
 
-export const sealedFields = ["text", "title", "description", "category", "subcategory", "tags", "image", "thumbnail"];
+export const sealedFields = [
+  "text", "title", "description", "category", "subcategory", "tags", "sourceUrl", "sourceTitle", "image", "thumbnail",
+];
 const iterations = 600_000;
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();

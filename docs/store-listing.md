@@ -21,7 +21,9 @@ Text to paste into the Chrome Web Store developer dashboard, Microsoft Edge Add-
 >
 > **Work with many clips.** Select all, then copy, pin, or delete them together.
 >
-> **Organize it.** Give clips a category, a subcategory, and tags, then filter by any of them or type #tag in search. Edits save as you type.
+> **Organize it.** Give clips colour-coded categories, subcategories, and tags, organize many at once, and let rules sort new clips for you. Filter by any of them, sort by most used, or type #tag in search. Edits save as you type.
+>
+> **Work faster.** Templates fill in the date or your clipboard. Copy as uppercase, a single line, or formatted JSON. Press Cmd+K or Ctrl+K to run any command.
 >
 > **Lock it with a passphrase.** Encrypt every clip's text and images. Copyhold keeps saving while locked, and locks again when you step away.
 >

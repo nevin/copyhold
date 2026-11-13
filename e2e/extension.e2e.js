@@ -1,6 +1,8 @@
 // Loads the built Chrome extension in Chrome for Testing and drives the popup like a person would.
 // Run with `npm run test:e2e` after `npm run build`.
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import { createRequire } from "node:module";
 import { after, before, test } from "node:test";
 import { fileURLToPath } from "node:url";
 import puppeteer from "puppeteer";
@@ -13,6 +15,7 @@ let origin;
 
 // A made-up key, assembled at runtime so secret scanners don't mistake it for a real one.
 const fakeApiKey = ["sk", "live", "51HxQabcdefghijklmnopqrstu"].join("_");
+const axeSource = await readFile(createRequire(import.meta.url).resolve("axe-core/axe.min.js"), "utf8");
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const text = (selector) => page.$eval(selector, (element) => element.textContent.trim());
 const clipTexts = () => page.$$eval(".clip .preview", (previews) => previews.map((preview) => preview.textContent));
@@ -180,16 +183,18 @@ test("categories and tags can be renamed and deleted across clips", async () => 
   await page.click("#settings summary");
   await page.$eval("#manage-organization", (button) => button.click());
   await page.waitForSelector("#manage-dialog[open]");
-  const rowFor = (label) => page.evaluateHandle((label) =>
-    [...document.querySelectorAll("#manage-dialog .manage-item")].find((item) => item.querySelector(".name")?.textContent === label), label);
-  await (await rowFor("#urgent")).evaluate((item) => item.querySelector("button").click());
+  const clickInRow = (label, action) => page.evaluate((label, action) => {
+    const row = [...document.querySelectorAll("#manage-dialog .manage-item")].find((item) => item.querySelector(".name")?.textContent === label);
+    [...row.querySelectorAll("button")].find((button) => button.textContent === action).click();
+  }, label, action);
+  await clickInRow("#urgent", "Rename");
   await page.keyboard.down(process.platform === "darwin" ? "Meta" : "Control");
   await page.keyboard.press("KeyA");
   await page.keyboard.up(process.platform === "darwin" ? "Meta" : "Control");
   await page.keyboard.type("important");
   await page.keyboard.press("Enter");
   await page.waitForFunction(() => document.querySelector("#manage-status").textContent === "Renamed in 2 clips.");
-  await (await rowFor("Home")).evaluate((item) => item.querySelectorAll("button")[1].click());
+  await clickInRow("Home", "Delete");
   await page.click("#confirm-action");
   await page.waitForFunction(() => document.querySelector("#manage-status").textContent === "Removed from 1 clip.");
   await page.click("#manage-dialog .primary");
@@ -253,7 +258,7 @@ test("the pinned group collapses, stays collapsed, and leaves keyboard navigatio
   assert.equal(await text("#pinned-count"), "1");
   await page.click("#pinned-toggle");
   await page.waitForFunction(() => document.querySelectorAll("#pinned-group .clip").length === 0);
-  assert.equal(await page.$eval("#pinned-toggle", (toggle) => toggle.getAttribute("aria-expanded")), "false");
+  assert.equal(await page.$eval("#pinned-toggle-sr", (toggle) => toggle.getAttribute("aria-expanded")), "false");
   assert.equal(await page.$eval("#pinned-group", (group) => group.hidden), false);
   // The first shown clip is now the first recent one, for arrows, Enter, and Alt+1.
   const firstShown = await page.$eval(".clip", (item) => item.closest("#recent-group") !== null);
@@ -262,7 +267,7 @@ test("the pinned group collapses, stays collapsed, and leaves keyboard navigatio
   await page.waitForFunction(async () =>
     (await (await import("/lib/settings.js")).getSettings()).pinnedCollapsed === true);
   await openPopup();
-  await page.waitForFunction(() => document.querySelector("#pinned-toggle").getAttribute("aria-expanded") === "false");
+  await page.waitForFunction(() => document.querySelector("#pinned-toggle-sr").getAttribute("aria-expanded") === "false");
   assert.equal(await page.$$eval("#pinned-group .clip", (rows) => rows.length), 0);
   // The Pinned filter still lists pinned clips.
   await page.click("#pinned-clips");
@@ -277,6 +282,145 @@ test("import and export are in the footer, outside Settings", async () => {
   for (const id of ["#import", "#export"]) {
     assert.equal(await page.$eval(id, (button) => button.closest(".list-footer") !== null && button.checkVisibility()), true);
   }
+});
+
+test("several selected clips can be organized at once", async () => {
+  await page.click("#select-all");
+  await page.waitForFunction(() => !document.querySelector("#bulk-actions").hidden);
+  const selected = await page.$$eval(".clip.is-selected", (rows) => rows.length);
+  await page.click("#organize-selected");
+  await page.waitForSelector("#organize-dialog[open]");
+  await page.type("#organize-category", "Inbox");
+  await page.type("#organize-add-tags", "triage, later");
+  await page.click("#apply-organize");
+  await page.waitForFunction(() => /^Organized \d+ clips?\.$/.test(document.querySelector("#status").textContent));
+  const clips = (await storedClips()).filter((clip) => clip.kind !== "image");
+  assert.ok(clips.filter((clip) => clip.category === "Inbox" && clip.tags.includes("triage")).length >= Math.min(selected, clips.length) - 1);
+  // Removing a tag from the same clips.
+  await page.click("#organize-selected");
+  await page.type("#organize-remove-tags", "later");
+  await page.click("#apply-organize");
+  await page.waitForFunction(async () =>
+    !(await (await import("/lib/store.js")).list()).some((clip) => clip.tags?.includes("later")));
+  await page.click("#finish-selection");
+});
+
+test("auto-tag rules organize new clips and can be applied to existing ones", async () => {
+  await page.click("#settings summary");
+  await page.$eval("#manage-rules", (button) => button.click());
+  await page.waitForSelector("#rules-dialog[open]");
+  await page.select("#rule-kind", "contains");
+  await page.type("#rule-value", "invoice");
+  await page.type("#rule-category", "Finance");
+  await page.type("#rule-tags", "billing");
+  await page.click("#rule-save");
+  await page.waitForFunction(() => document.querySelector("#rules-list").textContent.includes("invoice"));
+  await page.click("#apply-rules");
+  await page.waitForFunction(() => /^Rules updated/.test(document.querySelector("#rules-apply-status").textContent));
+  await page.click("#close-rules");
+  await page.click("#close-settings");
+  const invoice = (await storedClips()).find((clip) => clip.text === "Quarterly invoice 2026-Q3");
+  assert.ok(invoice.tags.includes("billing"));
+  assert.equal(await saveClipboard("Invoice INV-77 is due"), "Saved.");
+  const saved = (await storedClips()).find((clip) => clip.text === "Invoice INV-77 is due");
+  assert.deepEqual([saved.category, saved.tags], ["Finance", ["billing"]]);
+});
+
+test("Copy as changes the text, and templates fill in placeholders", async () => {
+  await page.evaluate(async () => {
+    const { add } = await import("/lib/store.js");
+    const { createEntry } = await import("/lib/entries.js");
+    await add([
+      createEntry({ text: "  mixed Case text  ", createdAt: new Date().toISOString() }),
+      createEntry({ text: "Today is {isodate}. Pasted: {clipboard}", template: true, createdAt: new Date(Date.now() + 1000).toISOString() }),
+    ]);
+  });
+  await openPopup();
+  const openMenuFor = (snippet) => page.evaluate((snippet) => {
+    const row = [...document.querySelectorAll(".clip")].find((item) => item.textContent.includes(snippet));
+    row.querySelector(".more").click();
+  }, snippet);
+  await openMenuFor("mixed Case text");
+  await page.waitForSelector("#clip-menu:popover-open");
+  await page.keyboard.press("c");
+  await page.waitForFunction(() => document.querySelector("#clip-menu .menu-heading")?.textContent === "Copy as…");
+  await page.keyboard.press("u");
+  await page.waitForFunction(async () => (await navigator.clipboard.readText()) === "  MIXED CASE TEXT  ");
+  assert.equal(await status(), "Copied as UPPERCASE.");
+
+  await setClipboard("from the clipboard");
+  await page.evaluate(() => {
+    const row = [...document.querySelectorAll(".clip")].find((item) => item.textContent.includes("{isodate}"));
+    row.querySelector(".copy").click();
+  });
+  const today = new Date();
+  const iso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  await page.waitForFunction(async (iso) =>
+    (await navigator.clipboard.readText()) === `Today is ${iso}. Pasted: from the clipboard`, {}, iso);
+  const template = (await storedClips()).find((clip) => clip.template);
+  assert.equal(template.useCount, 1);
+});
+
+test("clips can be sorted, and categories get colours", async () => {
+  await page.select("#sort-order", "name");
+  await page.waitForFunction(async () =>
+    (await (await import("/lib/settings.js")).getSettings()).sortOrder === "name");
+  const recentTexts = await page.$$eval("#recent-group .clip", (rows) => rows.slice(0, 3).map((row) => row.querySelector(".clip-title, .preview")?.textContent.trim().toLocaleLowerCase()));
+  assert.deepEqual(recentTexts, [...recentTexts].sort((a, b) => a.localeCompare(b, undefined, { numeric: true })));
+  await page.select("#sort-order", "used");
+  await page.waitForFunction(() => document.querySelector("#recent-group .clip")?.textContent.includes("{isodate}") ||
+    document.querySelector("#recent-group .clip")?.textContent.includes("MIXED") || document.querySelector("#recent-group .clip")?.textContent.includes("mixed"));
+  await page.select("#sort-order", "recent");
+
+  await page.click("#settings summary");
+  await page.$eval("#manage-organization", (button) => button.click());
+  await page.waitForSelector("#manage-dialog[open]");
+  await page.evaluate(() => {
+    const row = [...document.querySelectorAll("#manage-dialog .manage-item")].find((item) => item.querySelector(".name")?.textContent === "Finance");
+    row.querySelector(".color-button").click();
+  });
+  await page.click('#manage-dialog .color-swatch[aria-label="Teal"]');
+  await page.waitForFunction(async () =>
+    (await (await import("/lib/settings.js")).getSettings()).categoryColors.finance === "teal");
+  await page.click("#manage-dialog .primary");
+  await page.click("#close-settings");
+  await page.waitForFunction(() => document.querySelector('.clip-labels .category-dot[data-color="teal"]'));
+});
+
+test("the command palette runs actions and filters", async () => {
+  const shortcut = process.platform === "darwin" ? "Meta" : "Control";
+  await page.focus("#search");
+  await page.keyboard.down(shortcut);
+  await page.keyboard.press("KeyK");
+  await page.keyboard.up(shortcut);
+  await page.waitForSelector("#palette[open]");
+  await page.type("#palette-input", "tag billing");
+  await page.waitForFunction(() => document.querySelector("#palette-list .palette-item")?.textContent.includes("#billing"));
+  await page.keyboard.press("Enter");
+  await page.waitForFunction(() => !document.querySelector("#palette").open && document.querySelector("#filter-count").textContent === "1");
+  await page.click("#open-palette");
+  await page.type("#palette-input", "clear filters");
+  await page.keyboard.press("Enter");
+  await page.waitForFunction(() => document.querySelector("#active-filters").hidden);
+  await page.click("#open-palette");
+  await page.type("#palette-input", "theme dark");
+  await page.keyboard.press("Enter");
+  await page.waitForFunction(() => document.documentElement.dataset.theme === "dark");
+  await page.click("#open-palette");
+  await page.type("#palette-input", "theme system");
+  await page.keyboard.press("Enter");
+});
+
+test("Settings shows storage use and can delete image clips", async () => {
+  await page.click("#settings summary");
+  await page.waitForFunction(() => /clips/.test(document.querySelector("#storage-summary").textContent));
+  assert.match(await text("#storage-summary"), /1 image/);
+  await page.$eval("#delete-images", (button) => button.click());
+  await page.click("#confirm-action");
+  await page.waitForFunction(async () =>
+    !(await (await import("/lib/store.js")).list()).some((clip) => clip.kind === "image"));
+  await page.waitForFunction(() => document.querySelector("#delete-images").hidden);
+  await page.click("#close-settings");
 });
 
 test("automatic saving captures copied text with the popup closed", async () => {
@@ -321,14 +465,15 @@ test("a large history shows its first screenful, then the rest", async () => {
 
 test("the passphrase lock encrypts clips and asks for the passphrase", async () => {
   await page.click("#settings summary");
-  await page.click("#lock-setup");
+  await page.$eval("#lock-setup", (button) => button.click());
   await page.type("#new-passphrase", "correct horse battery");
   await page.type("#confirm-passphrase", "correct horse battery");
   await page.click("#save-lock");
   await page.waitForFunction(() => document.querySelector("#status").textContent.startsWith("Lock is on"), { timeout: 30_000 });
   const records = await storedClips();
-  assert.ok(records.length > 400);
-  assert.ok(records.every((record) => record.sealed && record.text === undefined));
+  assert.ok(records.length > 400, `${records.length} clips`);
+  const unsealed = records.filter((record) => !record.sealed || record.text !== undefined);
+  assert.deepEqual(unsealed.map((record) => Object.keys(record).join(",")), []);
 
   await page.click("#close-settings");
   await page.click("#lock-now");
@@ -362,6 +507,54 @@ test("the passphrase lock encrypts clips and asks for the passphrase", async () 
 test("the Firefox-only background script is left out of the Chrome build", async () => {
   const response = await page.evaluate(() => fetch("/background/firefox.js").then((result) => result.status, () => 404));
   assert.equal(response, 404);
+});
+
+// Runs axe on the page as it is now and fails on serious or critical problems.
+async function checkAccessibility(view) {
+  // Evaluating the source directly works under the extension's script policy, which blocks injected script tags.
+  await page.evaluate(`${axeSource};0`);
+  const violations = await page.evaluate(async () => {
+    const results = await globalThis.axe.run(document, { resultTypes: ["violations"] });
+    return results.violations
+      .filter((violation) => ["serious", "critical"].includes(violation.impact))
+      .map((violation) => `${violation.id}: ${violation.nodes.slice(0, 3).map((node) => node.target.join(" ")).join(", ")}`);
+  });
+  assert.deepEqual(violations, [], `Accessibility problems in ${view}`);
+}
+
+test("the main views have no serious accessibility problems", async () => {
+  await openPopup();
+  await checkAccessibility("the clip list");
+  await page.click("#settings summary");
+  await checkAccessibility("Settings");
+  await page.click("#close-settings");
+  await page.click("#filter-button");
+  await page.waitForSelector("#filter-panel:popover-open");
+  await checkAccessibility("the filter panel");
+  await page.keyboard.press("Escape");
+  await page.click("#new");
+  await checkAccessibility("the editor");
+  await page.keyboard.press("Escape");
+  await page.keyboard.down(process.platform === "darwin" ? "Meta" : "Control");
+  await page.keyboard.press("KeyK");
+  await page.keyboard.up(process.platform === "darwin" ? "Meta" : "Control");
+  await page.waitForSelector("#palette[open]");
+  await checkAccessibility("the command palette");
+  await page.keyboard.press("Escape");
+  await page.focus("#search");
+  await page.keyboard.down("Shift");
+  await page.keyboard.press("Enter");
+  await page.keyboard.up("Shift");
+  await page.waitForSelector("#clip-menu:popover-open");
+  await checkAccessibility("the actions menu");
+  await page.keyboard.press("Escape");
+  await page.emulateMediaFeatures([{ name: "prefers-color-scheme", value: "dark" }]);
+  await page.evaluate(() => localStorage.setItem("copyhold-theme", "dark"));
+  await openPopup();
+  await checkAccessibility("the dark theme");
+  await page.evaluate(() => localStorage.setItem("copyhold-theme", "system"));
+  await page.emulateMediaFeatures([]);
+  await openPopup();
 });
 
 // Wait briefly so a stray error from the last action surfaces inside the test run.

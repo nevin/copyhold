@@ -17,6 +17,10 @@ export const state = {
   hidePreviews: false,
   // The pinned group is folded away; its clips leave the list and keyboard navigation until it opens.
   pinnedCollapsed: false,
+  sortOrder: "recent",
+  /** Colour names keyed by lower-case category name. @type {Record<string, string>} */
+  categoryColors: {},
+  colorsVersion: 0,
   autoCaptureEnabled: false,
   closeAfterCopy: true,
   openShortcut: "",

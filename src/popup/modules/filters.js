@@ -9,7 +9,7 @@ const panel = byId("filter-panel");
 const activeFilters = byId("active-filters");
 const same = (first, second) => first.toLocaleLowerCase() === second.toLocaleLowerCase();
 
-function applyFilter(filter) {
+export function applyFilter(filter) {
   state.filter = filter;
   renderList(true);
   if (panel.matches(":popover-open")) buildPanel();

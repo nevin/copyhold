@@ -31,6 +31,7 @@ const samples = [
   { text: "ops-team@example.com", minutesAgo: 190, category: "Work", tags: ["contacts"] },
   { text: "221B Baker Street, London NW1 6XE", minutesAgo: 60 * 26, title: "Office address", pinned: true, category: "Personal", tags: ["address"] },
   { text: "Meeting notes: ship 1.2 on Thursday, update store listing, refresh screenshots.", minutesAgo: 60 * 50 },
+  { text: "Hi {clipboard}, thanks for reaching out. I'll get back to you by {weekday}.", minutesAgo: 60 * 30, title: "Quick reply", template: true, category: "Work", subcategory: "Email", tags: ["reply"] },
   { text: "npm run package", minutesAgo: 60 * 75, title: "Build command", pinned: true, category: "Work", subcategory: "Code", tags: ["snippet", "cli"] },
 ];
 
@@ -60,7 +61,10 @@ async function seed(page, { image = true } = {}) {
       clips.push(createEntry({ kind: "image", ...await describeImage(png), createdAt: new Date(now - 14 * minute).toISOString() }));
     }
     await store.add(clips);
-    await updateSettings({ autoCapture: false, autoCaptureAsked: true, density: "comfortable", hidePreviews: false });
+    await updateSettings({
+      autoCapture: false, autoCaptureAsked: true, density: "comfortable", hidePreviews: false, rules: [],
+      categoryColors: { work: "blue", personal: "green", design: "pink" },
+    });
   }, samples, minute, image);
 }
 
@@ -126,6 +130,28 @@ try {
   await page.evaluate(() => [...document.querySelectorAll("#filter-panel .filter-option")].find((item) => item.textContent.startsWith("Work")).click());
   await page.hover("#filter-panel");
   await shot("popup-filter");
+  await page.keyboard.press("Escape");
+
+  await open({ height: 640 });
+  await page.keyboard.down(process.platform === "darwin" ? "Meta" : "Control");
+  await page.keyboard.press("KeyK");
+  await page.keyboard.up(process.platform === "darwin" ? "Meta" : "Control");
+  await page.type("#palette-input", "filter");
+  await shot("popup-palette");
+  await page.keyboard.press("Escape");
+
+  await open({ height: 640 });
+  await page.evaluate(async () => {
+    const { updateSettings } = await import("/lib/settings.js");
+    await updateSettings({ rules: [
+      { id: "a", kind: "domain", value: "github.com", category: "Work", subcategory: "Code", tags: ["code"] },
+      { id: "b", kind: "contains", value: "invoice", category: "Finance", subcategory: "", tags: ["billing"] },
+    ] });
+  });
+  await page.click("#settings summary");
+  await page.$eval("#manage-rules", (button) => button.click());
+  await shot("popup-rules");
+  await page.click("#close-rules");
   await page.keyboard.press("Escape");
 
   await open({ height: 640 });

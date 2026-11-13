@@ -35,9 +35,9 @@ export function setUpShortcuts(saveClipboard) {
       () => void chrome.runtime.lastError,
     );
   });
-  chrome.contextMenus.onClicked.addListener((info) => {
+  chrome.contextMenus.onClicked.addListener((info, tab) => {
     if (info.menuItemId !== menuId || !info.selectionText) return;
-    saveSelection(info.selectionText)
+    saveSelection(info.selectionText, { url: info.pageUrl, title: tab?.title })
       .then((result) => showResult({ ...result, message: describeSave(result) }))
       .catch((error) => showResult({ error: error.message || t("errorSaveSelection") }));
   });

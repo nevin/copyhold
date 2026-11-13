@@ -76,7 +76,7 @@ Pushes to `main` run the checks and browser tests in GitHub Actions, and changes
 - After deleting one or more clips, **Undo** restores the most recent deletion for 12 seconds while the view stays open. Pointing at or focusing the undo bar pauses the countdown. Clips that have expired remain deleted.
 - Edits in the clip editor save as you type; **Done**, **Escape**, or **Cmd+Enter** (**Ctrl+Enter** elsewhere) closes it.
 - Select **Save clipboard** to save the current clipboard text, or the image on it when there's no text. If the same content is already saved, Copyhold moves that clip to the top instead of saving it again.
-- Press **Alt+Shift+S** to save the clipboard without opening Copyhold, or right-click selected text on a page and choose **Save selection to Copyhold**. A check mark on the toolbar icon confirms the save. Change the shortcuts at `chrome://extensions/shortcuts`. Use **New clip** to type or paste text with an optional title, description, category, subcategory, and tags.
+- Press **Alt+Shift+S** to save the clipboard without opening Copyhold, or right-click selected text on a page and choose **Save selection to Copyhold**; the clip remembers the page, with a link back and **Open source page** in its menu. A check mark on the toolbar icon confirms the save. Change the shortcuts at `chrome://extensions/shortcuts`. Use **New clip** to type or paste text with an optional title, description, category, subcategory, and tags.
 - Select the **Pinned** heading to fold the pinned clips away, and again to show them. Folded clips leave the list and keyboard navigation; the **Pinned** filter still shows them. Copyhold remembers the choice.
 - The list shows 200 clips at a time; select **Show more** or keep pressing **Down** to see more.
 - Clips show what kind of text they contain: links show their address without `https://`, code and commands use a monospace font, and colors show a swatch. Times are relative, such as "2 hours ago"; point at a time to see the exact date.
@@ -98,6 +98,32 @@ In the editor, give a clip a **Category**, a **Subcategory** within it, and any 
 Select **Filter** next to **All clips** and **Pinned** to filter by a category or subcategory and by tags; a clip must have every tag you choose. The chosen filters appear under the toolbar, where **×** removes one. Selecting a tag on a clip also filters by it, and typing `#tag` in search finds clips with a tag that starts with that word. Search also matches categories and tags.
 
 **Manage categories and tags** in **Settings and backups** renames or deletes them across every clip. Renaming to a name that already exists merges the two; deleting removes the label but keeps the clips.
+
+### Organizing many clips, rules, and colours
+
+Select clips (the box next to the filters selects every shown clip) and choose **Organize** to set or remove a category, or add and remove tags, for all of them at once.
+
+**Auto-tag rules** in **Settings and backups** organize clips as they're saved. A rule matches text that **contains** some words, **links to a site** (including the page a selection came from), or **matches a pattern** (a regular expression). The first matching rule with a category sets it, unless the clip already has one, and every matching rule adds its tags. **Apply to existing clips** runs the rules over your history.
+
+In **Manage categories and tags**, the dot beside each category picks its colour, shown on rows and in compact view.
+
+### Sorting
+
+The menu next to **Filter** sorts clips by **Recent** (last copied or saved), **Most used**, **Oldest**, or **A–Z**. Pinned clips always come first.
+
+### Templates and Copy as
+
+Check **Template** in the editor and copying the clip fills in `{date}`, `{isodate}` (2026-11-13), `{time}`, `{datetime}`, `{weekday}`, and `{clipboard}` (what's on the clipboard when you copy). Other text in braces is left alone.
+
+**Copy as…** in a clip's actions menu (press **C**) copies it **Trimmed**, as a **Single line**, in **UPPERCASE**, **lowercase**, or **Title Case**, as **Formatted** or **Compact JSON**, or **URL-encoded** or **URL-decoded**. Only the choices that would change the text are shown, each with a letter.
+
+### Command palette
+
+Press **Cmd+K** (**Ctrl+K** elsewhere), or select **Commands** in the bar under the list, and type to find any action (new clip, save clipboard, import, export, lock, settings), view (theme, density, sort, pinned), or filter by a category or tag. **Up** and **Down** choose, **Enter** runs.
+
+### Storage
+
+**Storage** in **Settings and backups** shows how many clips and images you have, how much space they take, and how much the browser allows. Copyhold warns when storage is almost full, and **Delete image clips** frees space (you can undo it right after).
 
 ### Sensitive text
 

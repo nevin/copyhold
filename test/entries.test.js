@@ -79,3 +79,24 @@ test("categories and tags are cleaned on creation and kept in backups", async ()
   const bad = { format: "copyhold", version: 1, entries: [{ ...entry, tags: "work" }] };
   await assert.rejects(importEntries(JSON.stringify(bad)), /Entry 1 is invalid/);
 });
+
+test("every sort order keeps pinned clips first", () => {
+  const clips = [
+    createEntry({ text: "banana", createdAt: "2026-01-02T00:00:00.000Z", useCount: 5 }),
+    createEntry({ text: "apple", createdAt: "2026-01-03T00:00:00.000Z", useCount: 1 }),
+    createEntry({ text: "cherry", createdAt: "2026-01-01T00:00:00.000Z", useCount: 9, pinned: true }),
+    createEntry({ text: "date", createdAt: "2026-01-04T00:00:00.000Z" }),
+  ];
+  const texts = (order) => sortEntries(clips, order).map((clip) => clip.text);
+  assert.deepEqual(texts("recent"), ["cherry", "date", "apple", "banana"]);
+  assert.deepEqual(texts("used"), ["cherry", "banana", "apple", "date"]);
+  assert.deepEqual(texts("oldest"), ["cherry", "banana", "apple", "date"]);
+  assert.deepEqual(texts("name"), ["cherry", "apple", "banana", "date"]);
+});
+
+test("templates, use counts, and source pages are kept in backups", async () => {
+  const clip = createEntry({ text: "Hi {date}", template: true, useCount: 3, sourceUrl: "https://example.com/a", sourceTitle: "Example" });
+  const [imported] = await importEntries(await exportEntries([clip]));
+  assert.deepEqual([imported.template, imported.useCount, imported.sourceUrl, imported.sourceTitle], [true, 3, "https://example.com/a", "Example"]);
+  assert.equal(createEntry({ text: "x", sourceUrl: "javascript:alert(1)" }).sourceUrl, undefined);
+});

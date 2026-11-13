@@ -104,7 +104,16 @@
             <div class="organize-setting">
               <p class="setting-label" data-i18n="categoriesAndTags">Categories and tags</p>
               <p class="hint" data-i18n="manageHint">Rename, merge, or delete them across all clips.</p>
-              <button id="manage-organization" class="secondary" type="button" data-i18n="manageCategoriesAndTags">Manage categories and tags</button>
+              <div class="actions">
+                <button id="manage-organization" class="secondary" type="button" data-i18n="manageCategoriesAndTags">Manage categories and tags</button>
+                <button id="manage-rules" class="secondary" type="button" data-i18n="autoTagRules">Auto-tag rules</button>
+              </div>
+            </div>
+            <div class="storage-setting">
+              <p class="setting-label" data-i18n="storage">Storage</p>
+              <div class="storage-bar" aria-hidden="true"><span id="storage-fill"></span></div>
+              <p id="storage-summary" class="hint"></p>
+              <button id="delete-images" class="secondary" type="button" hidden data-i18n="deleteImageClips">Delete image clips</button>
             </div>
             <fieldset class="lock-setting">
               <legend data-i18n="passphraseLock">Passphrase lock</legend>
@@ -190,6 +199,13 @@
           <span data-i18n="filter">Filter</span>
           <span id="filter-count" class="filter-count"></span>
         </button>
+        <label class="sr-only" for="sort-order" data-i18n="sortClips">Sort clips</label>
+        <select id="sort-order" class="sort-select" title="Sort clips" data-i18n-title="sortClips">
+          <option value="recent" data-i18n="sortRecent">Recent</option>
+          <option value="used" data-i18n="sortUsed">Most used</option>
+          <option value="oldest" data-i18n="sortOldest">Oldest</option>
+          <option value="name" data-i18n="sortName">A–Z</option>
+        </select>
         <p id="count"></p>
       </div>
       <div id="active-filters" class="active-filters" aria-label="Active filters" data-i18n-aria-label="activeFilters" hidden></div>
@@ -198,6 +214,7 @@
         <span id="selected-count" role="status"></span>
         <button id="copy-selected" class="secondary selection-control" type="button" disabled data-i18n="copy">Copy</button>
         <button id="pin-selected" class="secondary selection-control" type="button" disabled data-i18n="pin">Pin</button>
+        <button id="organize-selected" class="secondary selection-control" type="button" disabled data-i18n="organize">Organize</button>
         <button id="delete-selected" class="secondary selection-control" type="button" aria-label="Delete selected clips" title="Delete selected clips" disabled data-i18n-aria-label="deleteSelectedClips" data-i18n-title="deleteSelectedClips">
           <svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v5m4-5v5"/></svg>
           <span data-i18n="delete">Delete</span>
@@ -207,10 +224,12 @@
       <p id="search-status" class="sr-only" role="status" aria-atomic="true"></p>
       <p id="status" role="status" aria-atomic="true"></p>
       <p id="copy-status" class="sr-only" role="status" aria-atomic="true"></p>
+      <!-- A listbox may hold only options, so assistive technology gets this toggle just before it. -->
+      <button id="pinned-toggle-sr" class="sr-only" type="button" aria-controls="pinned-group" aria-expanded="true" hidden></button>
       <div id="entries" class="clips" role="listbox" aria-label="Saved clips" data-i18n-aria-label="savedClips">
         <div id="pinned-group" class="clip-group" role="group" aria-labelledby="pinned-heading" hidden>
           <div id="pinned-heading" class="group-heading" role="presentation">
-            <button id="pinned-toggle" class="group-toggle" type="button" aria-expanded="true" aria-controls="pinned-group">
+            <button id="pinned-toggle" class="group-toggle" type="button" tabindex="-1" aria-hidden="true">
               <svg class="action-icon chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
               <span data-i18n="pinned">Pinned</span>
               <span id="pinned-count" class="group-count"></span>
@@ -238,6 +257,9 @@
         </button>
         <input id="file" type="file" accept=".json,application/json" hidden>
         <span id="import-hint" class="list-footer-hint"></span>
+        <button id="open-palette" class="quiet palette-button" type="button" aria-keyshortcuts="Control+K Meta+K">
+          <span data-i18n="commands">Commands</span> <kbd id="open-palette-key"></kbd>
+        </button>
       </footer>
     </section>
   </main>
@@ -281,6 +303,13 @@
       </div>
       <datalist id="tag-options"></datalist>
       <p id="tag-hint" class="hint" data-i18n="tagHint">Press Enter or comma to add a tag.</p>
+      <div class="template-field">
+        <label class="capture-setting">
+          <input id="template" type="checkbox" aria-describedby="template-hint">
+          <span data-i18n="templateLabel">Template</span>
+        </label>
+        <p id="template-hint" class="hint" data-i18n="templateHint">When copied, fills in {date}, {isodate}, {time}, {datetime}, {weekday}, and {clipboard}.</p>
+      </div>
       <details id="editor-options" class="editor-options">
         <summary><span data-i18n="expiryAndPrivacy">Expiry and privacy</span> <span id="options-summary"></span></summary>
         <div class="options-body">
@@ -329,6 +358,93 @@
       <button id="clip-preview-reveal" class="secondary" type="button" aria-controls="clip-preview-text" data-i18n="reveal">Reveal</button>
       <button class="primary" autofocus data-i18n="close">Close</button>
     </form>
+  </dialog>
+
+  <dialog id="organize-dialog" aria-labelledby="organize-title">
+    <form id="organize-form" class="organize-form" novalidate>
+      <h2 id="organize-title" data-i18n="organizeClips">Organize clips</h2>
+      <p class="hint" data-i18n="organizeHint">Empty fields leave each clip as it is.</p>
+      <div class="field-row">
+        <div class="field">
+          <label for="organize-category" data-i18n="category">Category</label>
+          <input id="organize-category" type="text" list="organize-category-options" autocomplete="off" maxlength="40">
+        </div>
+        <div class="field">
+          <label for="organize-subcategory" data-i18n="subcategory">Subcategory</label>
+          <input id="organize-subcategory" type="text" list="organize-subcategory-options" autocomplete="off" maxlength="40">
+        </div>
+      </div>
+      <label class="capture-setting">
+        <input id="organize-clear-category" type="checkbox">
+        <span data-i18n="removeCategory">Remove the category</span>
+      </label>
+      <label for="organize-add-tags" data-i18n="addTags">Add tags</label>
+      <input id="organize-add-tags" type="text" list="organize-tag-options" autocomplete="off" placeholder="work, urgent" data-i18n-placeholder="tagsPlaceholder">
+      <label for="organize-remove-tags" data-i18n="removeTags">Remove tags</label>
+      <input id="organize-remove-tags" type="text" list="organize-tag-options" autocomplete="off">
+      <datalist id="organize-category-options"></datalist>
+      <datalist id="organize-subcategory-options"></datalist>
+      <datalist id="organize-tag-options"></datalist>
+      <p id="organize-status" role="alert"></p>
+      <div class="actions dialog-actions">
+        <button id="cancel-organize" class="secondary" type="button" data-i18n="cancel">Cancel</button>
+        <button id="apply-organize" class="primary" type="submit" data-i18n="apply">Apply</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="rules-dialog" aria-labelledby="rules-title">
+    <h2 id="rules-title" data-i18n="autoTagRules">Auto-tag rules</h2>
+    <p class="hint" data-i18n="rulesHint">When Copyhold saves new text, matching rules set its category if it has none and add their tags.</p>
+    <ul id="rules-list" class="manage-list"></ul>
+    <form id="rule-form" class="rule-form" novalidate>
+      <h3 id="rule-form-title" data-i18n="newRule">New rule</h3>
+      <div class="field-row">
+        <div class="field">
+          <label for="rule-kind" data-i18n="ruleWhen">When the text</label>
+          <select id="rule-kind">
+            <option value="contains" data-i18n="ruleContains">contains</option>
+            <option value="domain" data-i18n="ruleDomain">links to the site</option>
+            <option value="pattern" data-i18n="rulePattern">matches the pattern</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="rule-value" data-i18n="ruleValue">Words, site, or pattern</label>
+          <input id="rule-value" type="text" autocomplete="off" placeholder="github.com">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="rule-category" data-i18n="setCategory">Set category</label>
+          <input id="rule-category" type="text" list="organize-category-options" autocomplete="off" maxlength="40">
+        </div>
+        <div class="field">
+          <label for="rule-subcategory" data-i18n="subcategory">Subcategory</label>
+          <input id="rule-subcategory" type="text" autocomplete="off" maxlength="40">
+        </div>
+      </div>
+      <label for="rule-tags" data-i18n="addTags">Add tags</label>
+      <input id="rule-tags" type="text" list="organize-tag-options" autocomplete="off" placeholder="work, code" data-i18n-placeholder="tagsPlaceholder">
+      <p id="rule-status" role="alert"></p>
+      <div class="actions">
+        <button id="rule-cancel" class="quiet" type="button" hidden data-i18n="cancelEdit">Cancel edit</button>
+        <button id="rule-save" class="secondary" type="submit" data-i18n="addRule">Add rule</button>
+      </div>
+    </form>
+    <p id="rules-apply-status" class="hint" role="status"></p>
+    <div class="actions dialog-actions">
+      <button id="apply-rules" class="secondary" type="button" data-i18n="applyRulesToExisting">Apply to existing clips</button>
+      <button id="close-rules" class="primary" type="button" data-i18n="done">Done</button>
+    </div>
+  </dialog>
+
+  <dialog id="palette" class="palette" aria-label="Commands" data-i18n-aria-label="commands">
+    <div class="palette-field">
+      <svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="10.5" cy="10.5" r="5.5"/><path d="m15 15 4.5 4.5"/></svg>
+      <input id="palette-input" type="text" role="combobox" aria-controls="palette-list" aria-expanded="true" aria-autocomplete="list"
+        autocomplete="off" placeholder="Type a command, category, or tag" data-i18n-placeholder="paletteHint" aria-label="Commands" data-i18n-aria-label="commands">
+    </div>
+    <div id="palette-list" class="palette-list" role="listbox" aria-label="Commands" data-i18n-aria-label="commands"></div>
   </dialog>
 
   <dialog id="manage-dialog" aria-labelledby="manage-title">

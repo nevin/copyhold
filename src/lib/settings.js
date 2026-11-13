@@ -12,6 +12,12 @@ export const defaultSettings = {
   density: "comfortable",
   hidePreviews: false,
   pinnedCollapsed: false,
+  // "recent", "used", "oldest", or "name"; pinned clips always come first.
+  sortOrder: "recent",
+  // Colour names from the palette, keyed by lower-case category name.
+  categoryColors: {},
+  // Rules that categorize and tag new clips; see rules.js.
+  rules: [],
   // What automatic capture does with text that looks like a password, key, or card number: mask, skip, or keep.
   sensitiveClips: "mask",
   captureImages: false,

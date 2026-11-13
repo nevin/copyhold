@@ -1,9 +1,11 @@
 import { createEntry, withDefaultRetention } from "./entries.js";
 import { autoCaptureMaxImageBytes, describeImage, maxImageBytes } from "./images.js";
 import { fromBase64, toBase64 } from "./lock.js";
+import { applyRules } from "./rules.js";
 import { detectSensitive, sensitiveLabel } from "./sensitive.js";
 import { getSettings } from "./settings.js";
 import * as store from "./store.js";
+import { fillTemplate, transforms } from "./transforms.js";
 import { t } from "./i18n.js";
 
 // Automatic capture skips longer text, which would slow every popup open; Save clipboard still keeps it.
@@ -14,7 +16,8 @@ export const supportsAutoCapture = Boolean(globalThis.chrome?.runtime?.getManife
 
 /**
  * Clipboard content: text, or an image.
- * @typedef {{ text?: string, image?: Blob }} Content
+ * Selections also carry the page they came from.
+ * @typedef {{ text?: string, image?: Blob, sourceUrl?: string, sourceTitle?: string }} Content
  */
 
 export function withClipboardLock(work) {
@@ -86,9 +89,16 @@ export async function saveContent(content, mode) {
     }
   }
 
+  const source = content.sourceUrl ? { sourceUrl: content.sourceUrl, sourceTitle: content.sourceTitle } : {};
   const entry = image
     ? createEntry({ kind: "image", ...await describeImage(image) })
-    : createEntry({ text: content.text, visibility: mask ? "masked" : "visible", sensitive: mask ? sensitive : undefined });
+    : createEntry({
+      text: content.text,
+      visibility: mask ? "masked" : "visible",
+      sensitive: mask ? sensitive : undefined,
+      ...source,
+      ...applyRules({ text: content.text, ...source }, settings.rules),
+    });
   await store.add([withDefaultRetention(entry, settings.retentionDays)]);
   await record();
   await store.trimHistory(settings.historyLimit);
@@ -168,9 +178,13 @@ export function saveClipboard() {
   });
 }
 
-/** Saves selected text from a page; the context menu passes it without touching the clipboard. */
-export function saveSelection(text) {
-  return withClipboardLock(() => saveContent({ text }, "selection"));
+/**
+ * Saves selected text from a page; the context menu passes it without touching the clipboard.
+ * @param {string} text
+ * @param {{ url?: string, title?: string }} [source] The page it was selected on.
+ */
+export function saveSelection(text, source = {}) {
+  return withClipboardLock(() => saveContent({ text, sourceUrl: source.url, sourceTitle: source.title }, "selection"));
 }
 
 async function writeContent(content) {
@@ -188,9 +202,20 @@ async function writeContent(content) {
   }
 }
 
-/** Copies a clip that has been decrypted, if it was locked. */
-export function copyClip(entry) {
-  return withClipboardLock(() => writeContent(entry.kind === "image" ? { image: entry.image } : { text: entry.text }));
+/**
+ * Copies a clip that has been decrypted, if it was locked. Templates fill in their placeholders,
+ * and a transform such as "upper" changes the text as it is copied.
+ * @param {any} entry
+ * @param {{ transform?: string }} [options]
+ */
+export async function copyClip(entry, { transform } = {}) {
+  if (entry.kind === "image") return withClipboardLock(() => writeContent({ image: entry.image }));
+  let text = entry.text;
+  // Reading the clipboard for {clipboard} happens before taking the lock that writing holds.
+  if (entry.template) text = await fillTemplate(text, { clipboard: () => navigator.clipboard.readText() });
+  const chosen = transforms.find(({ id }) => id === transform);
+  if (chosen) text = chosen.apply(text);
+  return withClipboardLock(() => writeContent({ text }));
 }
 
 /** Copies the text of several clips, one per line. Images can't be combined, so they are left out. */
