@@ -68,6 +68,12 @@ let copiedFeedbackTimer;
 let closeAfterCopy = true;
 let openShortcut = "";
 const clipItems = new Map();
+// Rendering every match makes large histories slow, so the list grows in steps.
+const renderStep = 200;
+let renderLimit = renderStep;
+let hiddenMatches = 0;
+const showMore = byId("show-more");
+const historyLimit = byId("history-limit");
 
 document.documentElement.classList.toggle("full-tab", fullTab);
 byId("open-tab").hidden = fullTab;
@@ -641,8 +647,11 @@ function renderList(resetActive = false) {
   });
   const hadFocus = clipList.contains(document.activeElement);
 
-  const visibleIds = new Set(matches.map(({ id }) => id));
-  shownClips = matches;
+  if (resetActive) renderLimit = renderStep;
+  const shown = matches.slice(0, renderLimit);
+  hiddenMatches = matches.length - shown.length;
+  const visibleIds = new Set(shown.map(({ id }) => id));
+  shownClips = shown;
   for (const id of selectedIds) if (!visibleIds.has(id)) selectedIds.delete(id);
   for (const [id, { item }] of clipItems) {
     if (!visibleIds.has(id)) {
@@ -651,12 +660,12 @@ function renderList(resetActive = false) {
     }
   }
   const rows = { pinned: [], recent: [] };
-  matches.forEach((entry, index) => {
-    const data = JSON.stringify(entry);
+  shown.forEach((entry, index) => {
+    const revision = entry.revision ?? 0;
     let cached = clipItems.get(entry.id);
-    if (cached?.data !== data) {
+    if (cached?.revision !== revision) {
       cached?.item.remove();
-      cached = { data, item: itemFor(entry) };
+      cached = { revision, item: itemFor(entry) };
       clipItems.set(entry.id, cached);
       if (entry.id === copiedClipId) updateCopyFeedback(entry.id, true);
     }
@@ -672,6 +681,8 @@ function renderList(resetActive = false) {
   }
   byId("pinned-heading").hidden = pinnedOnly;
   byId("recent-heading").hidden = rows.pinned.length === 0;
+  showMore.hidden = hiddenMatches === 0;
+  showMore.textContent = `Show ${Math.min(renderStep, hiddenMatches).toLocaleString()} more of ${hiddenMatches.toLocaleString()}`;
   if (hadFocus && !clipList.contains(document.activeElement)) search.focus({ preventScroll: true });
 
   if (resetActive || !visibleIds.has(activeId)) activeId = matches[0]?.id;
@@ -699,10 +710,18 @@ async function render() {
 }
 
 search.addEventListener("input", () => renderList(true));
+showMore.addEventListener("click", () => {
+  renderLimit += renderStep;
+  renderList();
+});
 search.addEventListener("keydown", (event) => {
   if (event.isComposing) return;
   const index = shownClips.findIndex(({ id }) => id === activeId);
   const move = { ArrowDown: 1, ArrowUp: -1, PageDown: 5, PageUp: -5 }[event.key];
+  if (move > 0 && hiddenMatches && index + move >= shownClips.length) {
+    renderLimit += renderStep;
+    renderList();
+  }
   if (move && shownClips.length) {
     event.preventDefault();
     const next = index < 0 ? 0 : Math.max(0, Math.min(shownClips.length - 1, index + move));
@@ -840,6 +859,12 @@ if (supportsAutoCapture) {
       }
     }));
   }
+  run(async () => {
+    const { skippedLongAt = 0, skippedLongSeenAt = 0 } = await store.getMeta(["skippedLongAt", "skippedLongSeenAt"]);
+    if (skippedLongAt <= skippedLongSeenAt) return;
+    status("Copyhold didn't automatically save a very long text you copied (over 1,000,000 characters). Select Save clipboard to keep it.");
+    await store.setMeta({ skippedLongSeenAt: skippedLongAt });
+  });
   onSettingsChange((changes) => {
     if (changes.autoCaptureAsked) capturePrompt.hidden = true;
     if (!("autoCapture" in changes) && !("pausedUntil" in changes)) return;
@@ -903,6 +928,9 @@ run(async () => {
   const saved = await getSettings();
   retentionDays.value = String(saved.retentionDays);
   retentionDays.disabled = false;
+  savedHistoryLimit = saved.historyLimit;
+  historyLimit.value = String(saved.historyLimit);
+  historyLimit.disabled = false;
   closeAfterCopy = saved.closeAfterCopy;
   closeAfterCopyInput.checked = closeAfterCopy;
   closeAfterCopyInput.disabled = false;
@@ -910,9 +938,29 @@ run(async () => {
 onSettingsChange((changes) => {
   if ("retentionDays" in changes) retentionDays.value = String(changes.retentionDays);
   if ("closeAfterCopy" in changes) closeAfterCopyInput.checked = closeAfterCopy = changes.closeAfterCopy;
+  if ("historyLimit" in changes) historyLimit.value = String(savedHistoryLimit = changes.historyLimit);
 });
 retentionDays.addEventListener("change", () => run(async () => {
   await updateSettings({ retentionDays: Number(retentionDays.value) });
+}));
+let savedHistoryLimit = 0;
+historyLimit.addEventListener("change", () => run(async () => {
+  const limit = Number(historyLimit.value);
+  const excess = limit ? Math.max(0, clips.filter((clip) => !clip.pinned).length - limit) : 0;
+  if (excess && !await confirmAction(
+    `Delete ${excess.toLocaleString()} older ${excess === 1 ? "clip" : "clips"}?`,
+    `Keeping the last ${limit.toLocaleString()} clips deletes the least recently used unpinned clips now. Pinned clips are kept. This can't be undone.`,
+    "Delete clips",
+    true,
+  )) {
+    historyLimit.value = String(savedHistoryLimit);
+    return;
+  }
+  await updateSettings({ historyLimit: limit });
+  savedHistoryLimit = limit;
+  const removed = await store.trimHistory(limit);
+  if (removed) await refresh(`Deleted ${removed.toLocaleString()} older ${removed === 1 ? "clip" : "clips"}.`);
+  else status("History size saved.");
 }));
 closeAfterCopyInput.addEventListener("change", () => run(async () => {
   closeAfterCopy = closeAfterCopyInput.checked;

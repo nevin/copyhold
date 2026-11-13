@@ -32,11 +32,14 @@ Packaging rebuilds the extension and writes `dist/copyhold-<version>-chromium.zi
 - To delete several clips, choose **Select** from the menu or Shift-click a row. While selecting, **Enter** selects or clears the highlighted clip, and **Escape** or **Done** ends selection.
 - After deleting one or more clips, **Undo** restores the most recent deletion for 12 seconds while the view stays open. Pointing at or focusing the undo bar pauses the countdown. Clips that have expired remain deleted.
 - Select **Save clipboard** to save the current clipboard text. If the same text is already saved, Copyhold shows a message. Use **New clip** to type or paste text with an optional title and description. In the editor, press **Cmd+Enter** (**Ctrl+Enter** elsewhere) to save.
+- The list shows 200 clips at a time; select **Show more** or keep pressing **Down** to see more.
 - Clips show what kind of text they contain: links show their address without `https://`, code and commands use a monospace font, and colors show a swatch. Times are relative, such as "2 hours ago"; point at a time to see the exact date.
 
 ### Expiry and privacy
 
 In the editor, open **Expiry and privacy** to set **Delete automatically**. Pick **1 hour**, **1 day**, **1 week**, or a date and time, or choose **Never** to keep the clip. Copyhold checks for expired clips about once a minute while the browser is running and cleans up overdue clips when it starts.
+
+To limit how many clips Copyhold keeps, choose a **History size** in **Settings and backups**. When the history is full, the least recently used unpinned clips are deleted; pinned clips are always kept. Lowering the size asks before deleting anything.
 
 In **Settings and backups**, choose a default retention period for new clips you create or capture. The default starts at creation, leaves existing clips and imported backups as they are, and is cleared when you pin the clip. An expiry you set manually still applies to a pinned clip.
 
@@ -46,7 +49,7 @@ In **Settings and backups**, choose a default retention period for new clips you
 
 In Chrome and Edge, Copyhold can save plain text from the clipboard while the browser is running, even when the Copyhold window is closed. Automatic saving is off until you turn it on: the popup asks once, and you can change your answer under **Automatically save copied text** in **Settings and backups**. When you turn it on, Copyhold skips whatever is already on the clipboard and saves what you copy next.
 
-The bar under the header shows whether automatic saving is on. **Pause** stops it for 15 minutes; choose **Resume** to restart sooner. The monitor skips the clipboard contents it first sees on resume. **Save clipboard** is available during a pause. **Retry capture** restarts the monitor if the popup cannot confirm a recent successful read. Copyhold checks for changes about once per second and can miss text that is replaced between checks. Firefox supports **Save clipboard** for manual capture.
+The bar under the header shows whether automatic saving is on. **Pause** stops it for 15 minutes; choose **Resume** to restart sooner. The monitor skips the clipboard contents it first sees on resume. **Save clipboard** is available during a pause. **Retry capture** restarts the monitor if the popup cannot confirm a recent successful read. Copyhold checks for changes about once per second while you're using the computer, and stops checking while it's idle or locked. It can miss text that is replaced between checks. Text over 1,000,000 characters isn't saved automatically; the popup tells you, and **Save clipboard** still keeps it. Firefox supports **Save clipboard** for manual capture.
 
 ### Backups
 

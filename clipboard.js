@@ -1,5 +1,9 @@
 import { createEntry, withDefaultRetention } from "./entries.js";
+import { getSettings } from "./settings.js";
 import * as store from "./store.js";
+
+// Automatic capture skips longer text, which would slow every popup open; Save clipboard still keeps it.
+export const autoCaptureMaxLength = 1_000_000;
 
 // Only the Chromium build has a service worker, which automatic capture needs for its offscreen monitor.
 export const supportsAutoCapture = Boolean(globalThis.chrome?.runtime?.getManifest?.().background?.service_worker);
@@ -21,7 +25,10 @@ export function captureAutomatically(readText) {
     if (text === undefined) return null;
     // Polls usually see unchanged text, so skip hashing and storage until it changes.
     if (text === lastCaptured) return false;
-    const added = await store.observeClipboard(text, text ? newEntry(text) : undefined, { automatic: true });
+    const tooLong = text.length > autoCaptureMaxLength;
+    const added = await store.observeClipboard(text, text && !tooLong ? newEntry(text) : undefined, { automatic: true });
+    if (tooLong) await store.setMeta({ skippedLongAt: Date.now() });
+    if (added) await store.trimHistory((await getSettings()).historyLimit);
     lastCaptured = text;
     return added;
   });
@@ -37,7 +44,9 @@ export async function saveClipboard() {
     }
     if (!text) throw new Error("The clipboard has no text to save.");
 
-    return store.observeClipboard(text, newEntry(text), { manual: true });
+    const added = await store.observeClipboard(text, newEntry(text), { manual: true });
+    if (added) await store.trimHistory((await getSettings()).historyLimit);
+    return added;
   }
 
   return supportsAutoCapture ? withClipboardLock(save) : save();

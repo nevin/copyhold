@@ -101,6 +101,32 @@ export async function removeExpired() {
   return removed;
 }
 
+function recency(entry) {
+  return Date.parse(entry.lastUsedAt ?? entry.createdAt);
+}
+
+// Deletes the least recently used unpinned clips beyond the limit, and returns how many it removed.
+// The count check keeps this cheap when the history is within the limit.
+export async function trimHistory(limit) {
+  if (!limit) return 0;
+  let removed = 0;
+  await transact("readwrite", (store) => {
+    const count = store.count();
+    count.onsuccess = () => {
+      if (count.result <= limit) return;
+      const all = store.getAll();
+      all.onsuccess = () => {
+        const unpinned = all.result.filter((entry) => !entry.pinned).sort((a, b) => recency(b) - recency(a));
+        for (const entry of unpinned.slice(limit)) {
+          store.delete(entry.id);
+          removed++;
+        }
+      };
+    };
+  });
+  return removed;
+}
+
 export function add(entries) {
   return transact("readwrite", (store) => {
     for (const entry of entries) store.add(entry);
@@ -153,7 +179,8 @@ export function update(id, changes) {
     const request = store.get(id);
     request.onsuccess = () => {
       if (!request.result) return;
-      const entry = { ...request.result, ...changes };
+      // The revision tells views that this clip changed without comparing its contents.
+      const entry = { ...request.result, ...changes, revision: (request.result.revision ?? 0) + 1 };
       if (entry.pinned && entry.defaultExpiry) {
         entry.expiresAt = null;
         entry.defaultExpiry = false;

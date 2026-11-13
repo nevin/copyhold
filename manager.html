@@ -68,6 +68,15 @@
               <option value="90">90 days</option>
             </select>
             <p id="retention-hint" class="hint">Applies to new unpinned clips. Pinning clears the default expiry. Dates you set manually still apply.</p>
+            <label for="history-limit">History size</label>
+            <select id="history-limit" aria-describedby="history-limit-hint" disabled>
+              <option value="0">Keep all clips</option>
+              <option value="100">Last 100 clips</option>
+              <option value="500">Last 500 clips</option>
+              <option value="1000">Last 1,000 clips</option>
+              <option value="5000">Last 5,000 clips</option>
+            </select>
+            <p id="history-limit-hint" class="hint">When the history is full, the least recently used clips are deleted. Pinned clips are always kept.</p>
             <div class="actions">
               <button id="import" class="secondary" type="button" aria-describedby="import-hint">Import backup</button>
               <button id="export" class="secondary" type="button">Export backup</button>
@@ -139,6 +148,7 @@
           <div id="recent-heading" class="group-heading" role="presentation">Recent</div>
         </div>
       </div>
+      <button id="show-more" class="quiet show-more" type="button" hidden></button>
       <div id="empty" class="empty" hidden>
         <strong id="empty-title">No saved clips</strong>
         <div id="empty-hints"></div>

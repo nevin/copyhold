@@ -1,10 +1,14 @@
-import { removeExpired } from "./store.js";
+import { getSettings } from "./settings.js";
+import { removeExpired, trimHistory } from "./store.js";
 
 const alarmName = "copyhold-expiry";
 
 async function cleanUp() {
   try {
-    if (await removeExpired()) {
+    // Trimming here also covers clips added by import or New clip.
+    const expired = await removeExpired();
+    const trimmed = await trimHistory((await getSettings()).historyLimit);
+    if (expired || trimmed) {
       const changes = new BroadcastChannel("copyhold-entries");
       changes.postMessage("updated");
       changes.close();

@@ -374,6 +374,14 @@ button:disabled { cursor: default; opacity: .55; }
 .hint { font-size: .9rem; }
 .meta { color: var(--muted); font-size: .78rem; line-height: 1.35; }
 :root:not(.full-tab) .meta { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.show-more {
+  inline-size: 100%;
+  min-block-size: 38px;
+  border-block-start: 1px solid var(--line);
+  border-radius: 0;
+  color: var(--accent);
+  font-size: .88rem;
+}
 .empty { text-align: center; padding: 28px 20px 32px; border-block-start: 1px solid var(--line); }
 .empty p { color: var(--muted); margin-block-start: 4px; }
 #empty-hints { max-inline-size: 26rem; margin-inline: auto; }

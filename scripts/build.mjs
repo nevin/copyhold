@@ -49,7 +49,9 @@ async function build() {
       if (browser === "firefox") {
         browserManifest.background = { scripts: ["expiry.js"], type: "module" };
         delete browserManifest.minimum_chrome_version;
-        browserManifest.permissions = manifest.permissions.filter((permission) => permission !== "offscreen");
+        browserManifest.permissions = manifest.permissions.filter(
+          (permission) => permission !== "offscreen" && permission !== "idle",
+        );
       }
       const browserFiles = browser === "chromium"
         ? [...files, manifest.background.service_worker, "offscreen.html", "offscreen.js"]

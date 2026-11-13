@@ -13,7 +13,7 @@ Run through this with the built packages before each store submission. Use a fre
 Load it with **Load unpacked** on `chrome://extensions` and `edge://extensions`.
 
 **Install and first run**
-- [ ] The install prompt lists only clipboard access; no website access is requested.
+- [ ] The install prompt lists only clipboard access; no website access is requested. (`idle`, `alarms`, and `offscreen` show no warning.)
 - [ ] The toolbar icon is sharp on light and dark browser themes.
 - [ ] The popup shows **Save copied text automatically?** and the status bar reads **Auto-save off**.
 - [ ] **Not now** hides the prompt; reopening the popup doesn't show it again, and copying text saves nothing.
@@ -24,7 +24,9 @@ Load it with **Load unpacked** on `chrome://extensions` and `edge://extensions`.
 - [ ] **Pause** stops saving; the status shows when it resumes. **Resume** restarts it without saving what was copied during the pause.
 - [ ] Turn auto-save off in Settings, copy something, turn it on: the text copied while it was off is not saved.
 - [ ] Restart the browser: automatic saving comes back on its own if it was on.
-- [ ] Leave the browser idle for a few minutes, then open the popup: no **Capture needs attention** warning.
+- [ ] Leave the computer idle for two minutes or lock it: the offscreen document disappears from `chrome://extensions` → Copyhold → **Inspect views**. Move the mouse: it comes back, and the next copy is saved.
+- [ ] Open the popup right after returning from idle: no lasting **Capture needs attention** warning.
+- [ ] Copy text over 1,000,000 characters: it isn't saved automatically, and the next popup open says so once. **Save clipboard** still saves it.
 
 **Popup**
 - [ ] Open with Alt+Shift+Y (Option+Shift+Y on macOS). Search is focused.
@@ -34,6 +36,11 @@ Load it with **Load unpacked** on `chrome://extensions` and `edge://extensions`.
 - [ ] Shift+Enter opens the actions menu; each letter shortcut works; Escape returns to search.
 - [ ] Pin, mask, show, edit, select, and delete work; Undo restores deleted clips and pausing over the undo bar stops its countdown.
 - [ ] A link clip shows **Open link**, which opens the page in a new tab.
+
+**History size and long lists**
+- [ ] With more than 200 clips, the list shows 200 and a **Show more** row; Down at the last row loads more.
+- [ ] Set **History size** below the number of unpinned clips: a confirmation names how many will be deleted, and **Cancel** keeps the old setting.
+- [ ] With a history size set, saving more clips deletes the least recently used unpinned ones; pinned clips stay.
 
 **Expiry**
 - [ ] Set a clip to expire in a few minutes; it disappears about a minute after that time, even with the popup closed.

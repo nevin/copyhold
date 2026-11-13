@@ -7,6 +7,8 @@ const resumeAlarm = "copyhold-resume-capture";
 const watchdog = "copyhold-capture-watchdog";
 // Alarm names registered before the rename to Copyhold.
 const legacyAlarms = ["clipfile-resume-capture", "clipfile-capture-watchdog"];
+// Nothing can be copied without input, so the monitor stops after a minute of inactivity.
+const idleSeconds = 60;
 let pending = Promise.resolve();
 
 function updateMonitor({ enabled, pause, retry } = {}) {
@@ -17,7 +19,8 @@ function updateMonitor({ enabled, pause, retry } = {}) {
       : pause === "pause" ? Date.now() + 15 * 60_000
       : saved.pausedUntil > Date.now() ? saved.pausedUntil : 0;
     const changed = autoCapture !== saved.autoCapture || pausedUntil !== saved.pausedUntil;
-    const shouldRun = autoCapture && !pausedUntil;
+    const active = await chrome.idle.queryState(idleSeconds) === "active";
+    const shouldRun = autoCapture && !pausedUntil && active;
     const contexts = await chrome.runtime.getContexts({
       contextTypes: ["OFFSCREEN_DOCUMENT"],
       documentUrls: [chrome.runtime.getURL(offscreenPage)],
@@ -63,6 +66,8 @@ async function startMonitor() {
   }
 }
 
+chrome.idle.setDetectionInterval(idleSeconds);
+chrome.idle.onStateChanged.addListener(startMonitor);
 chrome.runtime.onStartup.addListener(startMonitor);
 chrome.runtime.onInstalled.addListener(startMonitor);
 chrome.alarms.onAlarm.addListener((alarm) => {

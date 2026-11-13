@@ -37,7 +37,8 @@ Text to paste into the Chrome Web Store developer dashboard and Firefox Add-ons 
 |---|---|
 | `clipboardRead` | Reads plain text from the clipboard when the user selects Save clipboard, and, only if the user turns on automatic saving, about once a second in the background to save newly copied text. |
 | `clipboardWrite` | Copies a saved clip back to the clipboard when the user selects it. |
-| `alarms` | Deletes clips whose expiry date has passed about once a minute, and ends a 15-minute pause of automatic saving. |
+| `alarms` | Deletes clips whose expiry date has passed and trims the history to the user's chosen size about once a minute, and ends a 15-minute pause of automatic saving. |
+| `idle` | Stops the background clipboard monitor while the computer is idle or locked, since nothing can be copied then, and restarts it when the user returns. This saves battery and CPU. Only the active, idle, or locked state is read. |
 | `offscreen` | Automatic saving reads the clipboard from an offscreen document, because a service worker cannot access the clipboard. The document is created only while automatic saving is on and not paused. |
 
 **Remote code:** No, I am not using remote code. All JavaScript is included in the package.

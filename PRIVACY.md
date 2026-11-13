@@ -7,14 +7,14 @@ Copyhold is a clipboard manager for Chrome, Edge, and Firefox. This policy expla
 ## What Copyhold stores
 
 - **Clips:** the text you save, with any title, description, pin, display setting, expiry date, and the times you created and last copied each clip.
-- **Settings:** your theme, default retention period, whether automatic saving is on, and whether the popup closes after copying.
+- **Settings:** your theme, default retention period, history size, whether automatic saving is on, and whether the popup closes after copying.
 - **A clipboard fingerprint:** a one-way SHA-256 hash of the last clipboard text Copyhold saw, so it doesn't save the same text twice. The text can't be recovered from the hash.
 
 Everything is stored in your browser profile on your device, using the browser's own storage. Copyhold has no servers and no accounts.
 
 ## Automatic saving
 
-In Chrome and Edge, Copyhold can save text you copy anywhere in the browser, even when its popup is closed. This is **off until you turn it on**. When it's on, Copyhold reads the clipboard about once a second and saves new plain text. That can include sensitive text such as passwords, so you can pause it for 15 minutes or turn it off at any time. Firefox only saves the clipboard when you select **Save clipboard**.
+In Chrome and Edge, Copyhold can save text you copy anywhere in the browser, even when its popup is closed. This is **off until you turn it on**. When it's on, Copyhold reads the clipboard about once a second while you're using the computer and saves new plain text. It stops reading while the computer is idle or locked, and it doesn't automatically save text over 1,000,000 characters. That can include sensitive text such as passwords, so you can pause it for 15 minutes or turn it off at any time. Firefox only saves the clipboard when you select **Save clipboard**.
 
 ## What Copyhold never does
 
@@ -30,7 +30,7 @@ In Chrome and Edge, Copyhold can save text you copy anywhere in the browser, eve
 ## Deleting your data
 
 - Delete individual clips, or select several and delete them, from the popup.
-- Set a retention period or an expiry date so clips delete themselves.
+- Set a retention period or an expiry date so clips delete themselves, or a history size so only your most recently used clips are kept.
 - Uninstalling Copyhold removes all of its stored data from your browser profile.
 
 ## Permissions
@@ -39,7 +39,8 @@ In Chrome and Edge, Copyhold can save text you copy anywhere in the browser, eve
 |---|---|
 | Read clipboard (`clipboardRead`) | To save clipboard text when you select **Save clipboard**, or automatically if you turn that on. |
 | Write clipboard (`clipboardWrite`) | To copy a saved clip back to your clipboard. |
-| Alarms (`alarms`) | To delete expired clips about once a minute and to end a pause after 15 minutes. |
+| Alarms (`alarms`) | To delete expired clips and trim the history about once a minute, and to end a pause after 15 minutes. |
+| Idle detection (`idle`, Chrome and Edge only) | To stop reading the clipboard while the computer is idle or locked. Copyhold only learns whether you're active, idle, or locked. |
 | Offscreen document (`offscreen`, Chrome and Edge only) | To read the clipboard in the background while automatic saving is on. |
 
 ## Changes
