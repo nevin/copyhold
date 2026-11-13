@@ -7,8 +7,7 @@
     "clipboardRead",
     "clipboardWrite",
     "alarms",
-    "offscreen",
-    "storage"
+    "offscreen"
   ],
   "minimum_chrome_version": "116",
   "background": {

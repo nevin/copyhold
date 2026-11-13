@@ -1,35 +1,22 @@
 import * as store from "./store.js";
 
-export const defaultSettings = { autoCapture: true, pausedUntil: 0, retentionDays: 0, closeAfterCopy: true };
+// Automatic capture stays off until the person turns it on, from the first-run prompt or Settings.
+export const defaultSettings = {
+  autoCapture: false,
+  autoCaptureAsked: false,
+  pausedUntil: 0,
+  retentionDays: 0,
+  closeAfterCopy: true,
+};
 const settingsChannel = "copyhold-settings";
 const themeKey = "copyhold-theme";
 const legacyThemeKey = "clipfile-theme";
-let migration;
-
-// Earlier builds kept capture settings in chrome.storage.local, which offscreen documents and
-// Firefox cannot read. Values already in IndexedDB win, so a late migration cannot undo a change.
-function migrate() {
-  migration ??= (async () => {
-    if (!globalThis.chrome?.storage?.local) return;
-    const legacyKeys = ["autoCapture", "pausedUntil", "skipCurrentClipboard"];
-    const { skipCurrentClipboard, ...legacy } = await chrome.storage.local.get(legacyKeys);
-    if (skipCurrentClipboard) legacy.skipClipboard = true;
-    if (Object.keys(legacy).length) await store.setMeta(legacy, { keepExisting: true });
-    await chrome.storage.local.remove(legacyKeys);
-  })().catch((error) => {
-    migration = undefined;
-    throw error;
-  });
-  return migration;
-}
 
 export async function getSettings() {
-  await migrate();
   return { ...defaultSettings, ...await store.getMeta(Object.keys(defaultSettings)) };
 }
 
 export async function updateSettings(changes) {
-  await migrate();
   await store.setMeta(changes);
   const channel = new BroadcastChannel(settingsChannel);
   channel.postMessage(changes);

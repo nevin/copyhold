@@ -818,8 +818,30 @@ async function checkCaptureHealth() {
 }
 
 if (supportsAutoCapture) {
+  const capturePrompt = byId("capture-prompt");
   byId("auto-capture-setting").hidden = false;
+  // Ask once before reading the clipboard in the background, so capture is never a surprise.
+  run(async () => {
+    const saved = await getSettings();
+    capturePrompt.hidden = saved.autoCaptureAsked || saved.autoCapture;
+  });
+  for (const [id, enabled] of [["capture-prompt-on", true], ["capture-prompt-off", false]]) {
+    byId(id).addEventListener("click", () => run(async () => {
+      capturePrompt.hidden = true;
+      search.focus({ preventScroll: true });
+      await updateSettings({ autoCaptureAsked: true });
+      if (!enabled) return;
+      updatingCapture = true;
+      try {
+        await configureAutoCapture({ enabled: true });
+        status("Automatic capture is on.");
+      } finally {
+        updatingCapture = false;
+      }
+    }));
+  }
   onSettingsChange((changes) => {
+    if (changes.autoCaptureAsked) capturePrompt.hidden = true;
     if (!("autoCapture" in changes) && !("pausedUntil" in changes)) return;
     run(async () => {
       const saved = await getSettings();
@@ -864,6 +886,7 @@ if (supportsAutoCapture) {
     autoCapture.setAttribute("aria-disabled", "true");
     try {
       await configureAutoCapture({ enabled });
+      await updateSettings({ autoCaptureAsked: true });
       status(enabled ? "Automatic capture is on." : "Automatic capture is off.");
     } catch (error) {
       const saved = await getSettings();

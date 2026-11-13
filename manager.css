@@ -111,6 +111,18 @@ button, .button {
 #capture-indicator[data-state="active"]::before { background: var(--success); }
 #capture-indicator[data-state="issue"]::before { background: var(--danger); }
 .capture-toolbar button { min-block-size: 26px; padding: 2px 7px; }
+.capture-prompt {
+  display: grid;
+  gap: 6px;
+  margin-block-end: 8px;
+  padding: 12px;
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  background: var(--tint);
+}
+.capture-prompt h2 { font-size: 1rem; }
+.capture-prompt p { color: var(--muted); font-size: .9rem; }
+.capture-prompt .actions { margin-block-start: 4px; }
 .header-actions { flex-wrap: wrap; }
 .undo-bar {
   position: fixed;

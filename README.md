@@ -44,12 +44,12 @@ In **Settings and backups**, choose a default retention period for new clips you
 
 ### Automatic capture
 
-In Chrome and Edge, Copyhold automatically saves plain text from the clipboard while the browser is running, even when the Copyhold window is closed. The bar under the header shows whether automatic saving is on. **Pause** stops it for 15 minutes; choose **Resume** to restart sooner. The monitor skips the clipboard contents it first sees on resume. **Save clipboard** is available during a pause. **Retry capture** restarts the monitor if the popup cannot confirm a recent successful read.
+In Chrome and Edge, Copyhold can save plain text from the clipboard while the browser is running, even when the Copyhold window is closed. Automatic saving is off until you turn it on: the popup asks once, and you can change your answer under **Automatically save copied text** in **Settings and backups**. When you turn it on, Copyhold skips whatever is already on the clipboard and saves what you copy next.
 
-To turn automatic saving off, open **Settings and backups** and uncheck **Automatically save copied text**. Copyhold checks for changes about once per second and can miss text that is replaced between checks. Firefox supports **Save clipboard** for manual capture.
+The bar under the header shows whether automatic saving is on. **Pause** stops it for 15 minutes; choose **Resume** to restart sooner. The monitor skips the clipboard contents it first sees on resume. **Save clipboard** is available during a pause. **Retry capture** restarts the monitor if the popup cannot confirm a recent successful read. Copyhold checks for changes about once per second and can miss text that is replaced between checks. Firefox supports **Save clipboard** for manual capture.
 
 ### Backups
 
 **Export** downloads a JSON backup. **Import** appends the backup entries with fresh IDs, preserving duplicate content, display preferences, stars, and timestamps. Backups exported under the extension's earlier name, Clipfile, import too. Import opens the full-tab view to keep the file picker open. In the full-tab view you can also drop a backup file onto the page.
 
-Copyhold stores entries locally and makes no network requests. Masking and hiding affect only the preview. The original text remains available to edit and copy, and exports contain it in plain text.
+Copyhold stores entries locally and makes no network requests. See [PRIVACY.md](PRIVACY.md) for the full privacy policy. Masking and hiding affect only the preview. The original text remains available to edit and copy, and exports contain it in plain text.

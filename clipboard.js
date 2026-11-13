@@ -1,8 +1,8 @@
 import { createEntry, withDefaultRetention } from "./entries.js";
 import * as store from "./store.js";
 
-export const supportsAutoCapture = Boolean(globalThis.chrome?.storage?.local &&
-  chrome.runtime.getManifest().background?.service_worker);
+// Only the Chromium build has a service worker, which automatic capture needs for its offscreen monitor.
+export const supportsAutoCapture = Boolean(globalThis.chrome?.runtime?.getManifest?.().background?.service_worker);
 
 function withClipboardLock(work) {
   return navigator.locks.request("copyhold-clipboard", work);

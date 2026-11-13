@@ -26,7 +26,8 @@ function updateMonitor({ enabled, pause, retry } = {}) {
     if (changed || stop) {
       // Hold the clipboard lock so the monitor cannot capture between these steps.
       await navigator.locks.request("copyhold-clipboard", async () => {
-        if (changed && (pause === "pause" || !autoCapture)) await skipCurrentClipboard();
+        // Skip what is on the clipboard now: it was copied while capture was off or before it was turned on.
+        if (changed && (pause === "pause" || autoCapture !== saved.autoCapture)) await skipCurrentClipboard();
         if (changed) await updateSettings({ autoCapture, pausedUntil });
         if (stop) await chrome.offscreen.closeDocument();
       });
