@@ -24,7 +24,7 @@ function showAutoCapture(enabled, pausedUntil = 0) {
   captureState.textContent = !enabled ? t("autoSaveOff") : pausedUntil ? t("autoSavePaused")
     : captureHealthy ? t("autoSaveOn") : t("autoSaveIssue");
   captureState.hidden = false;
-  byId("capture-toolbar").hidden = false;
+  captureSwitch.hidden = false;
   const indicator = byId("capture-indicator");
   const indicatorState = !enabled ? "off" : pausedUntil ? "paused" : captureHealthy ? "active" : "issue";
   const label = {
@@ -34,12 +34,15 @@ function showAutoCapture(enabled, pausedUntil = 0) {
     issue: t("captureIssue"),
   }[indicatorState];
   indicator.dataset.state = indicatorState;
+  // The dot in the header shows the state at a glance; its tooltip says it in words.
+  captureSwitch.dataset.state = indicatorState;
+  captureSwitch.title = label;
   if (indicator.textContent !== label) indicator.textContent = label;
   capturePause.hidden = !enabled;
-  capturePause.textContent = pausedUntil ? t("resume") : t("pause");
-  capturePause.title = pausedUntil ? t("resumeTitle") : t("pauseTitle");
+  byId("capture-pause-label").textContent = pausedUntil ? t("resumeTitle") : t("pauseTitle");
   captureRetry.hidden = !enabled || Boolean(pausedUntil) || captureHealthy;
   captureRetry.title = t("retryTitle");
+  if (!captureRetry.hidden) captureSwitch.title = `${label}. ${t("retryTitle")}`;
   updateEmptyState();
 }
 

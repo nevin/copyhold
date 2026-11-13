@@ -484,10 +484,10 @@
     "message": "Resume"
   },
   "resumeTitle": {
-    "message": "Resume automatic capture"
+    "message": "Resume auto-save"
   },
   "pauseTitle": {
-    "message": "Pause automatic capture for 15 minutes"
+    "message": "Pause auto-save for 15 minutes"
   },
   "retryTitle": {
     "message": "Capture may be unavailable. Restart automatic capture."
@@ -1313,5 +1313,14 @@
   },
   "tagsDescription": {
     "message": "Tags: $1"
+  },
+  "more": {
+    "message": "More"
+  },
+  "all": {
+    "message": "All"
+  },
+  "import": {
+    "message": "Import"
   }
 }

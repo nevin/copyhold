@@ -4,6 +4,7 @@ import { byId, fullTab, run } from "./modules/dom.js";
 import { render, search } from "./modules/list.js";
 import "./modules/actions.js";
 import "./modules/menu.js";
+import "./modules/app-menu.js";
 import "./modules/filters.js";
 import "./modules/manage.js";
 import "./modules/selection.js";

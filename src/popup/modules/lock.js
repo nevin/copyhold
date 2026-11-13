@@ -30,7 +30,7 @@ function showLockState() {
   const locked = enabled && !privateKey;
   lockScreen.hidden = !locked;
   byId("clips-panel").hidden = locked;
-  for (const id of ["new", "open-tab", "lock-now"]) byId(id).toggleAttribute("data-locked", locked);
+  for (const id of ["new", "open-tab", "lock-now", "search-area", "hide-previews", "open-palette"]) byId(id).toggleAttribute("data-locked", locked);
   byId("lock-now").hidden = !enabled || locked;
   byId("lock-summary").textContent = enabled
     ? t("lockSummaryOn")

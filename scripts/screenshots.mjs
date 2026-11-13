@@ -85,6 +85,14 @@ try {
     await page.evaluate(() => document.fonts.ready);
   }
 
+
+  // Settings and less frequent actions live in the ⋯ menu in the header.
+  async function chooseFromMenu(id) {
+    await page.click("#app-menu-button");
+    await page.waitForSelector("#app-menu:popover-open");
+    await page.click(`#${id}`);
+  }
+
   async function shot(name) {
     await new Promise((resolve) => setTimeout(resolve, 250));
     await page.screenshot({ path: `${output}/${name}.png` });
@@ -118,7 +126,7 @@ try {
   await shot("popup-select");
 
   await open();
-  await page.click("#settings summary");
+  await chooseFromMenu("open-settings");
   await page.$eval('label[for="sensitive-clips"]', (label) => label.scrollIntoView({ block: "start" }));
   await page.$eval(".settings-body", (body) => body.scrollBy(0, -12));
   await shot("popup-settings");
@@ -148,7 +156,7 @@ try {
       { id: "b", kind: "contains", value: "invoice", category: "Finance", subcategory: "", tags: ["billing"] },
     ] });
   });
-  await page.click("#settings summary");
+  await chooseFromMenu("open-settings");
   await page.$eval("#manage-rules", (button) => button.click());
   await shot("popup-rules");
   await page.click("#close-rules");

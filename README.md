@@ -69,13 +69,15 @@ Pushes to `main` run the checks and browser tests in GitHub Actions, and changes
 - Type to filter, use **Up** and **Down** to highlight a clip, and press **Enter** to copy it. **Alt+1** through **Alt+9** (**Option** on macOS) copy the clip at that position; hold **Alt** to see the numbers. By default the popup closes after a copy. Turn this off under **Close the popup after copying** in **Settings and backups**. The full-tab view stays open.
 - Click a clip row or its **Copy** button to copy the original text and record when it was used. Pinned clips appear first under **Pinned**, and the rest are sorted by recent use, or by creation time if they have never been copied from Copyhold.
 - Pointing at a clip, or highlighting it with the arrow keys, shows **Pin**, **Edit**, and **Delete** on the row. Deleting is immediate and can be undone.
+- The header holds the automatic-saving dot, search, **Save**, and the **⋯** menu, which has **New clip**, **Open in new tab**, **Hide clip previews**, pause and lock controls, **Commands**, and **Settings and backups**.
+- Each clip shows its title, its text, and one muted line with its category and tags; how long ago it was used appears on the right. Point at the age for when it was saved or copied and how long it is.
 - Choose **Compact** under **List density** in **Settings and backups** to fit about twice as many clips: one line each, with how long ago it was used and its length.
-- The eye button next to search hides every clip's text, for screen sharing. Select it again to show the text.
+- **Hide clip previews** in the **⋯** menu hides every clip's text, for screen sharing. Choose it again to show the text.
 - Each clip's **More actions** button (**⋯**) opens **Preview**, **Open link** for web addresses, **Mask** or **Show**, **Pin**, **Edit**, **Select**, and **Delete**. From search, press **Shift+Enter** to open the menu for the highlighted clip, then press the letter shown next to an action. Right-clicking a row opens the same menu.
 - To work with several clips, check the box next to the filters to select every shown clip, choose **Select** from a clip's menu, or Shift-click a row. **Copy** copies the selected clips one per line, **Pin** pins or unpins them, and **Delete** removes them. While selecting, **Enter** selects or clears the highlighted clip, and **Escape** or **Done** ends selection.
 - After deleting one or more clips, **Undo** restores the most recent deletion for 12 seconds while the view stays open. Pointing at or focusing the undo bar pauses the countdown. Clips that have expired remain deleted.
 - Edits in the clip editor save as you type; **Done**, **Escape**, or **Cmd+Enter** (**Ctrl+Enter** elsewhere) closes it.
-- Select **Save clipboard** to save the current clipboard text, or the image on it when there's no text. If the same content is already saved, Copyhold moves that clip to the top instead of saving it again.
+- Select **Save** to save the current clipboard text, or the image on it when there's no text. If the same content is already saved, Copyhold moves that clip to the top instead of saving it again.
 - Press **Alt+Shift+S** to save the clipboard without opening Copyhold, or right-click selected text on a page and choose **Save selection to Copyhold**; the clip remembers the page, with a link back and **Open source page** in its menu. A check mark on the toolbar icon confirms the save. Change the shortcuts at `chrome://extensions/shortcuts`. Use **New clip** to type or paste text with an optional title, description, category, subcategory, and tags.
 - Select the **Pinned** heading to fold the pinned clips away, and again to show them. Folded clips leave the list and keyboard navigation; the **Pinned** filter still shows them. Copyhold remembers the choice.
 - The list shows 200 clips at a time; select **Show more** or keep pressing **Down** to see more.
@@ -119,7 +121,7 @@ Check **Template** in the editor and copying the clip fills in `{date}`, `{isoda
 
 ### Command palette
 
-Press **Cmd+K** (**Ctrl+K** elsewhere), or select **Commands** in the bar under the list, and type to find any action (new clip, save clipboard, import, export, lock, settings), view (theme, density, sort, pinned), or filter by a category or tag. **Up** and **Down** choose, **Enter** runs.
+Press **Cmd+K** (**Ctrl+K** elsewhere), or choose **Commands** in the **⋯** menu, or select the ⌘K hint in search, and type to find any action (new clip, save clipboard, import, export, lock, settings), view (theme, density, sort, pinned), or filter by a category or tag. **Up** and **Down** choose, **Enter** runs.
 
 ### Storage
 
@@ -131,7 +133,7 @@ Copyhold recognizes text that looks like a password, API key, access token, priv
 
 ### Passphrase lock
 
-Under **Passphrase lock** in **Settings and backups**, select **Set up lock** and choose a passphrase. Copyhold encrypts every clip's text, title, description, and image, and asks for the passphrase when you open it. Saving keeps working while locked. It locks again after the time you choose without use, when the browser closes, when the computer locks, or when you select the lock button in the header. **Turn off lock** decrypts everything again. If you forget the passphrase, the clips can't be recovered; **Forgot your passphrase?** deletes them so you can start again.
+Under **Passphrase lock** in **Settings and backups**, select **Set up lock** and choose a passphrase. Copyhold encrypts every clip's text, title, description, and image, and asks for the passphrase when you open it. Saving keeps working while locked. It locks again after the time you choose without use, when the browser closes, when the computer locks, or when you choose **Lock Copyhold** in the **⋯** menu. **Turn off lock** decrypts everything again. If you forget the passphrase, the clips can't be recovered; **Forgot your passphrase?** deletes them so you can start again.
 
 ### Images
 
@@ -141,7 +143,7 @@ Under **Passphrase lock** in **Settings and backups**, select **Set up lock** an
 
 Copyhold can save plain text from the clipboard while the browser is running, even when the Copyhold window is closed. Automatic saving is off until you turn it on: the popup asks once, and you can change your answer under **Automatically save copied text** in **Settings and backups**. When you turn it on, Copyhold skips whatever is already on the clipboard and saves what you copy next.
 
-The switch in the bar under the header turns automatic saving on or off. **Pause** stops it for 15 minutes; choose **Resume** to restart sooner. The monitor skips the clipboard contents it first sees on resume. **Save clipboard** is available during a pause. **Retry capture** restarts the monitor if the popup cannot confirm a recent successful read. Copyhold checks for changes about once per second while you're using the computer, and stops checking while it's idle or locked. It can miss text that is replaced between checks. Text over 1,000,000 characters isn't saved automatically; the popup tells you, and **Save clipboard** still keeps it. Automatic capture works in Firefox too, from its background page.
+The dot at the left of the header turns automatic saving on or off and shows its state: hollow when off, green when saving, amber when paused, and red when it needs attention (point at it for details). **Pause auto-save for 15 minutes** in the **⋯** menu pauses it; choose **Resume auto-save** to restart sooner. The monitor skips the clipboard contents it first sees on resume. **Save clipboard** is available during a pause. **Retry capture**, also in the **⋯** menu, restarts the monitor if the popup cannot confirm a recent successful read. Copyhold checks for changes about once per second while you're using the computer, and stops checking while it's idle or locked. It can miss text that is replaced between checks. Text over 1,000,000 characters isn't saved automatically; the popup tells you, and **Save clipboard** still keeps it. Automatic capture works in Firefox too, from its background page.
 
 ### Backups
 

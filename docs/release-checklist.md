@@ -16,7 +16,7 @@ Load it with **Load unpacked** on `chrome://extensions` and `edge://extensions`.
 **Install and first run**
 - [ ] The install prompt lists only clipboard access; no website access is requested. (`alarms`, `contextMenus`, `idle`, `offscreen`, and `storage` show no warning.)
 - [ ] The toolbar icon is sharp on light and dark browser themes.
-- [ ] The popup shows **Save copied text automatically?** and the status bar reads **Auto-save off**.
+- [ ] The popup shows **Save copied text automatically?**, and the dot at the left of the header is hollow with the tooltip **Auto-save off**.
 - [ ] **Not now** hides the prompt; reopening the popup doesn't show it again, and copying text saves nothing.
 - [ ] **Turn on** starts saving. Text that was on the clipboard before you turned it on is **not** saved; the next text you copy is.
 
@@ -72,8 +72,8 @@ Load it with **Load unpacked** on `chrome://extensions` and `edge://extensions`.
 - [ ] A link clip shows **Open link**, which opens the page in a new tab.
 
 **Row actions, bulk actions, and views**
-- [ ] Pointing at a row shows Pin, Edit, and Delete; Delete removes the clip at once and Undo restores it.
-- [ ] The header switch turns automatic saving on and off and matches the Settings checkbox.
+- [ ] Pointing at a row replaces its age with Pin, Edit, Delete, Copy, and More; Delete removes the clip at once and Undo restores it.
+- [ ] The header dot turns automatic saving on and off, changes colour, and matches the Settings checkbox.
 - [ ] The checkbox beside the filters selects every shown clip; Copy, Pin, and Delete act on the selection.
 - [ ] Compact density shows one line per clip with its age and length, in both themes.
 - [ ] The eye button hides all clip text and remembers the choice the next time the popup opens.

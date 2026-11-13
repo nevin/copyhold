@@ -15,6 +15,13 @@
 - **Import and Export** are now in a bar under the clip list instead of inside Settings.
 - **Fold away pinned clips.** Select the Pinned heading to collapse or expand it; Copyhold remembers your choice.
 
+**A calmer, easier-to-read design**
+- One header row: the automatic-saving dot, search, **Save**, and a **⋯** menu for everything else. The separate auto-save bar is gone.
+- A slim view bar with All, Pinned, Filter, the clip count, and sort.
+- Clips show at most three lines: title, text, and one muted line with the category and tags as plain text. How long ago it was used sits on the right; row buttons appear when you point at a clip or highlight it.
+- Untitled text clips show two lines in the popup, so messages are readable at a glance.
+- Import and Export are small links under the list.
+
 **Improved**
 - Row buttons line up with the first line of each clip.
 - Screen readers get a clearer list: categories, tags, and the source page are read with each clip, and the pinned toggle is reachable. Automated accessibility checks now run on every view.

@@ -51,6 +51,13 @@ async function saveClipboard(value) {
   return message;
 }
 
+// Settings and less frequent actions live in the ⋯ menu in the header.
+async function chooseFromMenu(id) {
+  await page.click("#app-menu-button");
+  await page.waitForSelector("#app-menu:popover-open");
+  await page.click(`#${id}`);
+}
+
 before(async () => {
   browser = await puppeteer.launch({
     headless: process.env.HEADFUL ? false : true,
@@ -95,7 +102,7 @@ test("text that looks like a secret is saved masked", async () => {
 });
 
 test("a new clip can be written, searched, and copied with Enter", async () => {
-  await page.click("#new");
+  await chooseFromMenu("new");
   await page.type("#text", "written by hand");
   await page.type("#title", "Greeting");
   await page.click("#save-edit");
@@ -110,7 +117,7 @@ test("a new clip can be written, searched, and copied with Enter", async () => {
 });
 
 test("the editor saves as you type, with a category, subcategory, and tags", async () => {
-  await page.click("#new");
+  await chooseFromMenu("new");
   await page.type("#text", "Quarterly invoice 2026-Q3");
   await page.type("#category", "Work");
   await page.type("#subcategory", "Invoices");
@@ -180,7 +187,7 @@ test("clips can be filtered by tags, category, and #tag searches", async () => {
 });
 
 test("categories and tags can be renamed and deleted across clips", async () => {
-  await page.click("#settings summary");
+  await chooseFromMenu("open-settings");
   await page.$eval("#manage-organization", (button) => button.click());
   await page.waitForSelector("#manage-dialog[open]");
   const clickInRow = (label, action) => page.evaluate((label, action) => {
@@ -306,7 +313,7 @@ test("several selected clips can be organized at once", async () => {
 });
 
 test("auto-tag rules organize new clips and can be applied to existing ones", async () => {
-  await page.click("#settings summary");
+  await chooseFromMenu("open-settings");
   await page.$eval("#manage-rules", (button) => button.click());
   await page.waitForSelector("#rules-dialog[open]");
   await page.select("#rule-kind", "contains");
@@ -346,7 +353,7 @@ test("Copy as changes the text, and templates fill in placeholders", async () =>
   await page.waitForFunction(() => document.querySelector("#clip-menu .menu-heading")?.textContent === "Copy as…");
   await page.keyboard.press("u");
   await page.waitForFunction(async () => (await navigator.clipboard.readText()) === "  MIXED CASE TEXT  ");
-  assert.equal(await status(), "Copied as UPPERCASE.");
+  await page.waitForFunction(() => document.querySelector("#status").textContent === "Copied as UPPERCASE.");
 
   await setClipboard("from the clipboard");
   await page.evaluate(() => {
@@ -372,7 +379,7 @@ test("clips can be sorted, and categories get colours", async () => {
     document.querySelector("#recent-group .clip")?.textContent.includes("MIXED") || document.querySelector("#recent-group .clip")?.textContent.includes("mixed"));
   await page.select("#sort-order", "recent");
 
-  await page.click("#settings summary");
+  await chooseFromMenu("open-settings");
   await page.$eval("#manage-organization", (button) => button.click());
   await page.waitForSelector("#manage-dialog[open]");
   await page.evaluate(() => {
@@ -398,21 +405,21 @@ test("the command palette runs actions and filters", async () => {
   await page.waitForFunction(() => document.querySelector("#palette-list .palette-item")?.textContent.includes("#billing"));
   await page.keyboard.press("Enter");
   await page.waitForFunction(() => !document.querySelector("#palette").open && document.querySelector("#filter-count").textContent === "1");
-  await page.click("#open-palette");
+  await chooseFromMenu("open-palette");
   await page.type("#palette-input", "clear filters");
   await page.keyboard.press("Enter");
   await page.waitForFunction(() => document.querySelector("#active-filters").hidden);
-  await page.click("#open-palette");
+  await chooseFromMenu("open-palette");
   await page.type("#palette-input", "theme dark");
   await page.keyboard.press("Enter");
   await page.waitForFunction(() => document.documentElement.dataset.theme === "dark");
-  await page.click("#open-palette");
+  await chooseFromMenu("open-palette");
   await page.type("#palette-input", "theme system");
   await page.keyboard.press("Enter");
 });
 
 test("Settings shows storage use and can delete image clips", async () => {
-  await page.click("#settings summary");
+  await chooseFromMenu("open-settings");
   await page.waitForFunction(() => /clips/.test(document.querySelector("#storage-summary").textContent));
   assert.match(await text("#storage-summary"), /1 image/);
   await page.$eval("#delete-images", (button) => button.click());
@@ -459,12 +466,12 @@ test("a large history shows its first screenful, then the rest", async () => {
   });
   await openPopup();
   await page.waitForFunction(() => /^\d+ clips$/.test(document.querySelector("#count").textContent));
-  assert.equal(await page.$$eval(".clip", (clips) => clips.length), 200);
+  await page.waitForFunction(() => document.querySelectorAll(".clip").length === 200);
   assert.match(await text("#show-more"), /Show 200 more of 2\d\d/);
 });
 
 test("the passphrase lock encrypts clips and asks for the passphrase", async () => {
-  await page.click("#settings summary");
+  await chooseFromMenu("open-settings");
   await page.$eval("#lock-setup", (button) => button.click());
   await page.type("#new-passphrase", "correct horse battery");
   await page.type("#confirm-passphrase", "correct horse battery");
@@ -476,7 +483,7 @@ test("the passphrase lock encrypts clips and asks for the passphrase", async () 
   assert.deepEqual(unsealed.map((record) => Object.keys(record).join(",")), []);
 
   await page.click("#close-settings");
-  await page.click("#lock-now");
+  await chooseFromMenu("lock-now");
   await page.waitForFunction(() => !document.querySelector("#lock-screen").hidden);
   assert.equal(await page.$eval("#clips-panel", (panel) => panel.hidden), true);
 
@@ -496,7 +503,7 @@ test("the passphrase lock encrypts clips and asks for the passphrase", async () 
   assert.equal(saved.length, records.length + 1);
   assert.ok((await clipTexts()).includes("saved under the lock"));
 
-  await page.click("#settings summary");
+  await chooseFromMenu("open-settings");
   await page.click("#lock-remove");
   await page.click("#confirm-action");
   await page.waitForFunction(() => document.querySelector("#status").textContent === "Lock is off.", { timeout: 30_000 });
@@ -525,14 +532,18 @@ async function checkAccessibility(view) {
 test("the main views have no serious accessibility problems", async () => {
   await openPopup();
   await checkAccessibility("the clip list");
-  await page.click("#settings summary");
+  await page.click("#app-menu-button");
+  await page.waitForSelector("#app-menu:popover-open");
+  await checkAccessibility("the ⋯ menu");
+  await page.keyboard.press("Escape");
+  await chooseFromMenu("open-settings");
   await checkAccessibility("Settings");
   await page.click("#close-settings");
   await page.click("#filter-button");
   await page.waitForSelector("#filter-panel:popover-open");
   await checkAccessibility("the filter panel");
   await page.keyboard.press("Escape");
-  await page.click("#new");
+  await chooseFromMenu("new");
   await checkAccessibility("the editor");
   await page.keyboard.press("Escape");
   await page.keyboard.down(process.platform === "darwin" ? "Meta" : "Control");

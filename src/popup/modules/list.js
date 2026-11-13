@@ -90,7 +90,7 @@ function previewFor(entry, visibility) {
   const placeholder = !visible || !entry.text.trim();
   const preview = textLine(
     "p",
-    `preview${placeholder ? " protected" : ""}${type === "code" ? " code" : ""}`,
+    `preview${placeholder ? " protected" : ""}${type === "code" ? " code" : ""}${type === "link" ? " link" : ""}`,
     type === "link" ? displayUrl(entry.text) : clipPreview(entry.text, visibility),
   );
   if (type === "color" && CSS.supports("color", entry.text.trim())) {
@@ -143,11 +143,19 @@ function hostOf(url) {
 // The category, tags, template badge, and source page under a clip. Selecting a tag filters by it.
 function labelsFor(entry) {
   const tags = entry.tags ?? [];
-  if (!entry.category && !tags.length && !entry.template && !entry.sourceUrl) return null;
+  if (!entry.category && !tags.length && !entry.template && !entry.sourceUrl && !entry.expiresAt && !entry.sensitive) return null;
   const labels = document.createElement("div");
   labels.className = "clip-labels";
   // The chips and link are for pointers; screen readers get the same facts as text, since options can't hold controls.
   labels.setAttribute("aria-hidden", "true");
+  if (entry.sensitive) {
+    const shield = icon("shield", "action-icon meta-icon");
+    const marker = document.createElement("span");
+    marker.className = "label-shield";
+    marker.title = t("maskedAutomatically", sensitiveLabel(entry.sensitive));
+    marker.append(shield);
+    labels.append(marker);
+  }
   if (entry.template) {
     const badge = textLine("span", "template-badge", t("templateLabel"));
     badge.title = t("templateHint");
@@ -168,6 +176,12 @@ function labelsFor(entry) {
     chip.addEventListener("mousedown", (event) => event.preventDefault());
     chip.addEventListener("click", () => filterByTag(tag));
     labels.append(chip);
+  }
+  if (entry.expiresAt) {
+    const expiry = document.createElement("span");
+    expiry.className = "label-expiry";
+    appendMessage(expiry, "metaExpires", timeElement(entry.expiresAt));
+    labels.append(expiry);
   }
   if (entry.sourceUrl) {
     const source = textLine("span", "source-link", t("fromSite", hostOf(entry.sourceUrl)));
@@ -208,6 +222,8 @@ function itemFor(entry) {
   const age = textLine("span", Date.now() - Date.parse(usedAt) < 3_600_000 ? "clip-age is-fresh" : "clip-age", shortAge(usedAt));
   age.dataset.time = usedAt;
   age.setAttribute("aria-hidden", "true");
+  // The details line is gone from view; the age's tooltip keeps when it was used and how long it is.
+  age.title = `${t(entry.lastUsedAt ? "metaCopied" : "metaSaved", relativeTime(usedAt))} · ${sizeLabel(entry)}`;
   const label = sizeLabel(entry);
   const size = textLine("span", "clip-size", entry.kind === "image" ? t("imageShort") : displayLength(entry.text).toLocaleString());
   size.title = label;
@@ -229,10 +245,8 @@ function itemFor(entry) {
     appendMessage(meta, "metaExpires", timeElement(entry.expiresAt));
   }
   if (entry.visibility !== "hidden") meta.append(t("metaSeparator"), label);
-  if (entry.sensitive) {
-    meta.prepend(icon("shield", "action-icon meta-icon"));
-    meta.title = t("maskedAutomatically", sensitiveLabel(entry.sensitive));
-  }
+  // Read by screen readers only; the row shows the same facts more briefly.
+  if (entry.sensitive) meta.append(t("metaSeparator"), t("maskedAutomatically", sensitiveLabel(entry.sensitive)));
   details.append(meta);
 
   const actions = document.createElement("div");
@@ -362,8 +376,6 @@ export function updateItemStates() {
 
 function updateSearchHint() {
   const { shownClips, selecting } = state;
-  byId("search-key-hint").hidden = !shownClips.length;
-  byId("search-key-action").textContent = selecting ? t("select") : t("copy");
   byId("search-shortcut").textContent = !shownClips.length ? ""
     : selecting ? t("searchHintSelect") : t("searchHintCopy");
 }

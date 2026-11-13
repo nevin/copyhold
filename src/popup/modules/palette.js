@@ -194,3 +194,4 @@ document.addEventListener("keydown", (event) => {
 
 byId("open-palette").addEventListener("click", openPalette);
 byId("open-palette-key").textContent = paletteShortcut;
+byId("search-palette-hint").textContent = paletteShortcut;

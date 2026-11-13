@@ -30,13 +30,14 @@ onThemeChange(applyTheme);
 
 export function closeSettings() {
   settings.open = false;
-  settings.querySelector("summary").focus();
+  byId("app-menu-button").focus();
 }
 
 document.addEventListener("click", (event) => {
   // The path is fixed when the click starts, so it still counts a button that the click removed.
   const path = event.composedPath();
-  if (settings.open && !path.includes(settings) && !path.some((node) => node instanceof HTMLDialogElement)) settings.open = false;
+  const inside = path.includes(settings) || path.includes(byId("app-menu")) || path.some((node) => node instanceof HTMLDialogElement);
+  if (settings.open && !inside) settings.open = false;
 });
 settings.addEventListener("keydown", (event) => {
   if (event.key !== "Escape" || !settings.open) return;
@@ -52,10 +53,8 @@ function applyDensity(density) {
 
 function applyHidePreviews(hidden) {
   state.hidePreviews = hidden;
-  hidePreviewsButton.setAttribute("aria-pressed", String(hidden));
-  const label = hidden ? t("showClipPreviews") : t("hideClipPreviews");
-  hidePreviewsButton.title = label;
-  hidePreviewsButton.setAttribute("aria-label", label);
+  hidePreviewsButton.setAttribute("aria-checked", String(hidden));
+  hidePreviewsButton.querySelector("span").textContent = hidden ? t("showClipPreviews") : t("hideClipPreviews");
   hidePreviewsButton.querySelector("path").setAttribute("d", iconPaths[hidden ? "eye" : "eyeOff"]);
   renderList();
 }

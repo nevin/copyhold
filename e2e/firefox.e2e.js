@@ -19,6 +19,13 @@ let skip = false;
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const storedTexts = () => page.evaluate(async () => (await (await import("/lib/store.js")).list()).map((clip) => clip.text));
 
+// Settings and less frequent actions live in the ⋯ menu in the header.
+async function chooseFromMenu(id) {
+  await page.click("#app-menu-button");
+  await page.waitForSelector("#app-menu:popover-open");
+  await page.click(`#${id}`);
+}
+
 before(async () => {
   // WebDriver BiDi can't open extension pages directly, so a test copy lets an ordinary page open the popup.
   await rm(copy, { recursive: true, force: true });
@@ -85,14 +92,14 @@ test("Save clipboard works in Firefox", async (t) => {
 
 test("the passphrase lock works with Firefox session storage", async (t) => {
   if (skip) return t.skip(skip);
-  await page.click("#settings summary");
+  await chooseFromMenu("open-settings");
   await page.click("#lock-setup");
   await page.type("#new-passphrase", "firefox passphrase");
   await page.type("#confirm-passphrase", "firefox passphrase");
   await page.click("#save-lock");
   await page.waitForFunction(() => document.querySelector("#status").textContent.startsWith("Lock is on"), { timeout: 30_000 });
   await page.click("#close-settings");
-  await page.click("#lock-now");
+  await chooseFromMenu("lock-now");
   await page.waitForSelector("#lock-screen:not([hidden])");
   await page.type("#unlock-passphrase", "firefox passphrase");
   await page.keyboard.press("Enter");
