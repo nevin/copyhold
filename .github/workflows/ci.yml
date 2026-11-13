@@ -32,6 +32,9 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npx puppeteer browsers install chrome firefox
+      - run: npx puppeteer browsers install chrome
+      - run: npx puppeteer browsers install firefox
+      # Ubuntu blocks the unprivileged user namespaces Chrome's sandbox uses; allow them rather than turn the sandbox off.
+      - run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
       # Headless Chrome and Firefox share the virtual display's clipboard.
       - run: xvfb-run --auto-servernum npm run test:e2e
