@@ -29,10 +29,10 @@ const samples = [
   { text: "const total = items.reduce((sum, item) => sum + item.price, 0);", minutesAgo: 48, category: "Work", subcategory: "Code", tags: ["snippet", "js"] },
   { text: fakeApiKey, minutesAgo: 70, visibility: "masked", sensitive: "apiKey" },
   { text: "ops-team@example.com", minutesAgo: 190, category: "Work", tags: ["contacts"] },
-  { text: "221B Baker Street, London NW1 6XE", minutesAgo: 60 * 26, title: "Office address", pinned: true, category: "Personal", tags: ["address"] },
+  { text: "221B Baker Street, London NW1 6XE", minutesAgo: 60 * 26, title: "Office address", description: "For deliveries and invoices", pinned: true, category: "Personal", tags: ["address"] },
   { text: "Meeting notes: ship 1.2 on Thursday, update store listing, refresh screenshots.", minutesAgo: 60 * 50 },
-  { text: "Hi {clipboard}, thanks for reaching out. I'll get back to you by {weekday}.", minutesAgo: 60 * 30, title: "Quick reply", template: true, category: "Work", subcategory: "Email", tags: ["reply"] },
-  { text: "npm run package", minutesAgo: 60 * 75, title: "Build command", pinned: true, category: "Work", subcategory: "Code", tags: ["snippet", "cli"] },
+  { text: "Hi {clipboard}, thanks for reaching out. I'll get back to you by {weekday}.", minutesAgo: 60 * 30, title: "Quick reply", description: "Fills in the name from the clipboard", template: true, category: "Work", subcategory: "Email", tags: ["reply"] },
+  { text: "npm run package", minutesAgo: 60 * 75, title: "Build command", description: "Builds the store packages in dist", pinned: true, category: "Work", subcategory: "Code", tags: ["snippet", "cli"] },
 ];
 
 async function seed(page, { image = true } = {}) {

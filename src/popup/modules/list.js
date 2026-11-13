@@ -234,9 +234,16 @@ function itemFor(entry) {
   details.className = "clip-details";
   if (entry.title) details.append(textLine("p", "clip-title", entry.title));
   details.append(entry.kind === "image" ? imagePreviewFor(entry, visibility) : previewFor(entry, visibility));
-  if (entry.description) details.append(textLine("p", "description", entry.description));
+  // Three rows: title, content, then the description with the category and tags after it.
   const labels = labelsFor(entry);
-  if (labels) details.append(labels, textLine("span", "sr-only", describeLabels(entry)));
+  if (entry.description || labels) {
+    const thirdLine = document.createElement("div");
+    thirdLine.className = "clip-third-line";
+    if (entry.description) thirdLine.append(textLine("p", "description", entry.description));
+    if (labels) thirdLine.append(labels);
+    details.append(thirdLine);
+  }
+  if (labels) details.append(textLine("span", "sr-only", describeLabels(entry)));
   const meta = document.createElement("p");
   meta.className = "meta";
   appendMessage(meta, entry.lastUsedAt ? "metaCopied" : "metaSaved", timeElement(entry.lastUsedAt ?? entry.createdAt));

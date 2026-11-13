@@ -1004,3 +1004,20 @@ textarea { resize: vertical; }
 }
 /* Chrome popups can be 600px tall; the list takes what the header, view bar, and footer leave. */
 :root:not(.full-tab) .clips { max-block-size: 468px; }
+
+/* The third row: the description first, then the category and tags. Labels give way before the description. */
+.clip-third-line { display: flex; align-items: baseline; gap: 6px; min-inline-size: 0; margin-block-start: 1px; }
+.clip-third-line .description {
+  display: block;
+  flex: 0 1 auto;
+  min-inline-size: 4rem;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: .8rem;
+  line-height: 1.4;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.clip-third-line .clip-labels { flex: 0 2 auto; flex-wrap: nowrap; min-inline-size: 0; margin: 0; overflow: hidden; white-space: nowrap; }
+.clip-third-line .description + .clip-labels::before { content: "·"; color: var(--control); }
+.compact .clip-third-line { display: none; }

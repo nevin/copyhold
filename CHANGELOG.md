@@ -2,6 +2,7 @@
 
 ## 1.3.1
 
+- **Title, content, and description.** Each clip shows its title, its content, and its description, with the category and tags after the description, so descriptions you write are visible in the list.
 - **Preview from the row.** Pointing at a clip, or highlighting it, now shows a Preview button beside Pin, Edit, and Delete, so you can read the whole clip without copying it or opening the menu.
 
 ## 1.3.0
