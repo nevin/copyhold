@@ -258,6 +258,22 @@ test("the Preview button on a row shows the whole clip", async () => {
   await page.waitForFunction(() => !document.querySelector("#clip-preview").open);
 });
 
+test("Preview keeps text concealed while previews are hidden", async () => {
+  await chooseFromMenu("hide-previews");
+  await page.evaluate(() => {
+    const row = [...document.querySelectorAll(".clip")].find((item) => item.querySelector(".clip-title")?.textContent === "Greeting");
+    row.dispatchEvent(new PointerEvent("pointerenter"));
+    row.querySelector(".show-preview").click();
+  });
+  await page.waitForSelector("#clip-preview[open]");
+  assert.equal((await text("#clip-preview-text")).includes("written by hand"), false);
+  assert.equal(await page.$eval("#clip-preview-reveal", (button) => button.hidden), false);
+  await page.click("#clip-preview-reveal");
+  assert.equal(await text("#clip-preview-text"), "written by hand");
+  await page.keyboard.press("Escape");
+  await chooseFromMenu("hide-previews");
+});
+
 test("Escape closes the preview first, then the popup", async () => {
   const popup = await browser.newPage();
   await popup.goto(`${origin}/popup/popup.html`);

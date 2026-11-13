@@ -187,7 +187,7 @@ document.addEventListener("keydown", (event) => {
     palette.close();
     return;
   }
-  if (document.querySelector("dialog[open]") || menuIsOpen()) return;
+  if (document.querySelector("dialog[open]") || menuIsOpen() || !byId("lock-screen").hidden) return;
   event.preventDefault();
   openPalette();
 });

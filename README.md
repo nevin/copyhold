@@ -108,7 +108,7 @@ Select **Filter** next to **All clips** and **Pinned** to filter by a category o
 
 Select clips (the box next to the filters selects every shown clip) and choose **Organize** to set or remove a category, or add and remove tags, for all of them at once.
 
-**Auto-tag rules** in **Settings and backups** organize clips as they're saved. A rule matches text that **contains** some words, **links to a site** (including the page a selection came from), or **matches a pattern** (a regular expression). The first matching rule with a category sets it, unless the clip already has one, and every matching rule adds its tags. **Apply to existing clips** runs the rules over your history.
+**Auto-tag rules** in **Settings and backups** organize clips as they're saved. A rule matches text that **contains** some words, **links to a site** (including the page a selection came from), or **matches a pattern** (a regular expression of up to 200 characters; rules check the first 10,000 characters of a clip). The first matching rule with a category sets it, unless the clip already has one, and every matching rule adds its tags. **Apply to existing clips** runs the rules over your history.
 
 In **Manage categories and tags**, the dot beside each category picks its colour, shown on rows and in compact view.
 

@@ -62,8 +62,13 @@ export function deleteEntry(entry) {
   });
 }
 
+// Only web addresses are opened, whatever a clip or backup contains.
+function isWebAddress(text) {
+  return /^https?:\/\//i.test(text) && URL.canParse(text);
+}
+
 export function openSource(entry) {
-  window.open(entry.sourceUrl, "_blank", "noopener,noreferrer");
+  if (isWebAddress(entry.sourceUrl ?? "")) window.open(entry.sourceUrl, "_blank", "noopener,noreferrer");
 }
 
 export function openLink(entry) {
@@ -71,7 +76,7 @@ export function openLink(entry) {
     run(() => refresh(t("clipExpired")));
     return;
   }
-  window.open(entry.text.trim(), "_blank", "noopener");
+  if (isWebAddress(entry.text.trim())) window.open(entry.text.trim(), "_blank", "noopener,noreferrer");
 }
 
 function showPreviewContent(reveal) {
@@ -86,7 +91,8 @@ function showPreviewContent(reveal) {
   }
   previewImage.hidden = true;
   previewText.hidden = false;
-  previewText.textContent = reveal ? entry.text : clipPreview(entry.text, entry.visibility);
+  const visibility = entry.visibility === "visible" && state.hidePreviews ? "masked" : entry.visibility;
+  previewText.textContent = reveal ? entry.text : clipPreview(entry.text, visibility);
 }
 
 // Everything Copyhold knows about the clip, as label and value pairs under its content.
@@ -157,8 +163,10 @@ export function openClipPreview(entry) {
     element.hidden = !value;
   }
   showDetails(entry);
-  revealPreview.hidden = entry.visibility === "visible";
-  setRevealed(revealPreview.hidden);
+  // With previews hidden for screen sharing, Preview conceals visible clips too until Reveal.
+  const concealed = entry.visibility !== "visible" || state.hidePreviews;
+  revealPreview.hidden = !concealed;
+  setRevealed(!concealed);
   previewDialog.showModal();
 }
 

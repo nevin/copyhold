@@ -1364,5 +1364,8 @@
   },
   "detailVisibility": {
     "message": "Shown as"
+  },
+  "rulePatternTooLong": {
+    "message": "Use a pattern of 200 characters or fewer."
   }
 }

@@ -1,4 +1,8 @@
+import { maxImageBytes } from "./images.js";
 import { cleanName, cleanTags } from "./organize.js";
+
+// Base64 makes data 4/3 the size; a backup's images get the same limit as saving one.
+const maxImageDataUrlLength = Math.ceil(maxImageBytes * 4 / 3) + 64;
 import { t } from "./i18n.js";
 
 export const visibilityOptions = ["visible", "masked", "hidden"];
@@ -135,7 +139,8 @@ export async function importEntries(json, describeImage) {
   for (const [index, entry] of backup.entries.entries()) {
     const image = entry?.kind === "image";
     const content = image
-      ? typeof entry.image === "string" && entry.image.startsWith("data:image/")
+      ? typeof entry.image === "string" && /^data:image\/(?:png|jpeg|webp|gif);base64,/.test(entry.image) &&
+        entry.image.length <= maxImageDataUrlLength
       : typeof entry?.text === "string" && entry.text;
     if (!content ||
       typeof entry.title !== "string" || typeof entry.description !== "string" ||

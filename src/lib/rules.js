@@ -2,6 +2,9 @@
 import { cleanName, cleanTags } from "./organize.js";
 
 export const ruleKinds = ["contains", "domain", "pattern"];
+// Rules check the start of long clips only, so a slow pattern can't stall saving a huge copy.
+const ruleTextLimit = 10_000;
+const maxPatternLength = 200;
 
 /**
  * @typedef {{ id: string, kind: "contains" | "domain" | "pattern", value: string,
@@ -14,6 +17,7 @@ export function cleanRule(rule) {
   const value = String(rule.value ?? "").trim();
   if (!value) return { error: "ruleNeedsValue" };
   if (kind === "pattern") {
+    if (value.length > maxPatternLength) return { error: "rulePatternTooLong" };
     try {
       new RegExp(value, "i");
     } catch {
@@ -49,10 +53,11 @@ function hostsIn(text) {
 
 /**
  * @param {Rule} rule
- * @param {string} text
+ * @param {string} fullText Only the start of long text is checked.
  * @param {string} [sourceUrl] The page a selection came from, which domain rules also check.
  */
-export function ruleMatches(rule, text, sourceUrl = "") {
+export function ruleMatches(rule, fullText, sourceUrl = "") {
+  const text = fullText.slice(0, ruleTextLimit);
   if (rule.kind === "contains") return text.toLocaleLowerCase().includes(rule.value.toLocaleLowerCase());
   if (rule.kind === "domain") {
     const hosts = hostsIn(`${text} ${sourceUrl}`);

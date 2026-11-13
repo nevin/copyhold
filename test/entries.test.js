@@ -100,3 +100,9 @@ test("templates, use counts, and source pages are kept in backups", async () => 
   assert.deepEqual([imported.template, imported.useCount, imported.sourceUrl, imported.sourceTitle], [true, 3, "https://example.com/a", "Example"]);
   assert.equal(createEntry({ text: "x", sourceUrl: "javascript:alert(1)" }).sourceUrl, undefined);
 });
+
+test("backups may hold only raster images within the size limit", async () => {
+  const backup = (image) => JSON.stringify({ format: "copyhold", version: 1, entries: [{ ...entry, kind: "image", image }] });
+  await assert.rejects(importEntries(backup("data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=")), /Entry 1 is invalid/);
+  await assert.rejects(importEntries(backup(`data:image/png;base64,${"A".repeat(36_000_000)}`)), /Entry 1 is invalid/);
+});

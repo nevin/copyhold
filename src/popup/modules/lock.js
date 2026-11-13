@@ -164,7 +164,9 @@ lockForm.addEventListener("submit", (event) => {
         status(t("lockOn"));
       } else {
         lockRecord = await changePassphrase(lockRecord, privateKey, passphrase);
-        await store.setMeta({ lock: lockRecord });
+        // The clipboard fingerprint uses the lock's salt, which just changed, so the current clipboard is skipped
+        // rather than seen as new and saved again.
+        await withClipboardLock(() => store.setMeta({ lock: lockRecord, fingerprint: undefined, skipClipboard: true }));
         status(t("passphraseChanged"));
       }
       lockDialog.close();

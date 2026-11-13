@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.3.2
+
+Security and reliability fixes from a review.
+
+- **Hidden previews stay hidden in Preview.** With **Hide clip previews** on, Preview now conceals a clip's text and image until you select **Reveal**, so opening Preview while sharing your screen doesn't show it.
+- **Only web addresses open.** Open link and the source page open only `http` and `https` addresses, whatever a clip or a backup contains.
+- **Safer backups.** Images in a backup must be PNG, JPEG, WebP, or GIF, and no larger than images Copyhold saves itself.
+- **Rules can't stall saving.** Patterns are limited to 200 characters, and rules check the first 10,000 characters of a clip.
+- **The command palette stays closed while Copyhold is locked.**
+- **Changing the passphrase no longer saves the current clipboard again** while automatic saving is on.
+- GitHub workflows run actions pinned to exact versions.
+
 ## 1.3.1
 
 - **Title, content, and description.** Each clip shows its title, its content, and its description, with the category and tags after the description, so descriptions you write are visible in the list.

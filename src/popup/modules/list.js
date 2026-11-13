@@ -4,7 +4,7 @@ import { emptyFilter, isFiltering, matchesFilter, matchesTagTerms, matchesText, 
 import { sensitiveLabel } from "../../lib/sensitive.js";
 import { updateSettings } from "../../lib/settings.js";
 import * as store from "../../lib/store.js";
-import { copyEntry, deleteEntry, openClipPreview, togglePin } from "./actions.js";
+import { copyEntry, deleteEntry, openClipPreview, openSource, togglePin } from "./actions.js";
 import { byId, dateFormat, icon, iconPaths, run, status, textLine, timeElement } from "./dom.js";
 import { openEditor } from "./editor.js";
 import { filterByTag, showActiveFilters } from "./filters.js";
@@ -186,7 +186,7 @@ function labelsFor(entry) {
   if (entry.sourceUrl) {
     const source = textLine("span", "source-link", t("fromSite", hostOf(entry.sourceUrl)));
     source.title = entry.sourceTitle ? `${entry.sourceTitle}\n${entry.sourceUrl}` : entry.sourceUrl;
-    source.addEventListener("click", () => window.open(entry.sourceUrl, "_blank", "noopener,noreferrer"));
+    source.addEventListener("click", () => openSource(entry));
     labels.append(source);
   }
   return labels;

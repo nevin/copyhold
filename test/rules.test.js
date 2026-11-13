@@ -32,3 +32,10 @@ test("the first category wins, an existing one is kept, and tags add up", () => 
     { category: "Mine", subcategory: "", tags: ["kept", "finance", "urgent"], matched: 2 });
   assert.equal(applyRules({ text: "nothing" }, rules).matched, 0);
 });
+
+test("patterns are length-limited and run on the start of long text only", () => {
+  assert.equal(cleanRule({ kind: "pattern", value: "a".repeat(201), tags: ["x"] }).error, "rulePatternTooLong");
+  const late = rule({ kind: "contains", value: "needle", tags: ["x"] });
+  assert.equal(ruleMatches(late, `${"x".repeat(20_000)} needle`), false);
+  assert.equal(ruleMatches(late, `needle ${"x".repeat(20_000)}`), true);
+});
