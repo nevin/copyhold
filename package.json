@@ -1,0 +1,9 @@
+{
+  "name": "clipfile",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "package": "node scripts/build.mjs --zip"
+  }
+}
