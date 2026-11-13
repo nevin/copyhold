@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.1
+
+- **Preview from the row.** Pointing at a clip, or highlighting it, now shows a Preview button beside Pin, Edit, and Delete, so you can read the whole clip without copying it or opening the menu.
+
 ## 1.3.0
 
 **New**

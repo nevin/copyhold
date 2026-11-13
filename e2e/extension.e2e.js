@@ -245,6 +245,17 @@ test("an image on the clipboard is saved with a thumbnail and copied back", asyn
   await page.waitForFunction(async () => (await navigator.clipboard.read())[0].types.includes("image/png"));
 });
 
+test("the Preview button on a row shows the whole clip", async () => {
+  await page.evaluate(() => {
+    const row = [...document.querySelectorAll(".clip")].find((item) => item.textContent.includes("second clip"));
+    row.querySelector(".row-action.show-preview").click();
+  });
+  await page.waitForSelector("#clip-preview[open]");
+  assert.equal(await text("#clip-preview-text"), "second clip");
+  await page.keyboard.press("Escape");
+  await page.waitForFunction(() => !document.querySelector("#clip-preview").open);
+});
+
 test("deleting a clip can be undone", async () => {
   const before = (await storedClips()).length;
   await page.hover(".clip");

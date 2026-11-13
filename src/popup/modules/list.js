@@ -4,7 +4,7 @@ import { emptyFilter, isFiltering, matchesFilter, matchesTagTerms, matchesText, 
 import { sensitiveLabel } from "../../lib/sensitive.js";
 import { updateSettings } from "../../lib/settings.js";
 import * as store from "../../lib/store.js";
-import { copyEntry, deleteEntry, togglePin } from "./actions.js";
+import { copyEntry, deleteEntry, openClipPreview, togglePin } from "./actions.js";
 import { byId, icon, iconPaths, run, status, textLine, timeElement } from "./dom.js";
 import { openEditor } from "./editor.js";
 import { filterByTag, showActiveFilters } from "./filters.js";
@@ -73,12 +73,12 @@ export function showCopyFeedback(id) {
 
 // Row actions are for pointers; keyboard users reach the same actions from search and the actions menu.
 // They aren't buttons because a list option may not contain focusable controls.
-function rowButton(action, label, handler) {
+function rowButton(action, label, handler, iconName = action) {
   const button = document.createElement("span");
   button.className = `row-action ${action}`;
   button.dataset.action = action;
   button.title = label;
-  button.append(icon(action));
+  button.append(icon(iconName));
   button.addEventListener("mousedown", (event) => event.preventDefault());
   button.addEventListener("click", handler);
   return button;
@@ -252,6 +252,13 @@ function itemFor(entry) {
   const actions = document.createElement("div");
   actions.className = "clip-actions";
   actions.setAttribute("aria-hidden", "true");
+  // Preview shows the whole clip without copying it; masked and hidden clips stay concealed until revealed.
+  // "preview" already names the clip text, so the button gets its own class.
+  const preview = rowButton("show-preview", t("preview"), () => {
+    setActive(entry.id);
+    openClipPreview(entry);
+  }, "preview");
+  preview.classList.add("quick");
   const pin = rowButton("pin", entry.pinned ? t("unpin") : t("pin"), () => togglePin(entry));
   pin.classList.add("quick");
   pin.classList.toggle("is-on", entry.pinned);
@@ -260,6 +267,7 @@ function itemFor(entry) {
   const remove = rowButton("delete", t("delete"), () => deleteEntry(entry));
   remove.classList.add("quick");
   actions.append(
+    preview,
     pin,
     edit,
     remove,

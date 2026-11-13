@@ -73,6 +73,8 @@ test("copying the same text again moves its clip to the top instead of saving a 
   assert.equal(await clipboard.captureAutomatically(() => ({ text: "again" })), true);
   assert.equal(await clipboard.captureAutomatically(() => ({ text: "something else" })), true);
   const before = (await store.list()).find((entry) => entry.text === "again");
+  // Real copies are seconds apart; a short wait keeps the timestamps from tying.
+  await new Promise((resolve) => setTimeout(resolve, 5));
   assert.equal(await clipboard.captureAutomatically(() => ({ text: "again" })), true);
   const matches = (await store.list()).filter((entry) => entry.text === "again");
   assert.equal(matches.length, 1);

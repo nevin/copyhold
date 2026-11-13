@@ -72,7 +72,7 @@ Load it with **Load unpacked** on `chrome://extensions` and `edge://extensions`.
 - [ ] A link clip shows **Open link**, which opens the page in a new tab.
 
 **Row actions, bulk actions, and views**
-- [ ] Pointing at a row replaces its age with Pin, Edit, Delete, Copy, and More; Delete removes the clip at once and Undo restores it.
+- [ ] Pointing at a row replaces its age with Preview, Pin, Edit, Delete, Copy, and More; Preview shows the whole clip without copying it; Delete removes the clip at once and Undo restores it.
 - [ ] The header dot turns automatic saving on and off, changes colour, and matches the Settings checkbox.
 - [ ] The checkbox beside the filters selects every shown clip; Copy, Pin, and Delete act on the selection.
 - [ ] Compact density shows one line per clip with its age and length, in both themes.
