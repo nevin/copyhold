@@ -15,9 +15,13 @@ Text to paste into the Chrome Web Store developer dashboard and Firefox Add-ons 
 >
 > **Save what you copy.** Select Save clipboard, or turn on automatic saving in Chrome and Edge and Copyhold saves text as you copy it. Automatic saving is off until you choose to turn it on, and you can pause it at any time.
 >
-> **Find it fast.** Open Copyhold with Alt+Shift+Y, type to search, use the arrow keys, and press Enter to copy. Alt+1 to Alt+9 copy the first nine clips. Pin the clips you use most.
+> **Find it fast.** Open Copyhold with Alt+Shift+Y, type to search, use the arrow keys, and press Enter to copy. Alt+1 to Alt+9 copy the first nine clips. Pin the clips you use most. Search stays instant with thousands of clips.
 >
-> **Keep sensitive text out of sight.** Mask or hide a clip's preview, set clips to delete themselves after an hour, a day, a week, or on a date you choose, or give all new clips a default retention period.
+> **See more at once.** Switch to compact view for one line per clip, with when you last used it and how long it is. Pin, edit, or delete right from the row, and undo a delete if you change your mind.
+>
+> **Work with many clips.** Select all, then copy, pin, or delete them together.
+>
+> **Keep sensitive text out of sight.** Mask or hide a clip's preview, or hide every preview with one click while you share your screen. Set clips to delete themselves after an hour, a day, a week, or on a date you choose, give all new clips a default retention period, or cap your history size.
 >
 > **Private by design.** Your clips stay in your browser profile. Copyhold has no servers, no accounts, no analytics, and makes no network requests.
 >
@@ -58,11 +62,25 @@ Certify all three statements:
 - The code is not minified or bundled, so no separate source upload is needed.
 - Firefox has no automatic saving; say so in the description, as the draft above does.
 
-## Images to prepare
+## Images
 
-| Asset | Size | Notes |
+Ready to upload from `docs/store-assets/`, made from the real popup with sample text:
+
+| Asset | File | Size |
 |---|---|---|
-| Store icon | 128×128 | `src/icons/128.png`, already in the package |
-| Screenshots | 1280×800 or 640×400, 1 to 5 | The popup with a few clips, the actions menu, the editor's Expiry and privacy section, the first-run prompt, and the full-tab view. Use sample text, never real clipboard contents. |
-| Small promo tile | 440×280 | The icon with the name and summary on the purple background |
-| Marquee promo tile (optional) | 1400×560 | Only needed if the store features the extension |
+| Store icon | `icon-128.png` (same as `src/icons/128.png`) | 128×128 |
+| Screenshot 1 | `screenshot-1.png`: the popup and search | 1280×800 |
+| Screenshot 2 | `screenshot-2.png`: compact view | 1280×800 |
+| Screenshot 3 | `screenshot-3.png`: the actions menu | 1280×800 |
+| Screenshot 4 | `screenshot-4.png`: hidden previews and per-clip privacy | 1280×800 |
+| Screenshot 5 | `screenshot-5.png`: selecting several clips | 1280×800 |
+| Small promo tile | `promo-small-440x280.png` | 440×280 |
+| Marquee promo tile (optional) | `promo-marquee-1400x560.png` | 1400×560 |
+
+## Package
+
+Upload `copyhold-<version>-chromium.zip` from `npm run package`, or download it from the matching GitHub release. It has `manifest.json` at the root, as the store requires. Don't upload `copyhold-chromium.zip`, which wraps the files in a folder for manual installs.
+
+Privacy policy URL: https://nevin.github.io/copyhold/privacy.html
+Website: https://nevin.github.io/copyhold/
+Support: https://github.com/nevin/copyhold/issues
