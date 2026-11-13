@@ -50,6 +50,8 @@ before(async () => {
       await page.waitForSelector("#capture-prompt:not([hidden])", { timeout: 5000 });
       break;
     } catch (error) {
+      const seen = await page.evaluate(() => `${location.href} | ${document.title} | ${document.body?.innerText.slice(0, 200)}`).catch((cause) => cause.message);
+      console.log(`Opening the Firefox popup, attempt ${attempt}: ${error.message.split("\n")[0]} | ${seen}`);
       if (attempt === 6) throw error;
       await wait(1000);
     }
