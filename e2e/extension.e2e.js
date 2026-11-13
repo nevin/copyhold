@@ -145,6 +145,7 @@ test("the editor saves as you type, with a category, subcategory, and tags", asy
   // Editing an existing clip also saves on its own.
   await page.evaluate(() => {
     const row = [...document.querySelectorAll(".clip")].find((item) => item.textContent.includes("second clip"));
+    row.dispatchEvent(new PointerEvent("pointerenter"));
     row.querySelector(".edit").click();
   });
   await page.type("#category", "Home");
@@ -248,6 +249,7 @@ test("an image on the clipboard is saved with a thumbnail and copied back", asyn
 test("the Preview button on a row shows the whole clip", async () => {
   await page.evaluate(() => {
     const row = [...document.querySelectorAll(".clip")].find((item) => item.textContent.includes("second clip"));
+    row.dispatchEvent(new PointerEvent("pointerenter"));
     row.querySelector(".row-action.show-preview").click();
   });
   await page.waitForSelector("#clip-preview[open]");
@@ -260,14 +262,19 @@ test("Escape closes the preview first, then the popup", async () => {
   const popup = await browser.newPage();
   await popup.goto(`${origin}/popup/popup.html`);
   await popup.waitForFunction(() => document.querySelectorAll(".clip").length > 0);
-  await popup.evaluate(() => document.querySelector(".clip .show-preview").click());
+  await popup.evaluate(() => {
+    const row = document.querySelector(".clip");
+    row.dispatchEvent(new PointerEvent("pointerenter"));
+    row.querySelector(".show-preview").click();
+  });
   await popup.waitForSelector("#clip-preview[open]");
   assert.match(await popup.$eval("#clip-preview-details", (details) => details.textContent), /Saved/);
   await popup.keyboard.press("Escape");
   await popup.waitForFunction(() => !document.querySelector("#clip-preview").open);
   assert.equal(popup.isClosed(), false);
   const closed = new Promise((resolve) => popup.once("close", resolve));
-  await popup.keyboard.press("Escape");
+  // The popup can close between key down and key up, which ends the key press early.
+  await popup.keyboard.press("Escape").catch(() => {});
   await Promise.race([closed, wait(3000).then(() => { throw new Error("The popup didn't close"); })]);
   await page.bringToFront();
 });
@@ -286,6 +293,7 @@ test("deleting a clip can be undone", async () => {
 test("the pinned group collapses, stays collapsed, and leaves keyboard navigation", async () => {
   await page.evaluate(() => {
     const row = [...document.querySelectorAll("#recent-group .clip")].find((item) => item.textContent.includes("first clip"));
+    row.dispatchEvent(new PointerEvent("pointerenter"));
     row.querySelector(".pin").click();
   });
   await page.waitForFunction(() => document.querySelectorAll("#pinned-group .clip").length === 1);
@@ -372,6 +380,7 @@ test("Copy as changes the text, and templates fill in placeholders", async () =>
   await openPopup();
   const openMenuFor = (snippet) => page.evaluate((snippet) => {
     const row = [...document.querySelectorAll(".clip")].find((item) => item.textContent.includes(snippet));
+    row.dispatchEvent(new PointerEvent("pointerenter"));
     row.querySelector(".more").click();
   }, snippet);
   await openMenuFor("mixed Case text");
@@ -385,6 +394,7 @@ test("Copy as changes the text, and templates fill in placeholders", async () =>
   await setClipboard("from the clipboard");
   await page.evaluate(() => {
     const row = [...document.querySelectorAll(".clip")].find((item) => item.textContent.includes("{isodate}"));
+    row.dispatchEvent(new PointerEvent("pointerenter"));
     row.querySelector(".copy").click();
   });
   const today = new Date();
@@ -493,8 +503,8 @@ test("a large history shows its first screenful, then the rest", async () => {
   });
   await openPopup();
   await page.waitForFunction(() => /^\d+ clips$/.test(document.querySelector("#count").textContent));
-  await page.waitForFunction(() => document.querySelectorAll(".clip").length === 200);
-  assert.match(await text("#show-more"), /Show 200 more of 2\d\d/);
+  await page.waitForFunction(() => document.querySelectorAll(".clip").length === 100);
+  assert.match(await text("#show-more"), /Show 100 more of 3\d\d/);
 });
 
 test("the passphrase lock encrypts clips and asks for the passphrase", async () => {
@@ -522,7 +532,7 @@ test("the passphrase lock encrypts clips and asks for the passphrase", async () 
   await page.type("#unlock-passphrase", "correct horse battery");
   await page.keyboard.press("Enter");
   await page.waitForFunction(() => document.querySelector("#lock-screen").hidden, { timeout: 30_000 });
-  await page.waitForFunction(() => document.querySelectorAll(".clip").length === 200);
+  await page.waitForFunction(() => document.querySelectorAll(".clip").length === 100);
 
   // Saving still works while unlocked, and the new clip is encrypted too.
   assert.equal(await saveClipboard("saved under the lock"), "Saved.");

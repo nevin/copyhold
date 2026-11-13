@@ -1,7 +1,6 @@
 import { getSettings } from "../lib/settings.js";
 import { backfillHashes, removeExpired, trimHistory } from "../lib/store.js";
-
-const alarmName = "copyhold-expiry";
+import { everyMinute } from "./tick.js";
 
 async function cleanUp() {
   try {
@@ -19,14 +18,6 @@ async function cleanUp() {
 }
 
 async function startExpiry() {
-  try {
-    await chrome.alarms.clear("clipfile-expiry");
-    if (!await chrome.alarms.get(alarmName)) {
-      await chrome.alarms.create(alarmName, { periodInMinutes: 1 });
-    }
-  } catch (error) {
-    console.error("Clip expiry alarm:", error);
-  }
   await cleanUp();
   try {
     await backfillHashes();
@@ -35,8 +26,6 @@ async function startExpiry() {
   }
 }
 
-chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name === alarmName) return cleanUp();
-});
+everyMinute(cleanUp);
 chrome.runtime.onInstalled.addListener(startExpiry);
 chrome.runtime.onStartup.addListener(startExpiry);

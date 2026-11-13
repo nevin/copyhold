@@ -81,7 +81,7 @@ Load it with **Load unpacked** on `chrome://extensions` and `edge://extensions`.
 - [ ] The eye button hides all clip text and remembers the choice the next time the popup opens.
 
 **History size and long lists**
-- [ ] With more than 200 clips, the list shows 200 and a **Show more** row; Down at the last row loads more.
+- [ ] With more than 100 clips, the list shows 100 and a **Show more** row; Down at the last row loads more.
 - [ ] Set **History size** below the number of unpinned clips: a confirmation names how many will be deleted, and **Cancel** keeps the old setting.
 - [ ] With a history size set, saving more clips deletes the least recently used unpinned ones; pinned clips stay.
 

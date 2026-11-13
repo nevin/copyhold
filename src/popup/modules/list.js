@@ -23,8 +23,9 @@ const selectVisible = byId("select-visible");
 const showMore = byId("show-more");
 /** @type {Map<string, { revision: string, item: HTMLElement }>} */
 const clipItems = new Map();
-// Rendering every match makes large histories slow, so the list grows in steps.
-const renderStep = 200;
+// Rendering every match makes large histories slow, so the list grows in steps. The popup shows about
+// seven rows, so a step of 100 keeps memory low while scrolling and arrow keys load more as needed.
+const renderStep = 100;
 let renderLimit = renderStep;
 let hiddenMatches = 0;
 let renderVersion = 0;
@@ -55,8 +56,10 @@ function updateCopyFeedback(id, copied) {
   const item = clipItem(id);
   if (!item) return;
   const button = /** @type {HTMLElement} */ (item.querySelector('[data-action="copy"]'));
-  button.querySelector("path").setAttribute("d", iconPaths[copied ? "copied" : "copy"]);
-  button.title = copied ? t("copiedToClipboard") : t("copy");
+  if (button) {
+    button.querySelector("path").setAttribute("d", iconPaths[copied ? "copied" : "copy"]);
+    button.title = copied ? t("copiedToClipboard") : t("copy");
+  }
   item.classList.toggle("is-copied", copied);
 }
 
@@ -215,6 +218,47 @@ function sizeLabel(entry) {
   return tn("characters", displayLength(entry.text));
 }
 
+const actionBuilders = new WeakMap();
+
+/** Builds a row's buttons if they aren't there yet. */
+export function ensureRowActions(item) {
+  const build = actionBuilders.get(item);
+  if (!build) return;
+  actionBuilders.delete(item);
+  build();
+}
+
+function buildActions(entry, item, actions) {
+  // Preview shows the whole clip without copying it; masked and hidden clips stay concealed until revealed.
+  // "preview" already names the clip text, so the button gets its own class.
+  const preview = rowButton("show-preview", t("preview"), () => {
+    setActive(entry.id);
+    openClipPreview(entry);
+  }, "preview");
+  preview.classList.add("quick");
+  const pin = rowButton("pin", entry.pinned ? t("unpin") : t("pin"), () => togglePin(entry));
+  pin.classList.add("quick");
+  pin.classList.toggle("is-on", entry.pinned);
+  const edit = rowButton("edit", t("edit"), () => openEditor(entry));
+  edit.classList.add("quick");
+  const remove = rowButton("delete", t("delete"), () => deleteEntry(entry));
+  remove.classList.add("quick");
+  actions.append(
+    preview,
+    pin,
+    edit,
+    remove,
+    rowButton("copy", t("copy"), () => copyEntry(entry)),
+    rowButton("more", t("moreActions"), (event) => {
+      // The click that light-dismissed this entry's menu should not reopen it.
+      if (recentlyClosedFor(entry.id)) return;
+      setActive(entry.id);
+      openMenu(entry, event.currentTarget);
+    }),
+  );
+  if (entry.id === copiedClipId) updateCopyFeedback(entry.id, true);
+}
+
 function itemFor(entry) {
   const item = document.createElement("div");
   item.className = "clip";
@@ -277,33 +321,9 @@ function itemFor(entry) {
   const actions = document.createElement("div");
   actions.className = "clip-actions";
   actions.setAttribute("aria-hidden", "true");
-  // Preview shows the whole clip without copying it; masked and hidden clips stay concealed until revealed.
-  // "preview" already names the clip text, so the button gets its own class.
-  const preview = rowButton("show-preview", t("preview"), () => {
-    setActive(entry.id);
-    openClipPreview(entry);
-  }, "preview");
-  preview.classList.add("quick");
-  const pin = rowButton("pin", entry.pinned ? t("unpin") : t("pin"), () => togglePin(entry));
-  pin.classList.add("quick");
-  pin.classList.toggle("is-on", entry.pinned);
-  const edit = rowButton("edit", t("edit"), () => openEditor(entry));
-  edit.classList.add("quick");
-  const remove = rowButton("delete", t("delete"), () => deleteEntry(entry));
-  remove.classList.add("quick");
-  actions.append(
-    preview,
-    pin,
-    edit,
-    remove,
-    rowButton("copy", t("copy"), () => copyEntry(entry)),
-    rowButton("more", t("moreActions"), (event) => {
-      // The click that light-dismissed this entry's menu should not reopen it.
-      if (recentlyClosedFor(entry.id)) return;
-      setActive(entry.id);
-      openMenu(entry, event.currentTarget);
-    }),
-  );
+  // The buttons are built the first time the row is pointed at or highlighted, since most rows never are.
+  actionBuilders.set(item, () => buildActions(entry, item, actions));
+  item.addEventListener("pointerenter", () => ensureRowActions(item), { once: true });
   item.append(check, age, details, size, key, actions);
   const dot = categoryDot(entry.category, "category-dot clip-dot");
   if (dot) details.prepend(dot);
@@ -389,6 +409,7 @@ export function updateItemStates() {
     const selected = selectedIds.has(id);
     item.classList.toggle("is-selected", selecting && selected);
     item.classList.toggle("is-active", id === activeId);
+    if (id === activeId) ensureRowActions(item);
     item.setAttribute("aria-selected", String(selecting ? selected : id === activeId));
   }
   if (clipItems.has(activeId)) search.setAttribute("aria-activedescendant", `clip-${activeId}`);

@@ -6,6 +6,7 @@
 - **Expiry at a glance.** Clips that delete themselves show a small clock beside their age, amber in their last hour, instead of a line of text. Point at the age for the date, or open Preview.
 - **More in Preview.** Preview lists the category, subcategory, tags, expiry, when the clip was saved and last copied, how many times it was copied, its length, how it's shown, and the page it came from.
 - **Escape steps back.** The first Escape closes Preview or whatever is open; the next closes the popup.
+- **Lighter and faster.** The popup renders 100 rows at first and builds each row's buttons only when you point at or highlight it, so it holds half as many page elements and shows clips sooner. The background wakes once a minute instead of up to three times.
 - **Preview from the row.** Pointing at a clip, or highlighting it, now shows a Preview button beside Pin, Edit, and Delete, so you can read the whole clip without copying it or opening the menu.
 
 ## 1.3.0

@@ -33,6 +33,7 @@ npm run package
 - `npm run test:e2e` builds the extension and drives it in Chrome for Testing and Firefox with Puppeteer: saving, searching, copying, images, automatic capture, and the passphrase lock. Run `npx puppeteer browsers install chrome` once first. The Firefox tests use an installed Firefox, or `FIREFOX_PATH`, and are skipped without one.
 - `npm run lint` and `npm run typecheck` check the code with ESLint and the TypeScript checker, using JSDoc types.
 - `npm run screenshots` captures the website screenshots from the real extension with sample clips.
+- `npm run perf` measures disk use per clip, popup load time, memory, and page size with 1,000 to 20,000 clips, and the background monitor's CPU use.
 
 The build creates `dist/chromium` for Chrome and Edge and `dist/firefox` for Firefox. Packaging also writes:
 
@@ -82,7 +83,7 @@ Pushes to `main` run the checks and browser tests in GitHub Actions, and changes
 - Select **Save** to save the current clipboard text, or the image on it when there's no text. If the same content is already saved, Copyhold moves that clip to the top instead of saving it again.
 - Press **Alt+Shift+S** to save the clipboard without opening Copyhold, or right-click selected text on a page and choose **Save selection to Copyhold**; the clip remembers the page, with a link back and **Open source page** in its menu. A check mark on the toolbar icon confirms the save. Change the shortcuts at `chrome://extensions/shortcuts`. Use **New clip** to type or paste text with an optional title, description, category, subcategory, and tags.
 - Select the **Pinned** heading to fold the pinned clips away, and again to show them. Folded clips leave the list and keyboard navigation; the **Pinned** filter still shows them. Copyhold remembers the choice.
-- The list shows 200 clips at a time; select **Show more** or keep pressing **Down** to see more.
+- The list shows 100 clips at a time; select **Show more** or keep pressing **Down** to see more.
 - Clips show what kind of text they contain: links show their address without `https://`, code and commands use a monospace font, and colors show a swatch. Times are relative, such as "2 hours ago"; point at a time to see the exact date.
 
 ### Expiry and privacy

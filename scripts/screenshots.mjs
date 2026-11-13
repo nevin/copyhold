@@ -146,6 +146,7 @@ try {
   await open({ height: 640 });
   await page.evaluate(() => {
     const row = [...document.querySelectorAll(".clip")].find((item) => item.textContent.includes("Build command"));
+    row.dispatchEvent(new PointerEvent("pointerenter"));
     row.querySelector(".show-preview").click();
   });
   await page.waitForSelector("#clip-preview[open]");

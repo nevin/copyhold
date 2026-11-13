@@ -1,11 +1,11 @@
 import { getSettings, updateSettings } from "../lib/settings.js";
 import { skipCurrentClipboard } from "../lib/store.js";
+import { everyMinute } from "./tick.js";
 import { t } from "../lib/i18n.js";
 
 const resumeAlarm = "copyhold-resume-capture";
-const watchdog = "copyhold-capture-watchdog";
-// Alarm names registered before the rename to Copyhold.
-const legacyAlarms = ["clipfile-resume-capture", "clipfile-capture-watchdog"];
+// The resume alarm's name before the rename to Copyhold.
+const legacyAlarms = ["clipfile-resume-capture"];
 // Nothing can be copied without input, so the monitor stops after a minute of inactivity.
 const idleSeconds = 60;
 
@@ -74,9 +74,6 @@ export function setUpMonitor(driver) {
   async function startMonitor() {
     try {
       await Promise.all(legacyAlarms.map((name) => chrome.alarms.clear(name)));
-      if (!await chrome.alarms.get(watchdog)) {
-        await chrome.alarms.create(watchdog, { periodInMinutes: 1 });
-      }
       const { pausedUntil } = await updateMonitor();
       if (pausedUntil && !await chrome.alarms.get(resumeAlarm)) {
         await chrome.alarms.create(resumeAlarm, { when: pausedUntil });
@@ -86,12 +83,14 @@ export function setUpMonitor(driver) {
     }
   }
 
+  // A once-a-minute check restarts the monitor if Chrome closed its document.
+  everyMinute(startMonitor);
   chrome.idle.setDetectionInterval(idleSeconds);
   chrome.idle.onStateChanged.addListener(startMonitor);
   chrome.runtime.onStartup.addListener(startMonitor);
   chrome.runtime.onInstalled.addListener(startMonitor);
   chrome.alarms.onAlarm.addListener((alarm) => {
-    if (alarm.name === watchdog || alarm.name === resumeAlarm) return startMonitor();
+    if (alarm.name === resumeAlarm) return startMonitor();
   });
 
   chrome.runtime.onMessage.addListener((message, sender, respond) => {
