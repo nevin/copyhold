@@ -25,22 +25,31 @@ Packaging rebuilds the extension and writes `dist/clipfile-<version>-chromium.zi
 
 ## Use Clipfile
 
-- In Chrome and Edge, **Pause** stops automatic capture for 15 minutes. Choose **Resume** to restart sooner. The monitor skips the clipboard contents it first sees on resume. **Save clipboard** is available during a pause. **Retry capture** restarts the monitor if the popup cannot confirm a recent successful read.
-- Open the popup with **Alt+Shift+Y** (**Option+Shift+Y** on macOS) if the shortcut is available. Search is focused when the popup opens. Press **Enter** in search to copy the first result.
-- After deleting one or more clips, **Undo** restores the most recent deletion for 12 seconds while the view stays open. Clips that have expired remain deleted.
-- In **Settings and backups**, choose a default retention period for new clips you create or capture. The default starts at creation, leaves existing clips and imported backups as they are, and is cleared when you pin the clip. An expiry you set manually still applies to a pinned clip.
+- Open the popup with **Alt+Shift+Y** (**Option+Shift+Y** on macOS) if the shortcut is available. Search is focused when the popup opens.
+- Type to filter, use **Up** and **Down** to highlight a clip, and press **Enter** to copy it. **Alt+1** through **Alt+9** (**Option** on macOS) copy the clip at that position; hold **Alt** to see the numbers. By default the popup closes after a copy. Turn this off under **Close the popup after copying** in **Settings and backups**. The full-tab view stays open.
+- Click a clip row or its **Copy** button to copy the original text and record when it was used. Pinned clips appear first under **Pinned**, and the rest are sorted by recent use, or by creation time if they have never been copied from Clipfile.
+- Each clip's **More actions** button (**⋯**) opens **Preview**, **Open link** for web addresses, **Mask text** or **Show text**, **Pin**, **Edit**, **Select**, and **Delete**. From search, press **Shift+Enter** to open the menu for the highlighted clip, then press the letter shown next to an action. Right-clicking a row opens the same menu.
+- To delete several clips, choose **Select** from the menu or Shift-click a row. While selecting, **Enter** selects or clears the highlighted clip, and **Escape** or **Done** ends selection.
+- After deleting one or more clips, **Undo** restores the most recent deletion for 12 seconds while the view stays open. Pointing at or focusing the undo bar pauses the countdown. Clips that have expired remain deleted.
+- Select **Save clipboard** to save the current clipboard text. If the same text is already saved, Clipfile shows a message. Use **New clip** to type or paste text with an optional title and description. In the editor, press **Cmd+Enter** (**Ctrl+Enter** elsewhere) to save.
+- Clips show what kind of text they contain: links show their address without `https://`, code and commands use a monospace font, and colors show a swatch. Times are relative, such as "2 hours ago"; point at a time to see the exact date.
 
-Set **Delete automatically at** when creating or editing a clip to give it an expiry. Leave the field blank to keep it. Clipfile checks for expired clips about once a minute while the browser is running and cleans up overdue clips when it starts.
+### Expiry and privacy
 
-- Select **Save clipboard** to save the current clipboard text. If the same text is already saved, Clipfile shows a message. Use **New clip** to type or paste text with an optional title and description.
-- Click a clip row or use its **Copy** button to copy the original text and record when it was used. Pinned clips appear first. Clips are sorted by recent use, or by creation time if they have never been copied from Clipfile.
-- Use **Edit** to change the text, title, description, or display. **Mask text** shows bullets and **Hide text** replaces the preview with a label. The title and description remain visible. Use **Delete** to remove the entry.
-- **Export** downloads a JSON backup. **Import** appends the backup entries with fresh IDs, preserving duplicate content, display preferences, stars, and timestamps. Import uses the full-tab view to keep the file picker open.
+In the editor, open **Expiry and privacy** to set **Delete automatically**. Pick **1 hour**, **1 day**, **1 week**, or a date and time, or choose **Never** to keep the clip. Clipfile checks for expired clips about once a minute while the browser is running and cleans up overdue clips when it starts.
 
-Use **Search clips** to find clips by title, description, or visible text. Select **Pinned** to narrow the list to pinned clips. Backup controls are under **Settings and backups**.
+In **Settings and backups**, choose a default retention period for new clips you create or capture. The default starts at creation, leaves existing clips and imported backups as they are, and is cleared when you pin the clip. An expiry you set manually still applies to a pinned clip.
 
-Use the eye button on a clip to show up to three characters of its text followed by `**`. The title stays visible. A crossed-out eye restores the full preview for a masked or hidden clip.
+**Mask** shows up to three characters followed by `**`. **Hide** shows only "Hidden" and the length of the text. The title and description remain visible. Search matches masked and hidden clips by title and description only.
 
-In Chrome and Edge, Clipfile automatically saves plain text from the clipboard while the browser is running, even when the Clipfile window is closed. To turn this off, open **Settings and backups** and uncheck **Automatically save copied text**. Clipfile checks for changes about once per second and can miss text that is replaced between checks. Firefox supports **Save clipboard** for manual capture.
+### Automatic capture
 
-Clipfile stores entries locally and makes no network requests. Masking and hiding affect the table preview. The original text remains available to edit and copy, and exports contain it in plain text.
+In Chrome and Edge, Clipfile automatically saves plain text from the clipboard while the browser is running, even when the Clipfile window is closed. The bar under the header shows whether automatic saving is on. **Pause** stops it for 15 minutes; choose **Resume** to restart sooner. The monitor skips the clipboard contents it first sees on resume. **Save clipboard** is available during a pause. **Retry capture** restarts the monitor if the popup cannot confirm a recent successful read.
+
+To turn automatic saving off, open **Settings and backups** and uncheck **Automatically save copied text**. Clipfile checks for changes about once per second and can miss text that is replaced between checks. Firefox supports **Save clipboard** for manual capture.
+
+### Backups
+
+**Export** downloads a JSON backup. **Import** appends the backup entries with fresh IDs, preserving duplicate content, display preferences, stars, and timestamps. Import opens the full-tab view to keep the file picker open. In the full-tab view you can also drop a backup file onto the page.
+
+Clipfile stores entries locally and makes no network requests. Masking and hiding affect only the preview. The original text remains available to edit and copy, and exports contain it in plain text.

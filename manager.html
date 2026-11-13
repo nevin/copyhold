@@ -32,7 +32,10 @@
             </svg>
           </summary>
           <div class="settings-body">
-            <h2>Settings and backups</h2>
+            <div class="settings-heading">
+              <h2>Settings and backups</h2>
+              <button id="close-settings" class="quiet" type="button">Done</button>
+            </div>
             <fieldset class="theme-setting">
               <legend>Appearance</legend>
               <div class="filters">
@@ -49,6 +52,13 @@
               <p id="capture-state" class="sr-only" hidden></p>
               <p id="auto-capture-hint" class="hint">Saves text in this browser profile, even when the Clipfile popup is closed.</p>
             </div>
+            <div>
+              <label class="capture-setting">
+                <input id="close-after-copy" type="checkbox" disabled aria-describedby="close-after-copy-hint">
+                Close the popup after copying
+              </label>
+              <p id="close-after-copy-hint" class="hint">The full-tab view stays open.</p>
+            </div>
             <label for="retention-days">Default clip retention</label>
             <select id="retention-days" aria-describedby="retention-hint" disabled>
               <option value="0">Keep until deleted</option>
@@ -59,14 +69,21 @@
             </select>
             <p id="retention-hint" class="hint">Applies to new unpinned clips. Pinning clears the default expiry. Dates you set manually still apply.</p>
             <div class="actions">
-              <button id="import" class="secondary" type="button">Import backup</button>
+              <button id="import" class="secondary" type="button" aria-describedby="import-hint">Import backup</button>
               <button id="export" class="secondary" type="button">Export backup</button>
               <input id="file" type="file" accept=".json,application/json" hidden>
             </div>
+            <p id="import-hint" class="hint"></p>
           </div>
         </details>
       </div>
     </header>
+
+    <div id="capture-toolbar" class="capture-toolbar" hidden>
+      <span id="capture-indicator" role="status"></span>
+      <button id="capture-retry" class="quiet" type="button" hidden>Retry capture</button>
+      <button id="capture-pause" class="quiet" type="button" hidden>Pause</button>
+    </div>
 
     <section class="panel" aria-label="Saved clips">
       <div class="search">
@@ -75,9 +92,10 @@
           <svg class="action-icon search-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
             <circle cx="10.5" cy="10.5" r="5.5"/><path d="m15 15 4.5 4.5"/>
           </svg>
-          <input id="search" type="search" placeholder="Search clips" autocomplete="off" aria-describedby="search-shortcut">
-          <span id="search-shortcut" class="sr-only">Press Enter to copy the first match.</span>
-          <span id="search-key-hint" aria-hidden="true" hidden><kbd>↵</kbd> Copy first</span>
+          <input id="search" type="search" placeholder="Search clips" autocomplete="off" role="combobox"
+            aria-controls="entries" aria-expanded="false" aria-autocomplete="list" aria-describedby="search-shortcut">
+          <span id="search-shortcut" class="sr-only"></span>
+          <span id="search-key-hint" aria-hidden="true" hidden><kbd>↑↓</kbd> <kbd>↵</kbd> <span id="search-key-action">Copy</span></span>
           <button id="clear-search" class="quiet" type="button" aria-label="Clear search" title="Clear search" hidden>
             <svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m6 6 12 12M18 6 6 18"/></svg>
           </button>
@@ -89,10 +107,7 @@
           <label><input id="all-clips" name="clip-filter" type="radio" checked><span>All clips</span></label>
           <label><input id="pinned-clips" name="clip-filter" type="radio"><span>Pinned</span></label>
         </fieldset>
-        <div class="actions">
-          <p id="count"></p>
-          <button id="select-clips" class="quiet selection-control" type="button" aria-controls="bulk-actions" aria-expanded="false">Select clips</button>
-        </div>
+        <p id="count"></p>
       </div>
       <div id="bulk-actions" class="actions bulk-actions" hidden>
         <label><input id="select-visible" type="checkbox" aria-label="Select all shown"> All shown</label>
@@ -106,23 +121,28 @@
       <p id="search-status" class="sr-only" role="status" aria-atomic="true"></p>
       <p id="status" role="status" aria-atomic="true"></p>
       <p id="copy-status" class="sr-only" role="status" aria-atomic="true"></p>
-      <ul id="entries" class="clips" role="list" aria-label="Saved clips"></ul>
+      <div id="entries" class="clips" role="listbox" aria-label="Saved clips">
+        <div id="pinned-group" class="clip-group" role="group" aria-labelledby="pinned-heading" hidden>
+          <div id="pinned-heading" class="group-heading" role="presentation">Pinned</div>
+        </div>
+        <div id="recent-group" class="clip-group" role="group" aria-labelledby="recent-heading" hidden>
+          <div id="recent-heading" class="group-heading" role="presentation">Recent</div>
+        </div>
+      </div>
       <div id="empty" class="empty" hidden>
         <strong id="empty-title">No saved clips</strong>
-        <p id="empty-hint"></p>
+        <div id="empty-hints"></div>
         <button id="reset-filters" class="secondary" type="button" hidden>Show all clips</button>
       </div>
     </section>
-    <div id="capture-toolbar" class="capture-toolbar" hidden>
-      <span id="capture-indicator" role="status"></span>
-      <button id="capture-retry" class="quiet" type="button" hidden>Retry capture</button>
-      <button id="capture-pause" class="quiet" type="button" hidden>Pause</button>
-    </div>
   </main>
   <div id="undo-bar" class="undo-bar" hidden>
     <span id="undo-message" role="status"></span>
     <button id="undo-delete" class="secondary" type="button">Undo</button>
+    <span id="undo-progress" class="undo-progress" aria-hidden="true"></span>
   </div>
+
+  <div id="clip-menu" class="menu" role="menu" popover></div>
 
   <dialog id="editor" aria-labelledby="editor-title">
     <form id="edit-form">
@@ -133,29 +153,41 @@
       <input id="title" name="title" type="text">
       <label for="description">Description <span>Optional</span></label>
       <textarea id="description" name="description" rows="2"></textarea>
-      <label for="expires-at">Delete automatically at <span>Optional</span></label>
-      <input id="expires-at" name="expiresAt" type="datetime-local" aria-describedby="expiry-hint">
-      <p id="expiry-hint" class="hint">Uses local time. New clips without a date follow your default retention setting.</p>
-      <fieldset class="visibility-options">
-        <legend>Clip preview</legend>
-        <div class="filters">
-          <label><input type="radio" name="visibility" value="visible" aria-describedby="preview-visible" checked><span>Show</span></label>
-          <label><input type="radio" name="visibility" value="masked" aria-describedby="preview-masked"><span>Mask</span></label>
-          <label><input type="radio" name="visibility" value="hidden" aria-describedby="preview-hidden"><span>Hide</span></label>
+      <details id="editor-options" class="editor-options">
+        <summary>Expiry and privacy <span id="options-summary"></span></summary>
+        <div class="options-body">
+          <label for="expires-at">Delete automatically</label>
+          <div id="expiry-presets" class="expiry-presets" role="group" aria-label="Quick expiry">
+            <button type="button" class="chip" data-expiry="3600000">1 hour</button>
+            <button type="button" class="chip" data-expiry="86400000">1 day</button>
+            <button type="button" class="chip" data-expiry="604800000">1 week</button>
+            <button type="button" class="chip" data-expiry="0">Never</button>
+          </div>
+          <input id="expires-at" name="expiresAt" type="datetime-local" aria-describedby="expiry-hint">
+          <p id="expiry-hint" class="hint">Uses local time. New clips without a date follow your default retention setting.</p>
+          <fieldset class="visibility-options">
+            <legend>Clip preview</legend>
+            <div class="filters">
+              <label><input type="radio" name="visibility" value="visible" aria-describedby="preview-visible" checked><span>Show</span></label>
+              <label><input type="radio" name="visibility" value="masked" aria-describedby="preview-masked"><span>Mask</span></label>
+              <label><input type="radio" name="visibility" value="hidden" aria-describedby="preview-hidden"><span>Hide</span></label>
+            </div>
+            <p id="preview-visible" class="hint">Shows the clip text.</p>
+            <p id="preview-masked" class="hint">Shows up to three characters, then **.</p>
+            <p id="preview-hidden" class="hint">Shows only “Hidden” and the length of the text.</p>
+            <div class="preview-sample" role="group" aria-label="Preview in clip list">
+              <p id="sample-title" class="clip-title" hidden></p>
+              <p id="sample-text" class="preview"></p>
+            </div>
+            <p class="hint">Copy and export always use the original text.</p>
+          </fieldset>
         </div>
-        <p id="preview-visible" class="hint">Shows the clip text.</p>
-        <p id="preview-masked" class="hint">Shows up to three characters, then **.</p>
-        <p id="preview-hidden" class="hint">Replaces the clip text with “Hidden text”.</p>
-        <div class="preview-sample" role="group" aria-label="Preview in clip list">
-          <p id="sample-title" class="clip-title" hidden></p>
-          <p id="sample-text" class="preview"></p>
-        </div>
-        <p class="hint">Copy and export always use the original text.</p>
-      </fieldset>
+      </details>
       <p id="form-status" role="alert"></p>
-      <div class="actions dialog-actions">
+      <div class="actions dialog-actions editor-actions">
+        <span id="save-shortcut" class="hint" aria-hidden="true"></span>
         <button id="cancel-edit" class="secondary" type="button">Cancel</button>
-        <button class="primary" type="submit">Save clip</button>
+        <button id="save-edit" class="primary" type="submit">Save clip</button>
       </div>
     </form>
   </dialog>

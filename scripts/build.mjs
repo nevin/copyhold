@@ -10,6 +10,7 @@ const assets = [
   "clipboard.js",
   "entries.js",
   "expiry.js",
+  "format.js",
   "manager.css",
   "manager.html",
   "manager.js",

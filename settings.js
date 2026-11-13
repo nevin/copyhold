@@ -1,6 +1,6 @@
 import * as store from "./store.js";
 
-export const defaultSettings = { autoCapture: true, pausedUntil: 0, retentionDays: 0 };
+export const defaultSettings = { autoCapture: true, pausedUntil: 0, retentionDays: 0, closeAfterCopy: true };
 const settingsChannel = "clipfile-settings";
 const themeKey = "clipfile-theme";
 let migration;
