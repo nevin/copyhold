@@ -1045,3 +1045,5 @@ textarea { resize: vertical; }
 .detail-expiry.expiry-soon .expiry-icon { color: var(--warning); }
 .detail-note { color: var(--muted); font-size: .8rem; }
 :root:not(.full-tab) body:has(#clip-preview[open]) { min-block-size: 520px; }
+#export-status, #import-passphrase-status { color: var(--danger); }
+:root:not(.full-tab) body:has(#export-dialog[open]) { min-block-size: 440px; }

@@ -1,6 +1,6 @@
 import { t, tn } from "../../lib/i18n.js";
 import { cleanName, cleanTags, collectOrganization } from "../../lib/organize.js";
-import { getSettings, updateSettings } from "../../lib/settings.js";
+import { getProtectedSettings, updateProtectedSettings } from "./lock.js";
 import * as store from "../../lib/store.js";
 import { byId, run, textLine } from "./dom.js";
 import { confirmAction } from "./editor.js";
@@ -23,18 +23,18 @@ export const colorNames = ["purple", "blue", "teal", "green", "amber", "orange",
 
 // Colours are keyed by category name, so renaming moves the colour and deleting forgets it.
 async function moveColor(from, to) {
-  const colors = { ...(await getSettings()).categoryColors };
+  const colors = { ...(await getProtectedSettings()).categoryColors };
   const color = colors[from.toLocaleLowerCase()];
   delete colors[from.toLocaleLowerCase()];
   if (color && to) colors[to.toLocaleLowerCase()] = color;
-  await updateSettings({ categoryColors: colors });
+  await updateProtectedSettings({ categoryColors: colors });
 }
 
 async function setColor(category, color) {
-  const colors = { ...(await getSettings()).categoryColors };
+  const colors = { ...(await getProtectedSettings()).categoryColors };
   if (color) colors[category.toLocaleLowerCase()] = color;
   else delete colors[category.toLocaleLowerCase()];
-  await updateSettings({ categoryColors: colors });
+  await updateProtectedSettings({ categoryColors: colors });
   state.categoryColors = colors;
   render();
 }

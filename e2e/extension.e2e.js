@@ -1,7 +1,9 @@
 // Loads the built Chrome extension in Chrome for Testing and drives the popup like a person would.
 // Run with `npm run test:e2e` after `npm run build`.
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { mkdtemp, readdir, readFile, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { createRequire } from "node:module";
 import { after, before, test } from "node:test";
 import { fileURLToPath } from "node:url";
@@ -523,6 +525,44 @@ test("a large history shows its first screenful, then the rest", async () => {
   assert.match(await text("#show-more"), /Show 100 more of 3\d\d/);
 });
 
+test("backups can be protected with a passphrase and imported with it", async () => {
+  const downloads = await mkdtemp(join(tmpdir(), "copyhold-export-"));
+  const session = await page.createCDPSession();
+  await session.send("Browser.setDownloadBehavior", { behavior: "allow", downloadPath: downloads });
+  await page.click("#export");
+  await page.waitForSelector("#export-dialog[open]");
+  await page.type("#export-passphrase", "backup passphrase");
+  await page.type("#export-confirm", "different");
+  await page.click("#confirm-export");
+  await page.waitForFunction(() => document.querySelector("#export-status").textContent === "The passphrases don't match.");
+  await page.click("#export-confirm", { count: 3 });
+  await page.type("#export-confirm", "backup passphrase");
+  await page.click("#confirm-export");
+  let file;
+  for (let attempt = 0; attempt < 60 && !file; attempt++) {
+    await wait(500);
+    file = (await readdir(downloads)).find((name) => name.endsWith("-protected.json"));
+  }
+  assert.ok(file, "the protected backup was downloaded");
+  const contents = await readFile(join(downloads, file), "utf8");
+  assert.equal(contents.includes("first clip"), false);
+  assert.equal(JSON.parse(contents).version, 2);
+
+  const before = (await storedClips()).length;
+  const input = await page.$("#file");
+  await input.uploadFile(join(downloads, file));
+  await page.waitForSelector("#import-passphrase-dialog[open]");
+  await page.type("#import-passphrase", "wrong passphrase");
+  await page.keyboard.press("Enter");
+  await page.waitForFunction(() => document.querySelector("#import-passphrase-status").textContent === "That passphrase doesn't open this backup.", { timeout: 30_000 });
+  await page.click("#import-passphrase", { count: 3 });
+  await page.type("#import-passphrase", "backup passphrase");
+  await page.keyboard.press("Enter");
+  await page.waitForFunction(() => /^Imported \d+ clips\.$/.test(document.querySelector("#status").textContent), { timeout: 30_000 });
+  assert.equal((await storedClips()).length, before * 2);
+  await rm(downloads, { recursive: true, force: true });
+});
+
 test("the passphrase lock encrypts clips and asks for the passphrase", async () => {
   await chooseFromMenu("open-settings");
   await page.$eval("#lock-setup", (button) => button.click());
@@ -534,11 +574,22 @@ test("the passphrase lock encrypts clips and asks for the passphrase", async () 
   assert.ok(records.length > 400, `${records.length} clips`);
   const unsealed = records.filter((record) => !record.sealed || record.text !== undefined);
   assert.deepEqual(unsealed.map((record) => Object.keys(record).join(",")), []);
+  // Rules and colours name categories and tags, so they're sealed too.
+  const meta = await page.evaluate(async () => {
+    const values = await (await import("/lib/store.js")).getMeta(["rules", "categoryColors", "sealedSettings"]);
+    return { plainRules: "rules" in values, plainColors: "categoryColors" in values, sealed: Boolean(values.sealedSettings) };
+  });
+  assert.deepEqual(meta, { plainRules: false, plainColors: false, sealed: true });
 
   await page.click("#close-settings");
   await chooseFromMenu("lock-now");
   await page.waitForFunction(() => !document.querySelector("#lock-screen").hidden);
   assert.equal(await page.$eval("#clips-panel", (panel) => panel.hidden), true);
+  // Saving while locked works; the encrypted rules run on the clip at the next unlock.
+  await setClipboard("Invoice saved while locked");
+  await page.click("#capture");
+  await page.waitForFunction(async () =>
+    (await (await import("/lib/store.js")).list()).some((record) => record.rulesPending));
 
   await page.type("#unlock-passphrase", "wrong passphrase");
   await page.keyboard.press("Enter");
@@ -549,11 +600,13 @@ test("the passphrase lock encrypts clips and asks for the passphrase", async () 
   await page.keyboard.press("Enter");
   await page.waitForFunction(() => document.querySelector("#lock-screen").hidden, { timeout: 30_000 });
   await page.waitForFunction(() => document.querySelectorAll(".clip").length === 100);
+  await page.waitForFunction(() => [...document.querySelectorAll(".clip")].some((row) =>
+    row.textContent.includes("Invoice saved while locked") && row.textContent.includes("Finance")), { timeout: 15_000 });
 
   // Saving still works while unlocked, and the new clip is encrypted too.
   assert.equal(await saveClipboard("saved under the lock"), "Saved.");
   const saved = (await storedClips()).filter((record) => record.sealed);
-  assert.equal(saved.length, records.length + 1);
+  assert.equal(saved.length, records.length + 2);
   assert.ok((await clipTexts()).includes("saved under the lock"));
 
   await chooseFromMenu("open-settings");

@@ -21,7 +21,7 @@ Copied text can include passwords and other secrets. Copyhold checks each copy, 
 
 ## Passphrase lock
 
-If you set up a passphrase, Copyhold encrypts the text, title, description, category, subcategory, tags, source page, and image of every clip with AES-GCM, using keys derived with ECDH (P-256) and PBKDF2-SHA-256. Pins, dates, expiry, and use counts stay unencrypted so clean-up and sorting keep working; settings such as auto-tag rules and category colours are not encrypted. Copyhold keeps saving while locked, locks again after the time you choose without use and whenever the computer locks, and asks for the passphrase to show clips. If you forget the passphrase, nobody can decrypt your clips, including the developer.
+If you set up a passphrase, Copyhold encrypts the text, title, description, category, subcategory, tags, source page, and image of every clip with AES-GCM, using keys derived with ECDH (P-256) and PBKDF2-SHA-256. Your auto-tag rules and category colours, which name your categories and tags, are encrypted the same way. Pins, dates, expiry, use counts, and whether a clip was masked automatically stay unencrypted so clean-up and sorting keep working. Because rules are encrypted, clips saved while Copyhold is locked get their rules applied the next time you unlock. Copyhold keeps saving while locked, locks again after the time you choose without use and whenever the computer locks, and asks for the passphrase to show clips. If you forget the passphrase, nobody can decrypt your clips, including the developer.
 
 ## Saving without opening Copyhold
 
@@ -36,7 +36,7 @@ The **Save the clipboard** keyboard shortcut and the **Save selection to Copyhol
 
 ## Exports
 
-**Export backup** downloads a JSON file with all your clips **unencrypted**, including masked, hidden, and locked clips. The file goes wherever you save it, and Copyhold has no further control over it. Store backups somewhere you trust.
+**Export** downloads a JSON file with all your clips, including masked, hidden, and locked ones. By default it's **protected with a passphrase you choose**: the whole backup is encrypted with AES-GCM under a key derived from that passphrase with PBKDF2 (600,000 rounds), and importing it asks for the passphrase. If you turn protection off, the backup is unencrypted. Either way, the file goes wherever you save it, and Copyhold has no further control over it.
 
 ## Deleting your data
 

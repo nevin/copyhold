@@ -3,7 +3,7 @@ import test from "node:test";
 import "./helpers/environment.js";
 import * as clipboard from "../src/lib/clipboard.js";
 import { createEntry } from "../src/lib/entries.js";
-import { changePassphrase, createLock, createOpener, seal, unlock } from "../src/lib/lock.js";
+import { changePassphrase, createLock, createOpener, seal, sealValue, unlock } from "../src/lib/lock.js";
 import * as store from "../src/lib/store.js";
 
 const { lock, privateKey } = await createLock("correct horse battery");
@@ -56,4 +56,15 @@ test("with the lock on, saved and edited clips are stored encrypted", async () =
   const { fingerprint } = await store.getMeta(["fingerprint"]);
   assert.notEqual(fingerprint, await store.contentDigest({ text: "captured while locked" }));
   assert.equal(await clipboard.captureAutomatically(() => ({ text: "captured while locked" })), false);
+});
+
+test("settings can be sealed as one value", async () => {
+  const box = await sealValue({ rules: [{ value: "bank" }], categoryColors: { finance: "teal" } }, lock);
+  assert.equal(JSON.stringify(box).includes("bank"), false);
+  assert.deepEqual(await createOpener(privateKey).value(box), { rules: [{ value: "bank" }], categoryColors: { finance: "teal" } });
+});
+
+test("clips saved while locked are marked for rules at the next unlock", async () => {
+  const [saved] = (await store.list()).filter((record) => record.sealed && record.rulesPending);
+  assert.ok(saved, "a clip captured with the lock on is marked");
 });

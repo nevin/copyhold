@@ -99,6 +99,8 @@ export async function saveContent(content, mode) {
       ...source,
       ...applyRules({ text: content.text, ...source }, settings.rules),
     });
+  // With the lock on, rules are encrypted and can't be read here; they run on this clip at the next unlock.
+  if (lock && !image) entry.rulesPending = true;
   await store.add([withDefaultRetention(entry, settings.retentionDays)]);
   await record();
   await store.trimHistory(settings.historyLimit);

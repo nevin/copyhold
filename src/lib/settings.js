@@ -39,6 +39,13 @@ export async function updateSettings(changes) {
   channel.close();
 }
 
+/** Tells other views about changes stored elsewhere, such as settings encrypted under the lock. */
+export function announceSettings(changes) {
+  const channel = new BroadcastChannel(settingsChannel);
+  channel.postMessage(changes);
+  channel.close();
+}
+
 // The listener receives the changed settings, including changes made in this view.
 // Returns a function that stops listening.
 export function onSettingsChange(listener) {

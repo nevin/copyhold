@@ -517,7 +517,7 @@
     "message": "Imported $1 clips."
   },
   "exportTitle": {
-    "message": "Export clips?"
+    "message": "Export clips"
   },
   "exportMessage": {
     "message": "The backup contains all saved clips unencrypted, including masked, hidden, and locked ones. Store it somewhere safe."
@@ -1367,5 +1367,29 @@
   },
   "rulePatternTooLong": {
     "message": "Use a pattern of 200 characters or fewer."
+  },
+  "exportProtect": {
+    "message": "Protect the backup with a passphrase"
+  },
+  "exportPassphraseHint": {
+    "message": "You'll need it to import the backup. It can't be recovered."
+  },
+  "exportUnprotected": {
+    "message": "Export unprotected"
+  },
+  "encryptingBackup": {
+    "message": "Encrypting the backup…"
+  },
+  "exportStartedProtected": {
+    "message": "Export started. The backup is protected with your passphrase."
+  },
+  "importPassphraseTitle": {
+    "message": "Enter the backup's passphrase"
+  },
+  "importPassphraseHint": {
+    "message": "This backup is protected with a passphrase."
+  },
+  "errorBackupPassphrase": {
+    "message": "That passphrase doesn't open this backup."
   }
 }

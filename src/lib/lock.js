@@ -31,7 +31,7 @@ export function fromBase64(text) {
   return Uint8Array.from(atob(text), (character) => character.charCodeAt(0));
 }
 
-async function passphraseKey(passphrase, salt, rounds) {
+export async function passphraseKey(passphrase, salt, rounds) {
   const material = await crypto.subtle.importKey("raw", encoder.encode(passphrase), "PBKDF2", false, ["deriveKey"]);
   return crypto.subtle.deriveKey(
     { name: "PBKDF2", hash: "SHA-256", salt, iterations: rounds },
@@ -131,6 +131,17 @@ export async function seal(record, lock) {
   return record;
 }
 
+/**
+ * Encrypts any JSON value with the lock's public key, as one sealed box. Used for settings that name
+ * categories and tags, such as rules and category colours.
+ */
+export async function sealValue(value, lock) {
+  const { key, epk } = await sealerFor(lock);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const data = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, encoder.encode(JSON.stringify(value)));
+  return { epk, iv: toBase64(iv), data, json: true };
+}
+
 /** Decrypts sealed records with an unlocked private key, caching derived keys by ephemeral key. */
 export function createOpener(privateKey) {
   const keys = new Map();
@@ -146,7 +157,7 @@ export function createOpener(privateKey) {
     return key;
   }
   /** @param {any} record */
-  return async function open(record) {
+  async function open(record) {
     if (!record.sealed) return record;
     const { sealed, ...entry } = record;
     await Promise.all(Object.entries(sealed).map(async ([field, box]) => {
@@ -161,5 +172,11 @@ export function createOpener(privateKey) {
     entry.subcategory ??= "";
     entry.tags ??= [];
     return entry;
+  }
+  /** Decrypts a box made by sealValue. */
+  open.value = async (box) => {
+    const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: fromBase64(box.iv) }, await keyFor(box.epk), box.data);
+    return JSON.parse(decoder.decode(plain));
   };
+  return open;
 }

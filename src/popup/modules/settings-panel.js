@@ -82,7 +82,6 @@ run(async () => {
   if (saved.hidePreviews) applyHidePreviews(true);
   if (saved.pinnedCollapsed) setPinnedCollapsed(true);
   if (saved.sortOrder !== "recent") setSortOrder(saved.sortOrder);
-  setCategoryColors(saved.categoryColors);
   for (const [input, key] of [[retentionDays, "retentionDays"], [historyLimit, "historyLimit"], [sensitiveClips, "sensitiveClips"]]) {
     input.value = String(saved[key]);
     input.disabled = false;

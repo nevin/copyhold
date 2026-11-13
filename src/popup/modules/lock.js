@@ -1,13 +1,15 @@
 import { withClipboardLock } from "../../lib/clipboard.js";
-import { changePassphrase, createLock, createOpener, seal, unlock } from "../../lib/lock.js";
+import { changePassphrase, createLock, createOpener, seal, sealValue, unlock } from "../../lib/lock.js";
+import { applyRules } from "../../lib/rules.js";
 import {
   getUnlockedKey, lockNow, onLockChange, rememberUnlockedKey, touchUnlocked,
 } from "../../lib/session.js";
-import { getSettings, onSettingsChange, updateSettings } from "../../lib/settings.js";
+import { announceSettings, getSettings, onSettingsChange, updateSettings } from "../../lib/settings.js";
 import * as store from "../../lib/store.js";
 import { byId, run, status } from "./dom.js";
 import { confirmAction } from "./editor.js";
-import { loaders, refresh, render, search } from "./list.js";
+import { loaders, refresh, render, search, setCategoryColors } from "./list.js";
+import { state } from "./state.js";
 import { t } from "../../lib/i18n.js";
 
 const lockScreen = byId("lock-screen");
@@ -40,6 +42,49 @@ function showLockState() {
   byId("lock-change").hidden = !enabled || locked;
   byId("lock-remove").hidden = !enabled || locked;
   if (locked) byId("unlock-passphrase").focus();
+}
+
+// Rules and category colours name categories and tags, so with the lock on they're stored encrypted
+// together, in one sealed box, instead of as plain settings.
+const noProtectedSettings = { rules: [], categoryColors: {} };
+
+/** Rules and category colours, decrypted if the lock is on. Empty while locked. */
+export async function getProtectedSettings() {
+  if (!lockRecord) {
+    const saved = await getSettings();
+    return { rules: saved.rules, categoryColors: saved.categoryColors };
+  }
+  if (!opener) return noProtectedSettings;
+  const { sealedSettings } = await store.getMeta(["sealedSettings"]);
+  return { ...noProtectedSettings, ...(sealedSettings ? await opener.value(sealedSettings) : {}) };
+}
+
+/** Saves rules or category colours, encrypted when the lock is on, and tells other views. */
+export async function updateProtectedSettings(changes) {
+  if (!lockRecord) return updateSettings(changes);
+  const next = { ...await getProtectedSettings(), ...changes };
+  await store.setMeta({ sealedSettings: await sealValue(next, lockRecord) });
+  announceSettings(changes);
+}
+
+// Once the clips are showing: load category colours (decrypted if the lock is on), and run rules on
+// clips saved while Copyhold was locked.
+export async function afterUnlock() {
+  if (lockRecord && !opener) return;
+  const { rules, categoryColors } = await getProtectedSettings();
+  setCategoryColors(categoryColors);
+  if (!lockRecord) return;
+  const pending = state.clips.filter((clip) => clip.rulesPending);
+  if (!pending.length) return;
+  for (const clip of pending) {
+    const changes = { rulesPending: false };
+    if (clip.kind !== "image" && rules.length) {
+      const result = applyRules(clip, rules);
+      if (result.matched) Object.assign(changes, { category: result.category, subcategory: result.subcategory, tags: result.tags });
+    }
+    await store.update(clip.id, changes);
+  }
+  await refresh();
 }
 
 function setUnlocked(key) {
@@ -83,6 +128,7 @@ byId("unlock-form").addEventListener("submit", (event) => {
       showLockState();
       search.focus();
       await render({ quick: true });
+      await afterUnlock();
     } catch (error) {
       unlockStatus.textContent = error.message;
       input.select();
@@ -108,7 +154,8 @@ byId("forgot-passphrase").addEventListener("click", () => run(async () => {
   await withClipboardLock(async () => {
     await store.removeMany((await store.list()).map(({ id }) => id));
     await store.removeExpired();
-    await store.setMeta({ lock: undefined, skipClipboard: true });
+    // Encrypted rules and colours can't be read without the passphrase either, so they go too.
+    await store.setMeta({ lock: undefined, sealedSettings: undefined, skipClipboard: true });
   });
   lockRecord = undefined;
   setUnlocked(undefined);
@@ -152,12 +199,14 @@ lockForm.addEventListener("submit", (event) => {
     try {
       if (dialogMode === "setup") {
         const { lock, privateKey: key } = await createLock(passphrase);
+        const saved = await getSettings();
+        const sealedSettings = await sealValue({ rules: saved.rules, categoryColors: saved.categoryColors }, lock);
         // Hold the clipboard lock so no clip is captured unencrypted while the history is rewritten.
         await withClipboardLock(() => store.rewriteAll(async (record) => {
           if (record.sealed) return record;
           const { hash, ...entry } = record;
           return seal(entry, lock);
-        }, { lock, fingerprint: undefined, skipClipboard: true }));
+        }, { lock, sealedSettings, rules: undefined, categoryColors: undefined, fingerprint: undefined, skipClipboard: true }));
         lockRecord = lock;
         setUnlocked(key);
         await rememberUnlockedKey(key);
@@ -187,11 +236,14 @@ byId("lock-remove").addEventListener("click", () => run(async () => {
     t("turnOffLock"),
   )) return;
   status(t("decrypting"));
+  const { rules, categoryColors } = await getProtectedSettings();
   await withClipboardLock(() => store.rewriteAll(async (record) => {
-    const entry = await opener(record);
+    const { rulesPending, ...entry } = await opener(record);
+    if (rulesPending && rules.length && entry.kind !== "image") Object.assign(entry, applyRules(entry, rules));
+    delete entry.matched;
     entry.hash ??= await store.contentDigest(entry);
     return entry;
-  }, { lock: undefined, fingerprint: undefined, skipClipboard: true }));
+  }, { lock: undefined, sealedSettings: undefined, rules, categoryColors, fingerprint: undefined, skipClipboard: true }));
   lockRecord = undefined;
   setUnlocked(undefined);
   await lockNow();

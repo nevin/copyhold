@@ -136,7 +136,7 @@ Copyhold recognizes text that looks like a password, API key, access token, priv
 
 ### Passphrase lock
 
-Under **Passphrase lock** in **Settings and backups**, select **Set up lock** and choose a passphrase. Copyhold encrypts every clip's text, title, description, and image, and asks for the passphrase when you open it. Saving keeps working while locked. It locks again after the time you choose without use, when the browser closes, when the computer locks, or when you choose **Lock Copyhold** in the **⋯** menu. **Turn off lock** decrypts everything again. If you forget the passphrase, the clips can't be recovered; **Forgot your passphrase?** deletes them so you can start again.
+Under **Passphrase lock** in **Settings and backups**, select **Set up lock** and choose a passphrase. Copyhold encrypts every clip's text, title, description, category, tags, source page, and image, plus your auto-tag rules and category colours, and asks for the passphrase when you open it. Rules for clips saved while locked run when you next unlock. Saving keeps working while locked. It locks again after the time you choose without use, when the browser closes, when the computer locks, or when you choose **Lock Copyhold** in the **⋯** menu. **Turn off lock** decrypts everything again. If you forget the passphrase, the clips can't be recovered; **Forgot your passphrase?** deletes them so you can start again.
 
 ### Images
 
@@ -150,7 +150,7 @@ The dot at the left of the header turns automatic saving on or off and shows its
 
 ### Backups
 
-**Import backup** and **Export backup** are in the bar under the clip list. **Export** downloads a JSON backup, with images as data URLs. **Import** appends the backup entries with fresh IDs, preserving duplicate content, display preferences, pins, and timestamps. Backups exported under the extension's earlier name, Clipfile, import too. Import opens the full-tab view to keep the file picker open. In the full-tab view you can also drop a backup file onto the page.
+**Import backup** and **Export backup** are in the bar under the clip list. **Export** downloads a JSON backup, with images as data URLs. Backups are protected with a passphrase by default (AES-GCM, with the key derived by PBKDF2); importing one asks for the passphrase. You can turn protection off for a plain, unencrypted backup. **Import** appends the backup entries with fresh IDs, preserving duplicate content, display preferences, pins, and timestamps. Backups exported under the extension's earlier name, Clipfile, import too. Import opens the full-tab view to keep the file picker open. In the full-tab view you can also drop a backup file onto the page.
 
 Copyhold stores entries locally and makes no network requests. See [PRIVACY.md](PRIVACY.md) for the full privacy policy. Masking and hiding affect only the preview. The original text remains available to edit and copy, and exports contain it unencrypted.
 

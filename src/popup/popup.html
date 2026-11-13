@@ -366,6 +366,43 @@
     </form>
   </dialog>
 
+  <dialog id="export-dialog" aria-labelledby="export-title">
+    <form id="export-form" class="lock-form" novalidate>
+      <h2 id="export-title" data-i18n="exportTitle">Export clips?</h2>
+      <label class="capture-setting">
+        <input id="export-protect" type="checkbox" checked>
+        <span data-i18n="exportProtect">Protect the backup with a passphrase</span>
+      </label>
+      <div id="export-passphrase-fields" class="lock-form">
+        <label for="export-passphrase" data-i18n="passphrase">Passphrase</label>
+        <input id="export-passphrase" type="password" autocomplete="new-password" aria-describedby="export-passphrase-hint">
+        <label for="export-confirm" data-i18n="confirmPassphrase">Confirm passphrase</label>
+        <input id="export-confirm" type="password" autocomplete="new-password">
+        <p id="export-passphrase-hint" class="hint" data-i18n="exportPassphraseHint">You'll need it to import the backup. It can't be recovered.</p>
+      </div>
+      <p id="export-warning" class="hint" hidden data-i18n="exportMessage">The backup contains all saved clips unencrypted, including masked, hidden, and locked ones. Store it somewhere safe.</p>
+      <p id="export-status" role="alert"></p>
+      <div class="actions dialog-actions">
+        <button id="cancel-export" class="secondary" type="button" data-i18n="cancel">Cancel</button>
+        <button id="confirm-export" class="primary" type="submit" data-i18n="export">Export</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="import-passphrase-dialog" aria-labelledby="import-passphrase-title">
+    <form id="import-passphrase-form" class="lock-form" novalidate>
+      <h2 id="import-passphrase-title" data-i18n="importPassphraseTitle">Enter the backup's passphrase</h2>
+      <p class="hint" data-i18n="importPassphraseHint">This backup is protected with a passphrase.</p>
+      <label for="import-passphrase" data-i18n="passphrase">Passphrase</label>
+      <input id="import-passphrase" type="password" autocomplete="current-password">
+      <p id="import-passphrase-status" role="alert"></p>
+      <div class="actions dialog-actions">
+        <button id="cancel-import" class="secondary" type="button" data-i18n="cancel">Cancel</button>
+        <button id="confirm-import" class="primary" type="submit" data-i18n="import">Import</button>
+      </div>
+    </form>
+  </dialog>
+
   <dialog id="organize-dialog" aria-labelledby="organize-title">
     <form id="organize-form" class="organize-form" novalidate>
       <h2 id="organize-title" data-i18n="organizeClips">Organize clips</h2>

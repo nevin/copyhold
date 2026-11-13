@@ -1,11 +1,12 @@
 // Auto-tag rules: list, add, edit, delete, and apply them to clips already saved.
 import { t, tn } from "../../lib/i18n.js";
 import { applyRules, cleanRule } from "../../lib/rules.js";
-import { getSettings, onSettingsChange, updateSettings } from "../../lib/settings.js";
+import { onSettingsChange } from "../../lib/settings.js";
 import * as store from "../../lib/store.js";
 import { updateOrganizeOptions } from "./bulk.js";
 import { byId, run, textLine } from "./dom.js";
 import { confirmAction } from "./editor.js";
+import { getProtectedSettings, updateProtectedSettings } from "./lock.js";
 import { refresh } from "./list.js";
 import { state } from "./state.js";
 
@@ -82,7 +83,7 @@ function startEdit(rule) {
 
 async function save(next) {
   rules = next;
-  await updateSettings({ rules });
+  await updateProtectedSettings({ rules });
   render();
 }
 
@@ -129,7 +130,7 @@ byId("apply-rules").addEventListener("click", () => run(async () => {
 byId("close-rules").addEventListener("click", () => dialog.close());
 
 byId("manage-rules").addEventListener("click", () => run(async () => {
-  rules = (await getSettings()).rules;
+  rules = (await getProtectedSettings()).rules;
   resetForm();
   byId("rules-apply-status").textContent = "";
   updateOrganizeOptions("");

@@ -4,6 +4,8 @@
 
 Security and reliability fixes from a review.
 
+- **Protected backups.** Export now protects the backup with a passphrase by default, encrypting the whole file; importing asks for it. Plain backups are still available.
+- **Rules and category colours are encrypted under the lock**, since they name your categories and tags. Rules for clips saved while locked run when you next unlock.
 - **Hidden previews stay hidden in Preview.** With **Hide clip previews** on, Preview now conceals a clip's text and image until you select **Reveal**, so opening Preview while sharing your screen doesn't show it.
 - **Only web addresses open.** Open link and the source page open only `http` and `https` addresses, whatever a clip or a backup contains.
 - **Safer backups.** Images in a backup must be PNG, JPEG, WebP, or GIF, and no larger than images Copyhold saves itself.
