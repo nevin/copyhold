@@ -1,6 +1,6 @@
 # Copyhold privacy policy
 
-_Last updated: [date of publication]_
+_Last updated: November 13, 2026_
 
 Copyhold is a clipboard manager for Chrome, Edge, and Firefox. This policy explains what it stores and what it doesn't.
 
@@ -14,7 +14,7 @@ Everything is stored in your browser profile on your device, using the browser's
 
 ## Automatic saving
 
-In Chrome and Edge, Copyhold can save text you copy anywhere in the browser, even when its popup is closed. This is **off until you turn it on**. When it's on, Copyhold reads the clipboard about once a second while you're using the computer and saves new plain text. It stops reading while the computer is idle or locked, and it doesn't automatically save text over 1,000,000 characters. That can include sensitive text such as passwords, so you can pause it for 15 minutes or turn it off at any time. Firefox only saves the clipboard when you select **Save clipboard**.
+In Chrome and Edge, Copyhold can save text you copy anywhere in the browser, even when its popup is closed. This is **off until you turn it on**. When it's on, Copyhold reads the clipboard about once a second while you're using the computer and saves new plain text. That can include sensitive text such as passwords, so you can pause it for 15 minutes or turn it off at any time. It stops reading while the computer is idle or locked, and it doesn't automatically save text over 1,000,000 characters. Firefox only saves the clipboard when you select **Save clipboard**.
 
 ## What Copyhold never does
 
@@ -49,4 +49,4 @@ If this policy changes, the new version will be published at this address with a
 
 ## Contact
 
-Questions about privacy: [your contact email or support URL].
+Questions about privacy: open an issue at https://github.com/nevin/copyhold/issues.

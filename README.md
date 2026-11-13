@@ -1,8 +1,14 @@
 # Copyhold
 
+**[Website](https://nevin.github.io/copyhold/) · [Download for Chrome](https://github.com/nevin/copyhold/releases/latest/download/copyhold-chromium.zip) · [Privacy](PRIVACY.md)**
+
 Copyhold is a standalone Manifest V3 clipboard manager for desktop Chrome, Edge, and Firefox. It saves plain-text clips in the current browser profile.
 
-## Install locally
+## Install the latest release
+
+Until Copyhold is in the Chrome Web Store, [download `copyhold-chromium.zip`](https://github.com/nevin/copyhold/releases/latest/download/copyhold-chromium.zip) and unzip it. Open `chrome://extensions` (or `edge://extensions`), turn on **Developer mode**, select **Load unpacked**, and choose the `copyhold` folder. To update, replace the folder's files with a newer release and select the reload button on Copyhold's card. Your clips are kept.
+
+## Build from source
 
 - **Chrome 116 or later** · Run `npm run build -- chromium`. Open `chrome://extensions`, enable **Developer mode**, select **Load unpacked**, and choose `dist/chromium`.
 - **Edge** · Build the same Chromium target, then open `edge://extensions`, enable **Developer mode**, select **Load unpacked**, and choose `dist/chromium`.

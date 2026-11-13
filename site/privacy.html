@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Privacy policy · Copyhold</title>
+  <meta name="description" content="What Copyhold stores, what it never does, and how to delete your data.">
+  <link rel="icon" href="favicon.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="nav">
+    <div class="wrap">
+      <a class="brand" href="./"><img src="icon.svg" alt="" width="28" height="28">Copyhold</a>
+      <nav aria-label="Main">
+        <a href="./#features">Features</a>
+        <a href="./#install">Install</a>
+        <a href="https://github.com/nevin/copyhold">GitHub</a>
+      </nav>
+    </div>
+  </header>
+  <main class="doc">
+    <div class="wrap">
+      <!-- Generated from PRIVACY.md; edit that file and regenerate. -->
+      <h1>Copyhold privacy policy</h1>
+<p><em>Last updated: November 13, 2026</em></p>
+<p>Copyhold is a clipboard manager for Chrome, Edge, and Firefox. This policy explains what it stores and what it doesn't.</p>
+<h2>What Copyhold stores</h2>
+<ul><li><strong>Clips:</strong> the text you save, with any title, description, pin, display setting, expiry date, and the times you created and last copied each clip.</li><li><strong>Settings:</strong> your theme, default retention period, history size, whether automatic saving is on, and whether the popup closes after copying.</li><li><strong>A clipboard fingerprint:</strong> a one-way SHA-256 hash of the last clipboard text Copyhold saw, so it doesn't save the same text twice. The text can't be recovered from the hash.</li></ul>
+<p>Everything is stored in your browser profile on your device, using the browser's own storage. Copyhold has no servers and no accounts.</p>
+<h2>Automatic saving</h2>
+<p>In Chrome and Edge, Copyhold can save text you copy anywhere in the browser, even when its popup is closed. This is <strong>off until you turn it on</strong>. When it's on, Copyhold reads the clipboard about once a second while you're using the computer and saves new plain text. That can include sensitive text such as passwords, so you can pause it for 15 minutes or turn it off at any time. It stops reading while the computer is idle or locked, and it doesn't automatically save text over 1,000,000 characters. Firefox only saves the clipboard when you select <strong>Save clipboard</strong>.</p>
+<h2>What Copyhold never does</h2>
+<ul><li>It never sends your clips, settings, or any other data off your device. It makes no network requests at all.</li><li>It doesn't use analytics, tracking, advertising, or third-party code.</li><li>It doesn't sell, share, or transfer your data to anyone.</li><li>It doesn't read web pages, your browsing history, or anything other than plain text on the clipboard.</li></ul>
+<h2>Exports</h2>
+<p><strong>Export backup</strong> downloads a JSON file with all your clips <strong>in plain text</strong>, including masked and hidden clips. The file goes wherever you save it, and Copyhold has no further control over it. Store backups somewhere you trust.</p>
+<h2>Deleting your data</h2>
+<ul><li>Delete individual clips, or select several and delete them, from the popup.</li><li>Set a retention period or an expiry date so clips delete themselves, or a history size so only your most recently used clips are kept.</li><li>Uninstalling Copyhold removes all of its stored data from your browser profile.</li></ul>
+<h2>Permissions</h2>
+<table><thead><tr><th>Permission</th><th>Why Copyhold needs it</th></tr></thead><tbody><tr><td>Read clipboard (<code>clipboardRead</code>)</td><td>To save clipboard text when you select <strong>Save clipboard</strong>, or automatically if you turn that on.</td></tr><tr><td>Write clipboard (<code>clipboardWrite</code>)</td><td>To copy a saved clip back to your clipboard.</td></tr><tr><td>Alarms (<code>alarms</code>)</td><td>To delete expired clips and trim the history about once a minute, and to end a pause after 15 minutes.</td></tr><tr><td>Idle detection (<code>idle</code>, Chrome and Edge only)</td><td>To stop reading the clipboard while the computer is idle or locked. Copyhold only learns whether you're active, idle, or locked.</td></tr><tr><td>Offscreen document (<code>offscreen</code>, Chrome and Edge only)</td><td>To read the clipboard in the background while automatic saving is on.</td></tr></tbody></table>
+<h2>Changes</h2>
+<p>If this policy changes, the new version will be published at this address with a new date.</p>
+<h2>Contact</h2>
+<p>Questions about privacy: open an issue at <a href="https://github.com/nevin/copyhold/issues">https://github.com/nevin/copyhold/issues</a>.</p>
+    </div>
+  </main>
+</body>
+</html>
