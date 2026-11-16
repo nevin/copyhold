@@ -1,15 +1,18 @@
 {
   "manifest_version": 3,
   "name": "__MSG_extName__",
-  "version": "1.3.2",
+  "version": "1.4.0",
   "description": "__MSG_extDescription__",
   "permissions": [
     "clipboardRead",
     "clipboardWrite",
+    "activeTab",
     "alarms",
     "contextMenus",
     "idle",
     "offscreen",
+    "scripting",
+    "sidePanel",
     "storage"
   ],
   "minimum_chrome_version": "123",
@@ -55,5 +58,11 @@
       }
     }
   },
-  "default_locale": "en"
+  "default_locale": "en",
+  "side_panel": {
+    "default_path": "popup/popup.html?view=panel"
+  },
+  "optional_host_permissions": [
+    "<all_urls>"
+  ]
 }

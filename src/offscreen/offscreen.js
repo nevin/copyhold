@@ -19,7 +19,9 @@ function readClipboard({ images = captureImages } = {}) {
     const image = !text && images
       ? [...event.clipboardData.files].find((file) => file.type.startsWith("image/"))
       : undefined;
-    content = image ? { image } : { text };
+    // The formatted version is kept too, so the clip can be pasted with its formatting.
+    const html = text ? event.clipboardData.getData("text/html") : "";
+    content = image ? { image } : html ? { text, html } : { text };
   }, { once: true, signal: pasteRead.signal });
   try {
     clipboard.focus();

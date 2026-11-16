@@ -62,7 +62,8 @@ byId("delete-images").addEventListener("click", () => run(async () => {
     t("delete"),
     true,
   )) return;
-  offerUndo(await store.removeMany(images.map(({ id }) => id)));
+  // Freeing space deletes for good, so the trash doesn't keep the images.
+  offerUndo(await store.removeMany(images.map(({ id }) => id), { permanent: true }));
   await refresh();
   await showStorage();
 }));

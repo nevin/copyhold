@@ -2,9 +2,10 @@ import { copyClip } from "../../lib/clipboard.js";
 import { isExpired } from "../../lib/entries.js";
 import { clipPreview, displayLength, relativeTime } from "../../lib/format.js";
 import { sensitiveLabel } from "../../lib/sensitive.js";
+import { pasteIntoTab } from "../../lib/paste.js";
 import * as store from "../../lib/store.js";
 import { transformLabel } from "../../lib/transforms.js";
-import { byId, dateFormat, fullTab, icon, run, textLine } from "./dom.js";
+import { byId, dateFormat, icon, inPopup, run, textLine } from "./dom.js";
 import { categoryDot, refresh, showCopyFeedback } from "./list.js";
 import { offerUndo } from "./undo.js";
 import { state } from "./state.js";
@@ -19,23 +20,27 @@ let previewEntry;
 /**
  * @param {any} entry
  * @param {string} [transform] A transform id, such as "upper", to change the text as it is copied.
+ * @param {{ plain?: boolean }} [options] plain leaves out a clip's formatting.
  */
-export function copyEntry(entry, transform) {
+export function copyEntry(entry, transform, { plain = false } = {}) {
   return run(async () => {
     if (isExpired(entry)) {
       await refresh(t("clipExpired"));
       return;
     }
-    await copyClip(entry, { transform });
+    const copied = await copyClip(entry, { transform, plain });
+    // In the popup, the clip also goes into the text field the person was typing in, if there is one.
+    const pasted = inPopup && state.pasteIntoPage && typeof copied === "string" && state.pageTabId !== undefined
+      && await pasteIntoTab(state.pageTabId, copied);
     showCopyFeedback(entry.id);
     try {
       await store.update(entry.id, { lastUsedAt: new Date().toISOString(), useCount: (entry.useCount ?? 0) + 1 });
     } catch {
       throw new Error(t("errorLastUsed"));
     }
-    await refresh(transform ? t("copiedAs", transformLabel(transform)) : undefined);
-    // Leave the confirmation on screen briefly so closing does not feel abrupt.
-    if (!fullTab && state.closeAfterCopy) setTimeout(() => window.close(), 400);
+    await refresh(pasted ? t("pastedIntoPage") : transform ? t("copiedAs", transformLabel(transform)) : plain ? t("copiedPlain") : undefined);
+    // Leave the confirmation on screen briefly so closing does not feel abrupt. The side panel stays open.
+    if (inPopup && state.closeAfterCopy) setTimeout(() => window.close(), pasted ? 150 : 400);
   });
 }
 
@@ -133,6 +138,8 @@ function showDetails(entry) {
   const visibility = { visible: t("visibilityShown"), masked: t("visibilityMasked"), hidden: t("visibilityHidden") }[entry.visibility];
   add(t("detailVisibility"), entry.sensitive ? `${visibility} · ${t("maskedAutomatically", sensitiveLabel(entry.sensitive))}` : visibility);
   if (entry.template) add(t("templateLabel"), t("detailTemplate"));
+  if (entry.html) add(t("detailFormatting"), t("detailFormattingKept"));
+  if (entry.abbreviation) add(t("abbreviation"), entry.abbreviation);
   if (entry.sourceUrl) {
     const link = document.createElement("a");
     link.href = entry.sourceUrl;

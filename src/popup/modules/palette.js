@@ -62,6 +62,8 @@ function buildCommands() {
     { label: t("importBackup"), group: actions, run: click("import") },
     { label: t("exportBackup"), group: actions, run: click("export") },
     { label: t("settingsAndBackups"), group: actions, run: () => { byId("settings").open = true; } },
+    { label: t("keyboardShortcuts"), group: actions, run: click("open-shortcuts") },
+    { label: t("trash"), group: actions, run: click("open-trash") },
     { label: t("manageCategoriesAndTags"), group: actions, run: openSettingsThen("manage-organization") },
     { label: t("autoTagRules"), group: actions, run: openSettingsThen("manage-rules") },
   ];

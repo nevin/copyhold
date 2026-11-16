@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.4.0
+
+**Faster from clip to page**
+- **Paste straight into the page.** Choosing a clip in the popup puts it into the text field you were typing in, and copies it too. Turn this off in Settings to copy only. On pages extensions can't reach, it copies.
+- **Side panel.** Choose **Open in side panel** from the ⋯ menu to keep Copyhold beside the page (the sidebar in Firefox), and drag clips into any text field or app.
+- **Snippet abbreviations.** Give a clip an abbreviation such as `;addr`, turn on **Expand snippet abbreviations** in Settings, and typing it in a web page puts the clip there. Copyhold asks for site access only when you turn this on.
+- **Quick slots.** Pinned clips keep Alt+1 to Alt+9 in the order you pinned them, whatever the sort or search.
+
+**Finding and managing clips**
+- **Smarter search.** The best matches come first, the matched words are highlighted, and a typo in a longer word is forgiven.
+- **Type filters and search keywords.** Filter by Links, Code, Images, Text, Emails, or Colours in one click, or type `cat:`, `sub:`, `tag:`, `type:`, `is:pinned`, `before:`, and `after:`.
+- **Trash.** Deleted clips go to the Trash for 30 days, where you can restore them or delete them for good.
+- **Combine clips.** Select several and combine them into one, separated by new lines, blank lines, commas, or spaces.
+- **Keep formatting.** Copyhold keeps the formatted version of copied text and pastes it with its formatting. **Copy without formatting** (F in the actions menu) gives plain text.
+
+**Help**
+- **Keyboard shortcuts.** Press `?` to see every shortcut and search keyword.
+- A one-time tip points out what's new.
+
 ## 1.3.2
 
 Security and reliability fixes from a review.

@@ -8,6 +8,7 @@ import { createRequire } from "node:module";
 import { after, before, test } from "node:test";
 import { fileURLToPath } from "node:url";
 import puppeteer from "puppeteer";
+import { insertIntoFocusedField } from "../src/lib/paste.js";
 
 const extensionPath = fileURLToPath(new URL("../dist/chromium", import.meta.url));
 let browser;
@@ -17,6 +18,7 @@ let origin;
 
 // A made-up key, assembled at runtime so secret scanners don't mistake it for a real one.
 const fakeApiKey = ["sk", "live", "51HxQabcdefghijklmnopqrstu"].join("_");
+const expanderSource = await readFile(new URL("../src/content/expander.js", import.meta.url), "utf8");
 const axeSource = await readFile(createRequire(import.meta.url).resolve("axe-core/axe.min.js"), "utf8");
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const text = (selector) => page.$eval(selector, (element) => element.textContent.trim());
@@ -58,6 +60,16 @@ async function chooseFromMenu(id) {
   await page.click("#app-menu-button");
   await page.waitForSelector("#app-menu:popover-open");
   await page.click(`#${id}`);
+}
+
+// Points at the row containing the text, once it's shown, and clicks one of its buttons.
+async function clickRowAction(snippet, action) {
+  await page.waitForFunction((snippet) => [...document.querySelectorAll(".clip")].some((row) => row.textContent.includes(snippet)), {}, snippet);
+  await page.evaluate((snippet, action) => {
+    const row = [...document.querySelectorAll(".clip")].find((item) => item.textContent.includes(snippet));
+    row.dispatchEvent(new PointerEvent("pointerenter"));
+    row.querySelector(`.${action}`).click();
+  }, snippet, action);
 }
 
 before(async () => {
@@ -483,6 +495,187 @@ test("Settings shows storage use and can delete image clips", async () => {
     !(await (await import("/lib/store.js")).list()).some((clip) => clip.kind === "image"));
   await page.waitForFunction(() => document.querySelector("#delete-images").hidden);
   await page.click("#close-settings");
+});
+
+test("search ranks the best match first, highlights it, and forgives a typo", async () => {
+  await page.evaluate(async () => {
+    const { add } = await import("/lib/store.js");
+    const { createEntry } = await import("/lib/entries.js");
+    const now = Date.now();
+    await add([
+      createEntry({ text: "zebras everywhere", createdAt: new Date(now).toISOString() }),
+      createEntry({ text: "a zebra crossing", createdAt: new Date(now - 1000).toISOString() }),
+      createEntry({ text: "notes body", title: "Zebra notes", createdAt: new Date(now - 2000).toISOString() }),
+      createEntry({ text: "https://zoo.example.com/zebra", createdAt: new Date(now - 3000).toISOString() }),
+    ]);
+  });
+  await openPopup();
+  await page.click("#search");
+  await page.type("#search", "zebra");
+  await page.waitForFunction(() => document.querySelectorAll("#recent-group .clip").length === 4);
+  assert.equal(await page.$eval("#recent-group .clip", (row) => row.querySelector(".clip-title")?.textContent), "Zebra notes");
+  assert.ok(await page.$$eval("#recent-group .clip mark", (marks) => marks.length) >= 3);
+  await page.click("#search", { count: 3 });
+  await page.type("#search", "zbra");
+  await page.waitForFunction(() => document.querySelectorAll("#recent-group .clip").length >= 3);
+  await page.click("#search", { count: 3 });
+  await page.type("#search", "zebra type:link");
+  await page.waitForFunction(() => document.querySelectorAll(".clip").length === 1);
+  assert.match(await text(".clip .preview"), /zoo\.example\.com/);
+  await page.click("#clear-search");
+});
+
+test("the Type filter shows only one kind of clip", async () => {
+  await page.click("#filter-button");
+  await page.waitForSelector("#filter-panel:popover-open");
+  await page.evaluate(() => [...document.querySelectorAll("#filter-panel .tag")].find((chip) => chip.textContent.startsWith("Links")).click());
+  await page.waitForFunction(() => [...document.querySelectorAll(".clip")].every((row) => row.querySelector(".preview.link")));
+  await page.keyboard.press("Escape");
+  await page.click("#active-filters .clear-filters");
+  await page.waitForFunction(() => document.querySelector("#active-filters").hidden);
+});
+
+test("deleted clips go to the Trash and can be restored or removed for good", async () => {
+  await clickRowAction("a zebra crossing", "delete");
+  await page.waitForFunction(() => document.querySelector("#undo-message").textContent === "Clip moved to trash");
+  await chooseFromMenu("open-trash");
+  await page.waitForSelector("#trash-dialog[open]");
+  await page.waitForFunction(() => document.querySelector("#trash-list").textContent.includes("a zebra crossing"));
+  await page.evaluate(() => [...document.querySelectorAll("#trash-list button")].find((button) => button.textContent === "Restore").click());
+  await page.waitForFunction(() => document.querySelector("#trash-status").textContent === "Restored.");
+  assert.ok((await storedClips()).some((clip) => clip.text === "a zebra crossing"));
+  await page.click("#close-trash");
+  await clickRowAction("a zebra crossing", "delete");
+  await chooseFromMenu("open-trash");
+  await page.click("#empty-trash");
+  await page.click("#confirm-action");
+  await page.waitForFunction(() => document.querySelector("#trash-list").textContent === "The trash is empty.");
+  await page.click("#close-trash");
+  assert.equal(await page.evaluate(async () => (await import("/lib/store.js")).countTrash()), 0);
+});
+
+test("selected clips can be combined into one", async () => {
+  await page.click("#search");
+  await page.type("#search", "zebra");
+  await page.waitForFunction(() => document.querySelectorAll("#recent-group .clip").length >= 2);
+  const selected = await page.$$eval(".clip", (rows) => rows.filter((row) => !row.querySelector(".image-preview")).length);
+  await page.click("#select-all");
+  await page.click("#combine-selected");
+  await page.waitForSelector("#combine-dialog[open]");
+  await page.click('#combine-form input[value="comma"]');
+  await page.click("#combine-form .primary");
+  await page.waitForFunction((count) => document.querySelector("#status").textContent === `Combined ${count} clips.`, {}, selected);
+  const combined = (await storedClips()).find((clip) => clip.title === `Combined from ${selected} clips`);
+  assert.equal(combined.text.split(", ").length, selected);
+  await page.click("#clear-search");
+});
+
+test("pinned clips keep Alt+1 whatever the search", async () => {
+  const pinned = (await storedClips()).filter((clip) => clip.pinned)
+    .sort((first, second) => (first.pinnedAt ?? first.createdAt).localeCompare(second.pinnedAt ?? second.createdAt))[0];
+  await page.click("#search");
+  await page.type("#search", "zebras");
+  await page.waitForFunction(() => document.querySelectorAll(".clip").length >= 1);
+  await page.keyboard.down("Alt");
+  await page.keyboard.press("Digit1");
+  await page.keyboard.up("Alt");
+  await page.waitForFunction(async (text) => (await navigator.clipboard.readText()) === text, {}, pinned.text);
+  await page.click("#clear-search");
+});
+
+test("formatted text keeps its formatting, and can be copied without it", async () => {
+  await page.bringToFront();
+  await page.evaluate(() => navigator.clipboard.write([new ClipboardItem({
+    "text/plain": new Blob(["Bold heading"], { type: "text/plain" }),
+    "text/html": new Blob(["<b>Bold heading</b>"], { type: "text/html" }),
+  })]));
+  await page.evaluate(() => { document.querySelector("#status").textContent = ""; });
+  await page.click("#capture");
+  await page.waitForFunction(() => document.querySelector("#status").textContent === "Saved.");
+  const saved = (await storedClips()).find((clip) => clip.text === "Bold heading");
+  assert.match(saved.html, /<b>Bold heading<\/b>/);
+  await setClipboard("something else");
+  await clickRowAction("Bold heading", "copy");
+  await page.waitForFunction(async () => (await navigator.clipboard.read())[0].types.includes("text/html"));
+  await clickRowAction("Bold heading", "more");
+  await page.waitForSelector("#clip-menu:popover-open");
+  await page.keyboard.press("f");
+  await page.waitForFunction(() => document.querySelector("#status").textContent === "Copied without formatting.");
+  assert.deepEqual(await page.evaluate(async () => (await navigator.clipboard.read())[0].types), ["text/plain"]);
+});
+
+test("pasting puts the clip into the focused field of a page", async () => {
+  const other = await browser.newPage();
+  await other.setContent('<input id="field" value="Hello "><div id="editor" contenteditable="true">Dear team</div>');
+  await other.focus("#field");
+  await other.evaluate(() => document.querySelector("#field").setSelectionRange(6, 6));
+  assert.equal(await other.evaluate(insertIntoFocusedField, "world"), true);
+  assert.equal(await other.$eval("#field", (field) => field.value), "Hello world");
+  await other.evaluate(() => {
+    const editor = document.querySelector("#editor");
+    editor.focus();
+    getSelection().collapse(editor.firstChild, 9);
+  });
+  assert.equal(await other.evaluate(insertIntoFocusedField, "!"), true);
+  assert.equal(await other.$eval("#editor", (editor) => editor.textContent), "Dear team!");
+  await other.evaluate(() => document.activeElement.blur());
+  assert.equal(await other.evaluate(insertIntoFocusedField, "nowhere"), false);
+  await other.close();
+  await page.bringToFront();
+});
+
+test("typing a snippet abbreviation in a page expands it", async () => {
+  const other = await browser.newPage();
+  await other.setContent('<textarea id="field"></textarea>');
+  // The page script asks Copyhold for abbreviations and text; here a stand-in answers.
+  await other.evaluate(() => {
+    globalThis.chrome = { runtime: { sendMessage: async (message) => {
+      if (message.type === "copyhold-abbreviations") return [";addr"];
+      return message.abbreviation === ";addr" ? { text: "221B Baker Street" } : {};
+    } } };
+  });
+  await other.addScriptTag({ content: expanderSource });
+  await wait(100);
+  await other.click("#field");
+  await other.keyboard.type("Ship to ;addr");
+  await other.waitForFunction(() => document.querySelector("#field").value === "Ship to 221B Baker Street");
+  // Input a page fakes doesn't expand.
+  await other.evaluate(() => {
+    const field = document.querySelector("#field");
+    field.value = "x ;addr";
+    field.setSelectionRange(7, 7);
+    field.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data: "r" }));
+  });
+  await wait(200);
+  assert.equal(await other.$eval("#field", (field) => field.value), "x ;addr");
+  await other.close();
+  await page.bringToFront();
+});
+
+test("the side panel view stays open, and ? shows the keyboard shortcuts", async () => {
+  const panel = await browser.newPage();
+  await panel.goto(`${origin}/popup/popup.html?view=panel`);
+  await panel.waitForFunction(() => document.documentElement.classList.contains("side-panel"));
+  assert.equal(await panel.$eval("#open-side-panel", (item) => item.hidden), true);
+  await panel.focus("#search");
+  await panel.keyboard.press("Escape");
+  await wait(300);
+  assert.equal(panel.isClosed(), false);
+  await panel.keyboard.press("?");
+  await panel.waitForSelector("#shortcuts-dialog[open]");
+  assert.match(await panel.$eval("#shortcuts-list", (list) => list.textContent), /Paste the chosen clip/);
+  await panel.close();
+  await page.bringToFront();
+});
+
+test("the what's-new tip can be dismissed for good", async () => {
+  await openPopup();
+  await page.waitForSelector("#tip-bar:not([hidden])");
+  await page.click("#dismiss-tip");
+  await page.waitForFunction(async () => (await (await import("/lib/settings.js")).getSettings()).tipsSeen === "1.4");
+  await openPopup();
+  await wait(300);
+  assert.equal(await page.$eval("#tip-bar", (tip) => tip.hidden), true);
 });
 
 test("automatic saving captures copied text with the popup closed", async () => {

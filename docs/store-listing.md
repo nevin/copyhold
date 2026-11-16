@@ -23,6 +23,10 @@ Text to paste into the Chrome Web Store developer dashboard, Microsoft Edge Add-
 >
 > **Organize it.** Give clips colour-coded categories, subcategories, and tags, organize many at once, and let rules sort new clips for you. Filter by any of them, sort by most used, or type #tag in search. Edits save as you type.
 >
+> **Straight into the page.** Choose a clip and it goes into the field you were typing in. Keep Copyhold in the side panel and drag clips anywhere, or type an abbreviation like ;addr to expand a snippet.
+>
+> **Find it fast.** Search ranks the best matches first and forgives typos, with filters for links, code, images, and more. Deleted clips wait 30 days in the Trash.
+>
 > **Work faster.** Templates fill in the date or your clipboard. Copy as uppercase, a single line, or formatted JSON. Press Cmd+K or Ctrl+K to run any command.
 >
 > **Lock it with a passphrase.** Encrypt every clip's text and images. Copyhold keeps saving while locked, and locks again when you step away.
@@ -48,6 +52,10 @@ Text to paste into the Chrome Web Store developer dashboard, Microsoft Edge Add-
 | `clipboardRead` | Reads plain text from the clipboard when the user selects Save clipboard, and, only if the user turns on automatic saving, about once a second in the background to save newly copied text. |
 | `clipboardWrite` | Copies a saved clip back to the clipboard when the user selects it. |
 | `alarms` | Deletes clips whose expiry date has passed and trims the history to the user's chosen size about once a minute, ends a 15-minute pause of automatic saving, and locks the optional passphrase lock again after the user's chosen time. |
+| `activeTab` | When the user opens Copyhold and chooses a clip, pastes it into the text field they were typing in on that tab. No access to any page until the user opens Copyhold, and only to that tab. |
+| `scripting` | Inserts the chosen clip at the caret in the active tab (with `activeTab`), and, only if the user turns on snippet expansion and grants site access, registers the script that expands their abbreviations. |
+| `sidePanel` | Opens Copyhold in the side panel when the user chooses Open in side panel. |
+| Optional host access `<all_urls>` | Requested only when the user turns on snippet expansion, to watch for their abbreviations as they type in web pages. Never requested at install; removed when turned off. |
 | `contextMenus` | Adds a "Save selection to Copyhold" item when the user right-clicks selected text. Only the selected text is received, and only when the user chooses the item. |
 | `idle` | Stops the background clipboard monitor while the computer is idle, since nothing can be copied then, and restarts it when the user returns. Also locks the optional passphrase lock when the computer locks. Only the active, idle, or locked state is read. |
 | `offscreen` | Reads the clipboard from an offscreen document, because a service worker cannot access the clipboard. The document is created only while automatic saving is on and not paused, or for a moment when the user presses the Save clipboard keyboard shortcut. |

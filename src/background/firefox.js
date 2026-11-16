@@ -1,6 +1,7 @@
 // Firefox background. Its background page can read the clipboard directly, so it runs the monitor itself.
 import "./expiry.js";
 import "./lock-timer.js";
+import "./expander.js";
 import { describeSave, readClipboard, saveContent, withClipboardLock } from "../lib/clipboard.js";
 import { createPoller } from "../lib/poller.js";
 import { getSettings, onSettingsChange } from "../lib/settings.js";

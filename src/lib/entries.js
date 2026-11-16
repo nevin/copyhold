@@ -1,7 +1,9 @@
 import { maxImageBytes } from "./images.js";
-import { cleanName, cleanTags } from "./organize.js";
+import { cleanAbbreviation, cleanName, cleanTags } from "./organize.js";
 
 // Base64 makes data 4/3 the size; a backup's images get the same limit as saving one.
+// Formatting larger than this is dropped; the plain text is still kept.
+export const maxHtmlLength = 1_000_000;
 const maxImageDataUrlLength = Math.ceil(maxImageBytes * 4 / 3) + 64;
 import { t } from "./i18n.js";
 
@@ -29,6 +31,14 @@ export function createEntry(fields) {
     // A template fills in placeholders such as {date} when it is copied.
     template: fields.template === true,
   };
+  // The formatted (HTML) version of copied text, kept so the clip can be pasted with its formatting.
+  // It is only ever written back to the clipboard, never shown as HTML in Copyhold.
+  if (typeof fields.html === "string" && fields.html && fields.html.length <= maxHtmlLength) entry.html = fields.html;
+  // Typing the abbreviation in a text field expands it to the clip, when snippet expansion is on.
+  const abbreviation = cleanAbbreviation(fields.abbreviation);
+  if (abbreviation) entry.abbreviation = abbreviation;
+  // Pinned clips keep Alt+number slots in the order they were pinned.
+  if (entry.pinned) entry.pinnedAt = isTimestamp(fields.pinnedAt) ? fields.pinnedAt : entry.createdAt;
   // The page a selection was saved from.
   if (fields.sourceUrl && /^https?:\/\//i.test(fields.sourceUrl)) {
     entry.sourceUrl = String(fields.sourceUrl).slice(0, 2048);
@@ -97,7 +107,8 @@ async function dataUrl(blob) {
 }
 
 const exportedFields = [
-  "kind", "text", "title", "description", "category", "subcategory", "tags", "useCount", "template", "sourceUrl", "sourceTitle",
+  "kind", "text", "html", "title", "description", "category", "subcategory", "tags", "abbreviation", "useCount", "template",
+  "sourceUrl", "sourceTitle", "pinnedAt",
   "visibility", "pinned", "createdAt", "lastUsedAt", "expiresAt", "defaultExpiry",
 ];
 
@@ -150,7 +161,9 @@ export async function importEntries(json, describeImage) {
       (entry.category != null && typeof entry.category !== "string") ||
       (entry.subcategory != null && typeof entry.subcategory !== "string") ||
       (entry.tags != null && (!Array.isArray(entry.tags) || entry.tags.some((tag) => typeof tag !== "string"))) ||
-      (entry.sourceUrl != null && typeof entry.sourceUrl !== "string")) {
+      (entry.sourceUrl != null && typeof entry.sourceUrl !== "string") ||
+      (entry.html != null && (typeof entry.html !== "string" || entry.html.length > maxHtmlLength)) ||
+      (entry.abbreviation != null && typeof entry.abbreviation !== "string")) {
       throw new Error(t("errorInvalidEntry", index + 1));
     }
     const fields = { ...entry, expiresAt: entry.expiresAt == null ? null : new Date(entry.expiresAt).toISOString() };

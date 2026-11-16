@@ -12,7 +12,7 @@ export function orderKey(entry) {
 function openDatabase() {
   database ??= new Promise((resolve, reject) => {
     // The database keeps its pre-rename name; renaming it would orphan existing clips.
-    const request = indexedDB.open("clipfile", 5);
+    const request = indexedDB.open("clipfile", 6);
     request.onupgradeneeded = ({ oldVersion }) => {
       if (oldVersion < 1) request.result.createObjectStore("entries", { keyPath: "id" });
       if (oldVersion < 2) request.result.createObjectStore("clipboard");
@@ -31,6 +31,12 @@ function openDatabase() {
           cursor.update({ ...cursor.value, order: orderKey(cursor.value) });
           cursor.continue();
         };
+      }
+      if (oldVersion < 6) {
+        // Deleted clips wait in the trash before they're removed for good.
+        request.result.createObjectStore("trash", { keyPath: "id" }).createIndex("deletedAt", "deletedAt");
+        // Snippet abbreviations are looked up without loading every clip.
+        entries.createIndex("abbreviation", "abbreviation");
       }
     };
     request.onsuccess = () => {
@@ -207,11 +213,16 @@ export async function add(entries) {
   });
 }
 
-// Puts back records exactly as remove returned them, for undo.
+// Puts back records exactly as remove returned them, for undo, and takes them out of the trash.
 export function restore(records) {
-  return transact("readwrite", (store) => {
-    for (const record of records) store.put(record);
-  });
+  return transact("readwrite", (store, transaction) => {
+    const trash = transaction.objectStore("trash");
+    for (const record of records) {
+      const { deletedAt, ...entry } = record;
+      store.put(entry);
+      trash.delete(record.id);
+    }
+  }, ["entries", "trash"]);
 }
 
 // Returns an unexpired clip with the same content, if there is one. Locked clips have no hash.
@@ -237,6 +248,11 @@ export async function update(id, changes) {
       const next = { ...request.result, ...(sealedChanges ?? changes), revision: (request.result.revision ?? 0) + 1 };
       if (sealedChanges) next.sealed = { ...request.result.sealed, ...sealedChanges.sealed };
       if (hash) next.hash = hash;
+      // Pinning records when, so pinned clips keep stable Alt+number slots.
+      if (changes.pinned === true && !request.result.pinned) next.pinnedAt = new Date().toISOString();
+      if (changes.pinned === false) delete next.pinnedAt;
+      // An empty abbreviation is removed, so it isn't indexed.
+      if ("abbreviation" in changes && !changes.abbreviation) delete next.abbreviation;
       if (next.pinned && next.defaultExpiry) {
         next.expiresAt = null;
         next.defaultExpiry = false;
@@ -253,19 +269,97 @@ export function remove(id) {
   return removeMany([id]);
 }
 
-export async function removeMany(ids) {
+/**
+ * Deletes clips, moving them to the trash unless permanent is set. Returns the records as they were.
+ * Expiry, history trimming, and freeing space delete permanently; deleting by hand goes to the trash.
+ * @param {string[]} ids
+ * @param {{ permanent?: boolean }} [options]
+ */
+export async function removeMany(ids, { permanent = false } = {}) {
   const removed = [];
-  await transact("readwrite", (store) => {
+  const deletedAt = new Date().toISOString();
+  await transact("readwrite", (store, transaction) => {
+    const trash = transaction.objectStore("trash");
     for (const id of new Set(ids)) {
       const request = store.get(id);
       request.onsuccess = () => {
         if (!request.result) return;
         removed.push(request.result);
         store.delete(id);
+        if (!permanent) trash.put({ ...request.result, deletedAt });
       };
     }
-  });
+  }, ["entries", "trash"]);
   return removed;
+}
+
+/** Clips in the trash, most recently deleted first. */
+export async function listTrash() {
+  const records = await transact("readonly", (trash) => trash.getAll(), ["trash"]);
+  return records.sort((first, second) => second.deletedAt.localeCompare(first.deletedAt));
+}
+
+export function countTrash() {
+  return transact("readonly", (trash) => trash.count(), ["trash"]);
+}
+
+/** Moves clips from the trash back into the history. */
+export async function restoreFromTrash(ids) {
+  const records = await transact("readonly", (trash) => {
+    const found = [];
+    for (const id of ids) {
+      const request = trash.get(id);
+      request.onsuccess = () => { if (request.result) found.push(request.result); };
+    }
+    // transact returns request.result once the transaction completes, so this hands back the found records.
+    return { get result() { return found; } };
+  }, ["trash"]);
+  await restore(records);
+  return records.length;
+}
+
+/** Deletes clips from the trash for good, or all of them when no ids are given. */
+export function deleteFromTrash(ids) {
+  return transact("readwrite", (trash) => {
+    if (!ids) trash.clear();
+    else for (const id of ids) trash.delete(id);
+  }, ["trash"]);
+}
+
+/** Removes trashed clips deleted more than the given number of days ago. Returns whether any were removed. */
+export async function purgeTrash(days = 30) {
+  let removed = false;
+  const cutoff = new Date(Date.now() - days * 86_400_000).toISOString();
+  await transact("readwrite", (trash) => {
+    const request = trash.index("deletedAt").openCursor(IDBKeyRange.upperBound(cutoff));
+    request.onsuccess = () => {
+      const cursor = request.result;
+      if (!cursor) return;
+      cursor.delete();
+      removed = true;
+      cursor.continue();
+    };
+  }, ["trash"]);
+  return removed;
+}
+
+/** Abbreviations in use, with the ids of their clips. */
+export async function listAbbreviations() {
+  const found = [];
+  await transact("readonly", (store) => {
+    const request = store.index("abbreviation").openKeyCursor();
+    request.onsuccess = () => {
+      const cursor = request.result;
+      if (!cursor) return;
+      found.push({ abbreviation: String(cursor.key), id: String(cursor.primaryKey) });
+      cursor.continue();
+    };
+  });
+  return found;
+}
+
+export function get(id) {
+  return transact("readonly", (store) => store.get(id));
 }
 
 // Clips saved before version 1.2 have no hash; this adds one so duplicates can be found.
@@ -295,12 +389,20 @@ export async function backfillHashes() {
 export async function rewriteAll(transform, meta) {
   const records = [];
   for (const entry of await transact("readonly", (store) => store.getAll())) records.push(await transform(entry));
+  // Trashed clips are rewritten too, so turning the lock on encrypts them as well.
+  const trashed = [];
+  for (const entry of await transact("readonly", (trash) => trash.getAll(), ["trash"])) {
+    const { deletedAt, ...rest } = entry;
+    trashed.push({ ...await transform(rest), deletedAt });
+  }
   await transact("readwrite", (store, transaction) => {
     for (const record of records) store.put({ ...record, order: orderKey(record) });
+    const trash = transaction.objectStore("trash");
+    for (const record of trashed) trash.put(record);
     const metaStore = transaction.objectStore("meta");
     for (const [key, value] of Object.entries(meta)) {
       if (value === undefined) metaStore.delete(key);
       else metaStore.put(value, key);
     }
-  }, ["entries", "meta"]);
+  }, ["entries", "meta", "trash"]);
 }

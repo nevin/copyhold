@@ -42,7 +42,15 @@ async function build() {
       if (browser === "firefox") {
         browserManifest.background = { scripts: ["background/firefox.js"], type: "module" };
         delete browserManifest.minimum_chrome_version;
-        browserManifest.permissions = manifest.permissions.filter((permission) => permission !== "offscreen");
+        browserManifest.permissions = manifest.permissions.filter((permission) => permission !== "offscreen" && permission !== "sidePanel");
+        // Firefox has a sidebar instead of Chrome's side panel.
+        delete browserManifest.side_panel;
+        browserManifest.sidebar_action = {
+          default_panel: "popup/popup.html?view=panel",
+          default_title: manifest.action.default_title,
+          default_icon: manifest.action.default_icon,
+          open_at_install: false,
+        };
         for (const path of chromiumOnly) await rm(join(output, path), { recursive: true, force: true });
       }
       await writeFile(join(output, "manifest.json"), `${JSON.stringify(browserManifest, null, 2)}\n`);

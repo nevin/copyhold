@@ -104,6 +104,24 @@ Select **Filter** next to **All clips** and **Pinned** to filter by a category o
 
 **Manage categories and tags** in **Settings and backups** renames or deletes them across every clip. Renaming to a name that already exists merges the two; deleting removes the label but keeps the clips.
 
+### Pasting into pages, the side panel, and snippets
+
+In the popup, choosing a clip (Enter, a click, or Alt+number) puts it into the text field you were typing in, and copies it too. Turn off **Paste into the page when you choose a clip** in **Settings and backups** to copy only. On pages extensions can't reach, such as browser settings, Copyhold copies.
+
+**Open in side panel** in the **⋯** menu keeps Copyhold beside the page (the sidebar in Firefox). Drag any clip into a text field or app; images drag as files.
+
+Give a clip an **Abbreviation** in the editor, such as `;addr`, and turn on **Expand snippet abbreviations as you type** in **Settings and backups**. Chrome asks to let Copyhold read and change pages; then typing the abbreviation in a web page replaces it with the clip. Make abbreviations distinctive, for example starting with `;`.
+
+Pinned clips keep **Alt+1** to **Alt+9** in the order you pinned them, whatever the sort or search; remaining numbers go to the first clips shown.
+
+### Search and the Trash
+
+Search ranks clips by how well they match, title and tags first, highlights the matched words, and forgives one typo in words of four letters or more when there are few exact matches. Narrow it with keywords: `cat:Work`, `sub:Code`, `tag:urgent` (or `#urgent`), `type:link` (also `image`, `code`, `text`, `email`, `color`), `is:pinned` (also `template`, `expiring`, `masked`, `hidden`, `formatted`, `snippet`), `before:2026-11-01`, and `after:2026-11-01`. The **Filter** panel has one-click type filters too. Press **?** for every shortcut and keyword.
+
+Deleting a clip moves it to the **Trash** in the **⋯** menu for 30 days, where you can restore it or delete it for good. Select clips and choose **Combine** to join them into one clip.
+
+Copied text keeps its formatting, so pasting a clip into an editor keeps bold, links, and lists. **Copy without formatting** (**F** in the actions menu) gives plain text.
+
 ### Organizing many clips, rules, and colours
 
 Select clips (the box next to the filters selects every shown clip) and choose **Organize** to set or remove a category, or add and remove tags, for all of them at once.

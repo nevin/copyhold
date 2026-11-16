@@ -6,7 +6,7 @@ Copyhold is a clipboard manager for Chrome, Edge, and Firefox. This policy expla
 
 ## What Copyhold stores
 
-- **Clips:** the text and images you save, with any title, description, category, subcategory, tags, template setting, how many times you've copied it, the page it was selected on (for **Save selection to Copyhold**), pin, display setting, expiry date, and the times you created and last copied each clip. Images are stored with a small thumbnail.
+- **Clips:** the text and images you save (with the formatted version of copied text, when there is one), with any abbreviation, title, description, category, subcategory, tags, template setting, how many times you've copied it, the page it was selected on (for **Save selection to Copyhold**), pin, display setting, expiry date, and the times you created and last copied each clip. Images are stored with a small thumbnail.
 - **Hashes of clips:** a one-way SHA-256 hash of each clip and of the last clipboard content Copyhold saw, so it can find a clip you copy again instead of saving a duplicate. The content can't be recovered from a hash. With the passphrase lock on, clips have no hash, and the clipboard hash is strengthened with PBKDF2 so it's slow to guess.
 - **Settings:** your theme, list density, whether previews are hidden, default retention period, history size, how to handle sensitive text, whether automatic saving of text and images is on, how soon the lock closes again, whether the popup closes after copying, your sort order, category colours, and auto-tag rules.
 - **The passphrase lock, if you set one up:** an encryption key pair. The private key is itself encrypted with your passphrase; Copyhold never stores the passphrase. While Copyhold is unlocked, the private key is kept in the browser's session storage, which is held in memory and cleared when the browser closes.
@@ -27,12 +27,22 @@ If you set up a passphrase, Copyhold encrypts the text, title, description, cate
 
 The **Save the clipboard** keyboard shortcut and the **Save selection to Copyhold** menu item save what you choose at that moment. The menu item receives only the text you selected and the address and title of that page, which Copyhold keeps with the clip; it can't read web pages otherwise.
 
+## Pasting into pages and snippet expansion
+
+When you choose a clip in the popup, Copyhold puts it into the text field you were typing in on the page you opened it over. It uses the browser's one-time permission for the current tab, given when you open Copyhold, and only inserts the clip; it doesn't read the page. You can turn this off in Settings.
+
+**Snippet expansion** is off until you turn it on, and the browser then asks you to let Copyhold read and change web pages. With it on, a small script in each page watches what you type for your abbreviations, such as `;addr`. When you type one, it asks Copyhold for that clip and inserts it. It doesn't record, keep, or send what you type, and only typing on the keyboard triggers it, not the page itself. Turning it off removes the script and gives up the site access. Abbreviations are stored unencrypted, even with the lock on, so pages can be checked for them; the clips they expand to stay encrypted, and locked clips expand only while Copyhold is unlocked.
+
+## Trash
+
+Clips you delete wait in the Trash for 30 days, then are removed for good; you can restore them or empty the Trash sooner. Expired clips, clips trimmed by the history size, and images removed with **Delete image clips** are deleted at once. With the lock on, trashed clips are encrypted too.
+
 ## What Copyhold never does
 
 - It never sends your clips, settings, or any other data off your device. It makes no network requests at all.
 - It doesn't use analytics, tracking, advertising, or third-party code.
 - It doesn't sell, share, or transfer your data to anyone.
-- It doesn't read web pages or your browsing history. It reads the clipboard only as described above, and page text only when you choose **Save selection to Copyhold**.
+- It doesn't read web pages or your browsing history. It reads the clipboard only as described above, page text only when you choose **Save selection to Copyhold**, and, with snippet expansion on, only what you type, to spot your abbreviations.
 
 ## Exports
 
@@ -51,6 +61,9 @@ The **Save the clipboard** keyboard shortcut and the **Save selection to Copyhol
 | Read clipboard (`clipboardRead`) | To save clipboard text when you select **Save clipboard**, or automatically if you turn that on. |
 | Write clipboard (`clipboardWrite`) | To copy a saved clip back to your clipboard. |
 | Alarms (`alarms`) | To delete expired clips and trim the history about once a minute, to end a pause after 15 minutes, and to lock again after the time you choose. |
+| Active tab (`activeTab`) and scripting (`scripting`) | To paste a chosen clip into the text field on the page you opened Copyhold over. The access lasts only for that tab, only after you open Copyhold. |
+| Side panel (`sidePanel`, Chrome and Edge) | To open Copyhold in the browser's side panel. |
+| Access to all sites (optional) | Only if you turn on snippet expansion: to watch for your abbreviations as you type in web pages. |
 | Context menus (`contextMenus`) | To add **Save selection to Copyhold** when you right-click selected text. |
 | Idle detection (`idle`) | To stop reading the clipboard while the computer is idle, and to lock Copyhold when the computer locks. Copyhold only learns whether you're active, idle, or locked. |
 | Offscreen document (`offscreen`, Chrome and Edge only) | To read the clipboard in the background while automatic saving is on, or when you use the Save the clipboard shortcut. |

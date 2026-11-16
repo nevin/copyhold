@@ -106,3 +106,12 @@ test("backups may hold only raster images within the size limit", async () => {
   await assert.rejects(importEntries(backup("data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=")), /Entry 1 is invalid/);
   await assert.rejects(importEntries(backup(`data:image/png;base64,${"A".repeat(36_000_000)}`)), /Entry 1 is invalid/);
 });
+
+test("formatting, abbreviations, and pin order are kept and cleaned", async () => {
+  const clip = createEntry({ text: "Hi", html: "<b>Hi</b>", abbreviation: "  ;hi ", pinned: true });
+  assert.deepEqual([clip.html, clip.abbreviation, clip.pinnedAt], ["<b>Hi</b>", ";hi", clip.createdAt]);
+  assert.equal(createEntry({ text: "x", abbreviation: "has space" }).abbreviation, undefined);
+  assert.equal(createEntry({ text: "x", html: "y".repeat(1_000_001) }).html, undefined);
+  const [imported] = await importEntries(await exportEntries([clip]));
+  assert.deepEqual([imported.html, imported.abbreviation, imported.pinnedAt], ["<b>Hi</b>", ";hi", clip.pinnedAt]);
+});

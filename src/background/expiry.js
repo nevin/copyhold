@@ -1,11 +1,13 @@
 import { getSettings } from "../lib/settings.js";
-import { backfillHashes, removeExpired, trimHistory } from "../lib/store.js";
+import { backfillHashes, purgeTrash, removeExpired, trimHistory } from "../lib/store.js";
 import { everyMinute } from "./tick.js";
 
 async function cleanUp() {
   try {
     // Trimming here also covers clips added by import or New clip.
     const expired = await removeExpired();
+    // Trashed clips are removed for good after 30 days.
+    await purgeTrash(30);
     const trimmed = await trimHistory((await getSettings()).historyLimit);
     if (expired || trimmed) {
       const changes = new BroadcastChannel("copyhold-entries");

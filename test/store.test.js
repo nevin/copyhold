@@ -33,6 +33,9 @@ test("upgrading keeps settings and capture state from the old clipboard store", 
     pausedUntil: 0,
     retentionDays: 7,
     closeAfterCopy: true,
+    pasteIntoPage: true,
+    expandAbbreviations: false,
+    tipsSeen: "",
     historyLimit: 0,
     density: "comfortable",
     hidePreviews: false,
@@ -128,4 +131,42 @@ test("listRecent returns the first clips in list order", async () => {
   assert.deepEqual((await store.listRecent(2)).map((entry) => entry.text), ["recent 3", "recent 4"]);
   assert.equal(await store.countUnpinned(), (await store.list()).filter((entry) => !entry.pinned).length);
   await store.removeMany(clips.map(({ id }) => id));
+});
+
+test("deleted clips go to the trash, can be restored, and are purged after 30 days", async () => {
+  await store.removeMany((await store.list()).map(({ id }) => id), { permanent: true });
+  await store.deleteFromTrash();
+  const [kept, trashed, gone] = ["kept", "trashed", "gone"].map((text) => createEntry({ text }));
+  await store.add([kept, trashed, gone]);
+  await store.removeMany([trashed.id]);
+  await store.removeMany([gone.id], { permanent: true });
+  assert.deepEqual((await store.list()).map(({ text }) => text), ["kept"]);
+  const [inTrash] = await store.listTrash();
+  assert.equal(inTrash.text, "trashed");
+  assert.ok(inTrash.deletedAt);
+  assert.equal(await store.restoreFromTrash([trashed.id]), 1);
+  assert.equal(await store.countTrash(), 0);
+  assert.deepEqual((await store.list()).map(({ text }) => text).sort(), ["kept", "trashed"]);
+  const restored = (await store.list()).find(({ text }) => text === "trashed");
+  assert.equal(restored.deletedAt, undefined);
+
+  await store.removeMany([trashed.id]);
+  assert.equal(await store.purgeTrash(30), false);
+  assert.equal(await store.purgeTrash(-1), true);
+  assert.equal(await store.countTrash(), 0);
+  await store.removeMany([kept.id], { permanent: true });
+});
+
+test("pinning records when, and abbreviations are indexed", async () => {
+  const clip = createEntry({ text: "address", abbreviation: ";addr" });
+  await store.add([clip]);
+  assert.deepEqual(await store.listAbbreviations(), [{ abbreviation: ";addr", id: clip.id }]);
+  await store.update(clip.id, { pinned: true });
+  assert.ok((await store.get(clip.id)).pinnedAt);
+  await store.update(clip.id, { pinned: false, abbreviation: "" });
+  const updated = await store.get(clip.id);
+  assert.equal(updated.pinnedAt, undefined);
+  assert.equal(updated.abbreviation, undefined);
+  assert.deepEqual(await store.listAbbreviations(), []);
+  await store.removeMany([clip.id], { permanent: true });
 });

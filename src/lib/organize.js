@@ -1,8 +1,19 @@
 // Categories, subcategories, and tags, and the filters built from them.
 // Each clip has at most one category, one subcategory within it, and any number of tags.
 
+import { clipKind } from "./search.js";
+
 export const maxTags = 20;
 const maxNameLength = 40;
+
+/**
+ * A snippet abbreviation such as ";addr": 2 to 32 characters with no spaces, or "" when invalid.
+ * @param {unknown} value
+ */
+export function cleanAbbreviation(value) {
+  const abbreviation = String(value ?? "").trim();
+  return /^\S{2,32}$/.test(abbreviation) ? abbreviation : "";
+}
 
 /** Trims a category, subcategory, or tag name and collapses its spaces. */
 export function cleanName(name) {
@@ -74,17 +85,17 @@ export function parseQuery(query) {
 }
 
 /**
- * @typedef {{ category: string, subcategory: string, tags: string[] }} Filter
+ * @typedef {{ category: string, subcategory: string, tags: string[], types?: string[] }} Filter
  * Empty strings and an empty list match every clip. A clip must have all the chosen tags.
  */
 
 /** @returns {Filter} */
 export function emptyFilter() {
-  return { category: "", subcategory: "", tags: [] };
+  return { category: "", subcategory: "", tags: [], types: [] };
 }
 
 export function isFiltering(filter) {
-  return Boolean(filter.category || filter.tags.length);
+  return Boolean(filter.category || filter.tags.length || filter.types?.length);
 }
 
 /**
@@ -94,6 +105,7 @@ export function isFiltering(filter) {
 export function matchesFilter(clip, filter) {
   if (filter.category && !sameName(clip.category ?? "", filter.category)) return false;
   if (filter.subcategory && !sameName(clip.subcategory ?? "", filter.subcategory)) return false;
+  if (filter.types?.length && !filter.types.includes(clipKind(clip))) return false;
   const clipTags = clip.tags ?? [];
   return filter.tags.every((tag) => clipTags.some((clipTag) => sameName(clipTag, tag)));
 }

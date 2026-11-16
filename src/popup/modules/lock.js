@@ -152,7 +152,8 @@ byId("forgot-passphrase").addEventListener("click", () => run(async () => {
     true,
   )) return;
   await withClipboardLock(async () => {
-    await store.removeMany((await store.list()).map(({ id }) => id));
+    await store.removeMany((await store.list()).map(({ id }) => id), { permanent: true });
+    await store.deleteFromTrash();
     await store.removeExpired();
     // Encrypted rules and colours can't be read without the passphrase either, so they go too.
     await store.setMeta({ lock: undefined, sealedSettings: undefined, skipClipboard: true });

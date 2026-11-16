@@ -62,6 +62,16 @@ Load it with **Load unpacked** on `chrome://extensions` and `edge://extensions`.
 - [ ] Cmd+K or Ctrl+K opens the palette; typing a tag name and pressing Enter filters by it.
 - [ ] **Storage** in Settings shows clip and image counts and sizes.
 
+**Paste, side panel, snippets, search, and Trash**
+- [ ] Click into a text field on a web page, open Copyhold, and press Enter: the clip appears in the field and the popup closes.
+- [ ] Do the same on `chrome://settings`: the clip is copied, and nothing breaks.
+- [ ] **Open in side panel**: Copyhold stays beside the page; drag a clip into a text field.
+- [ ] Give a clip the abbreviation `;test`, turn on snippet expansion (allow the prompt), and type `;test` in a web page text field: it expands. Turn it off: Chrome no longer lists site access.
+- [ ] Search with a typo, `type:link`, and `is:pinned`; the best match is first and highlighted.
+- [ ] Delete a clip, restore it from the Trash, then empty the Trash.
+- [ ] Copy formatted text from a web page and save it; pasting the clip into a document keeps the formatting; **Copy without formatting** doesn't.
+- [ ] Press `?` for the shortcuts; the what's-new tip disappears after **Got it**.
+
 **Popup**
 - [ ] Open with Alt+Shift+Y (Option+Shift+Y on macOS). Search is focused.
 - [ ] Type to filter, use Up and Down, press Enter: the clip is copied and the popup closes.

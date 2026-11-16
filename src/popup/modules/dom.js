@@ -8,7 +8,11 @@ import { t } from "../../lib/i18n.js";
  */
 export const byId = (id) => document.getElementById(id);
 
-export const fullTab = new URLSearchParams(location.search).get("view") === "tab";
+const view = new URLSearchParams(location.search).get("view");
+export const fullTab = view === "tab";
+// The side panel stays open beside the page, like the full-tab view, but is narrow like the popup.
+export const inPanel = view === "panel";
+export const inPopup = !fullTab && !inPanel;
 export const isMac = /mac|iphone|ipad/i.test(
   /** @type {any} */ (navigator).userAgentData?.platform ?? navigator.platform,
 );

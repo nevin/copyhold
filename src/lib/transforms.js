@@ -63,6 +63,17 @@ export const placeholders = ["date", "isodate", "time", "datetime", "weekday", "
  * @param {{ now?: Date, clipboard?: () => Promise<string> }} [options]
  */
 export async function fillTemplate(text, { now = new Date(), clipboard = async () => "" } = {}) {
+  const clipboardText = text.includes("{clipboard}") ? await clipboard().catch(() => "") : "";
+  return fillTemplateNow(text, { now, clipboardText });
+}
+
+/**
+ * Fills placeholders without waiting, for dragging, where the clipboard can't be read; {clipboard} is
+ * filled with clipboardText.
+ * @param {string} text
+ * @param {{ now?: Date, clipboardText?: string }} [options]
+ */
+export function fillTemplateNow(text, { now = new Date(), clipboardText = "" } = {}) {
   const pad = (value) => String(value).padStart(2, "0");
   const values = {
     date: () => now.toLocaleDateString(),
@@ -71,7 +82,6 @@ export async function fillTemplate(text, { now = new Date(), clipboard = async (
     datetime: () => now.toLocaleString([], { dateStyle: "medium", timeStyle: "short" }),
     weekday: () => now.toLocaleDateString([], { weekday: "long" }),
   };
-  const clipboardText = text.includes("{clipboard}") ? await clipboard().catch(() => "") : "";
   return text.replace(/\{(\w+)\}/g, (match, name) => {
     if (name === "clipboard") return clipboardText;
     return values[name]?.() ?? match;

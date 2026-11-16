@@ -8,6 +8,8 @@ export const state = {
   partial: false,
   /** Clips currently rendered, in list order. @type {any[]} */
   shownClips: [],
+  /** The clips Alt+1 to Alt+9 copy, in order. @type {any[]} */
+  slots: [],
   /** @type {string | undefined} */
   activeId: undefined,
   selecting: false,
@@ -21,8 +23,13 @@ export const state = {
   /** Colour names keyed by lower-case category name. @type {Record<string, string>} */
   categoryColors: {},
   colorsVersion: 0,
+  /** Searched words to highlight in rows. @type {string[]} */
+  highlight: [],
   autoCaptureEnabled: false,
   closeAfterCopy: true,
+  pasteIntoPage: true,
+  /** The tab the popup was opened over, for pasting into. @type {number | undefined} */
+  pageTabId: undefined,
   openShortcut: "",
   /** Category, subcategory, and tags chosen in the filter panel. @type {import("../../lib/organize.js").Filter} */
   filter: emptyFilter(),

@@ -2,17 +2,18 @@ import { exportEntries, importEntries, sortEntries } from "../../lib/entries.js"
 import { decryptBackup, encryptBackup, encryptedBackup } from "../../lib/backup-crypto.js";
 import { describeImage } from "../../lib/images.js";
 import * as store from "../../lib/store.js";
-import { byId, fullTab, run, status } from "./dom.js";
+import { byId, fullTab, inPanel, run, status } from "./dom.js";
 import { loaders, refresh } from "./list.js";
 import { t, tn } from "../../lib/i18n.js";
 
 const file = byId("file");
 
-byId("import-hint").textContent = fullTab ? t("importHintTab") : t("importHintPopup");
+byId("import-hint").textContent = fullTab ? t("importHintTab") : inPanel ? "" : t("importHintPopup");
 if (!fullTab) byId("import").title = t("importHintPopup");
 
 byId("import").addEventListener("click", () => {
-  if (fullTab) file.click();
+  // The full-tab view and side panel stay open while the file picker is showing; the popup doesn't.
+  if (fullTab || inPanel) file.click();
   else window.open("popup.html?view=tab&import=1", "_blank", "noopener");
 });
 

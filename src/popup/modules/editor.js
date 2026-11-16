@@ -1,7 +1,7 @@
 import { createEntry, isExpired, withDefaultRetention } from "../../lib/entries.js";
 import { clipPreview, relativeTime } from "../../lib/format.js";
 import { t } from "../../lib/i18n.js";
-import { cleanName, cleanTags, collectOrganization, maxTags, parseTags } from "../../lib/organize.js";
+import { cleanAbbreviation, cleanName, cleanTags, collectOrganization, maxTags, parseTags } from "../../lib/organize.js";
 import { getSettings } from "../../lib/settings.js";
 import * as store from "../../lib/store.js";
 import { byId, isMac, run, textLine } from "./dom.js";
@@ -119,6 +119,7 @@ function readForm() {
   data.subcategory = data.category ? cleanName(subcategoryInput.value) : "";
   data.tags = [...editorTags];
   data.template = byId("template").checked;
+  data.abbreviation = cleanAbbreviation(data.abbreviation);
   return data;
 }
 
@@ -198,6 +199,8 @@ export function openEditor(entry) {
   subcategoryInput.value = entry?.subcategory ?? "";
   editorTags = [...entry?.tags ?? []];
   byId("template").checked = entry?.template === true;
+  byId("abbreviation").value = entry?.abbreviation ?? "";
+  byId("abbreviation-hint").textContent = t("abbreviationHint");
   byId("template").closest(".template-field").hidden = image;
   tagInput.value = "";
   renderTags();
@@ -225,8 +228,16 @@ export function confirmAction(title, message, action, destructive = false) {
 }
 
 byId("new").addEventListener("click", () => openEditor());
+// Warns when another clip already has the abbreviation, since only one of them can expand.
+function checkAbbreviation() {
+  const abbreviation = cleanAbbreviation(byId("abbreviation").value);
+  const taken = abbreviation && state.clips.some((clip) => clip.abbreviation === abbreviation && clip.id !== editedEntry?.id);
+  byId("abbreviation-hint").textContent = taken ? t("abbreviationTaken") : t("abbreviationHint");
+}
+
 editForm.addEventListener("input", (event) => {
   updateEditorPreview();
+  if (event.target === byId("abbreviation")) checkAbbreviation();
   if (event.target === categoryInput) updateSuggestions();
   if (event.target === tagInput) {
     // A suggestion picked from the list arrives as one replacement, and is added right away.

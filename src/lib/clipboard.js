@@ -17,7 +17,7 @@ export const supportsAutoCapture = Boolean(globalThis.chrome?.runtime?.getManife
 /**
  * Clipboard content: text, or an image.
  * Selections also carry the page they came from.
- * @typedef {{ text?: string, image?: Blob, sourceUrl?: string, sourceTitle?: string }} Content
+ * @typedef {{ text?: string, html?: string, image?: Blob, sourceUrl?: string, sourceTitle?: string }} Content
  */
 
 export function withClipboardLock(work) {
@@ -94,6 +94,7 @@ export async function saveContent(content, mode) {
     ? createEntry({ kind: "image", ...await describeImage(image) })
     : createEntry({
       text: content.text,
+      html: content.html,
       visibility: mask ? "masked" : "visible",
       sensitive: mask ? sensitive : undefined,
       ...source,
@@ -154,7 +155,8 @@ export async function readClipboard({ images = true } = {}) {
     for (const item of items) {
       if (item.types.includes("text/plain")) {
         const text = await (await item.getType("text/plain")).text();
-        if (text) return { text };
+        const html = item.types.includes("text/html") ? await (await item.getType("text/html")).text() : undefined;
+        if (text) return html ? { text, html } : { text };
       }
     }
     for (const item of items) {
@@ -192,7 +194,13 @@ export function saveSelection(text, source = {}) {
 async function writeContent(content) {
   try {
     if (content.image) await navigator.clipboard.write([new ClipboardItem({ [content.image.type]: content.image })]);
-    else await navigator.clipboard.writeText(content.text);
+    // Formatted clips are written as both HTML and plain text, so each app takes the version it supports.
+    else if (content.html) {
+      await navigator.clipboard.write([new ClipboardItem({
+        "text/plain": new Blob([content.text], { type: "text/plain" }),
+        "text/html": new Blob([content.html], { type: "text/html" }),
+      })]);
+    } else await navigator.clipboard.writeText(content.text);
   } catch {
     throw new Error(t("errorWriteClipboard"));
   }
@@ -208,16 +216,23 @@ async function writeContent(content) {
  * Copies a clip that has been decrypted, if it was locked. Templates fill in their placeholders,
  * and a transform such as "upper" changes the text as it is copied.
  * @param {any} entry
- * @param {{ transform?: string }} [options]
+ * @param {{ transform?: string, plain?: boolean }} [options] plain copies text without its formatting.
  */
-export async function copyClip(entry, { transform } = {}) {
-  if (entry.kind === "image") return withClipboardLock(() => writeContent({ image: entry.image }));
+export async function copyClip(entry, { transform, plain = false } = {}) {
+  if (entry.kind === "image") {
+    await withClipboardLock(() => writeContent({ image: entry.image }));
+    return null;
+  }
   let text = entry.text;
   // Reading the clipboard for {clipboard} happens before taking the lock that writing holds.
   if (entry.template) text = await fillTemplate(text, { clipboard: () => navigator.clipboard.readText() });
   const chosen = transforms.find(({ id }) => id === transform);
   if (chosen) text = chosen.apply(text);
-  return withClipboardLock(() => writeContent({ text }));
+  // Formatting is kept only when the text goes out unchanged.
+  const keepFormatting = entry.html && !plain && !chosen && !entry.template;
+  await withClipboardLock(() => writeContent(keepFormatting ? { text, html: entry.html } : { text }));
+  // The text as copied, after templates and transforms, for pasting into the page.
+  return text;
 }
 
 /** Copies the text of several clips, one per line. Images can't be combined, so they are left out. */

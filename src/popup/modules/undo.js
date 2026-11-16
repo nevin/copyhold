@@ -1,6 +1,7 @@
 import { isExpired } from "../../lib/entries.js";
 import * as store from "../../lib/store.js";
 import { byId, run } from "./dom.js";
+import { updateTrashCount } from "./trash.js";
 import { refresh, search } from "./list.js";
 import { t, tn } from "../../lib/i18n.js";
 
@@ -41,6 +42,7 @@ function holdUndo(reason, held) {
 /** @param {any[]} clips The stored entries that were deleted, as they were in the database. */
 export function offerUndo(clips) {
   if (!clips.length) return;
+  store.countTrash().then(updateTrashCount, () => {});
   clearTimeout(undoTimer);
   deletedClips = clips;
   undoBar.hidden = false;
@@ -67,6 +69,7 @@ undoButton.addEventListener("click", () => run(async () => {
   undoButton.disabled = true;
   try {
     await store.restore(restorable);
+    store.countTrash().then(updateTrashCount, () => {});
     if (deletedClips === batch) closeUndo();
     await refresh(restorable.length === batch.length ? t("deletionUndone") : t("expiredNotRestored"));
   } finally {

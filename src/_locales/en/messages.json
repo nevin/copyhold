@@ -730,10 +730,10 @@
     "message": "Expired clips could not be restored."
   },
   "clipsDeleted_one": {
-    "message": "Clip deleted"
+    "message": "Clip moved to trash"
   },
   "clipsDeleted_other": {
-    "message": "$1 clips deleted"
+    "message": "$1 clips moved to trash"
   },
   "untitledClip": {
     "message": "Untitled clip"
@@ -784,7 +784,7 @@
     "message": "Try a different search."
   },
   "searchLimitations": {
-    "message": "Masked, hidden, and image clips are searched by title, description, category, and tags only. Type #tag to search tags."
+    "message": "Masked, hidden, and image clips are searched by title, description, category, and tags. Type #tag, cat:, type:link, is:pinned, before:, or after: to narrow the search."
   },
   "noMatchingClips": {
     "message": "No matching clips"
@@ -1391,5 +1391,224 @@
   },
   "errorBackupPassphrase": {
     "message": "That passphrase doesn't open this backup."
+  },
+  "type": {
+    "message": "Type"
+  },
+  "type_text": {
+    "message": "Text"
+  },
+  "type_link": {
+    "message": "Links"
+  },
+  "type_email": {
+    "message": "Emails"
+  },
+  "type_code": {
+    "message": "Code"
+  },
+  "type_color": {
+    "message": "Colours"
+  },
+  "type_image": {
+    "message": "Images"
+  },
+  "pasteIntoPageSetting": {
+    "message": "Paste into the page when you choose a clip"
+  },
+  "pasteIntoPageHint": {
+    "message": "Puts the clip into the text field you were typing in, and copies it too. On pages Copyhold can't reach, it only copies."
+  },
+  "pastedIntoPage": {
+    "message": "Pasted into the page."
+  },
+  "copiedPlain": {
+    "message": "Copied without formatting."
+  },
+  "trash": {
+    "message": "Trash"
+  },
+  "trashHint": {
+    "message": "Deleted clips stay here for 30 days, then they're removed for good."
+  },
+  "emptyTrash": {
+    "message": "Empty trash"
+  },
+  "trashEmpty": {
+    "message": "The trash is empty."
+  },
+  "deletedAgo": {
+    "message": "Deleted $1"
+  },
+  "restore": {
+    "message": "Restore"
+  },
+  "restored": {
+    "message": "Restored."
+  },
+  "deleteForever": {
+    "message": "Delete forever"
+  },
+  "emptyTrashTitle_one": {
+    "message": "Delete $1 clip forever?"
+  },
+  "emptyTrashTitle_other": {
+    "message": "Delete $1 clips forever?"
+  },
+  "emptyTrashMessage": {
+    "message": "Clips in the trash will be removed for good. This can't be undone."
+  },
+  "combine": {
+    "message": "Combine"
+  },
+  "combineClips": {
+    "message": "Combine clips"
+  },
+  "combineSeparator": {
+    "message": "Put between clips"
+  },
+  "separatorLine": {
+    "message": "New line"
+  },
+  "separatorBlank": {
+    "message": "Blank line"
+  },
+  "separatorComma": {
+    "message": "Comma"
+  },
+  "separatorSpace": {
+    "message": "Space"
+  },
+  "combineRemove": {
+    "message": "Move the original clips to the trash"
+  },
+  "combineSkipsImages_one": {
+    "message": "$1 image clip is left out; only text can be combined."
+  },
+  "combineSkipsImages_other": {
+    "message": "$1 image clips are left out; only text can be combined."
+  },
+  "combinedTitle": {
+    "message": "Combined from $1 clips"
+  },
+  "combined_one": {
+    "message": "Combined $1 clip."
+  },
+  "combined_other": {
+    "message": "Combined $1 clips."
+  },
+  "copyPlainMenu": {
+    "message": "Copy without formatting"
+  },
+  "menuKeyPlain": {
+    "message": "F"
+  },
+  "detailFormatting": {
+    "message": "Formatting"
+  },
+  "detailFormattingKept": {
+    "message": "Kept; copies with formatting"
+  },
+  "abbreviation": {
+    "message": "Abbreviation"
+  },
+  "openInSidePanel": {
+    "message": "Open in side panel"
+  },
+  "abbreviationHint": {
+    "message": "Type it in any text field to put this clip there. Turn on snippet expansion in Settings."
+  },
+  "abbreviationTaken": {
+    "message": "Another clip already has this abbreviation; only one of them will expand."
+  },
+  "abbreviationLabel": {
+    "message": "Abbreviation $1"
+  },
+  "expandAbbreviationsSetting": {
+    "message": "Expand snippet abbreviations as you type"
+  },
+  "expandAbbreviationsHint": {
+    "message": "Typing a clip's abbreviation, such as ;addr, in a web page puts the clip there. Chrome asks to let Copyhold read and change pages; it only looks for your abbreviations as you type."
+  },
+  "expandNeedsAccess": {
+    "message": "Snippet expansion needs access to the pages you type in."
+  },
+  "expandOn": {
+    "message": "Snippet expansion is on."
+  },
+  "expandOff": {
+    "message": "Snippet expansion is off."
+  },
+  "keyboardShortcuts": {
+    "message": "Keyboard shortcuts"
+  },
+  "gotIt": {
+    "message": "Got it"
+  },
+  "shortcutsList": {
+    "message": "Anywhere"
+  },
+  "shortcutOpen": {
+    "message": "Open Copyhold"
+  },
+  "shortcutSave": {
+    "message": "Save the clipboard without opening Copyhold"
+  },
+  "shortcutChoose": {
+    "message": "Choose a clip"
+  },
+  "shortcutEnter": {
+    "message": "Paste the chosen clip into the page, or copy it"
+  },
+  "shortcutMenu": {
+    "message": "Actions for the chosen clip"
+  },
+  "shortcutSlots": {
+    "message": "Copy a numbered clip; pinned clips come first"
+  },
+  "shortcutPalette": {
+    "message": "Find any command, category, or tag"
+  },
+  "shortcutSelect": {
+    "message": "Select several clips"
+  },
+  "shortcutEscape": {
+    "message": "Close what's open, then the popup"
+  },
+  "shortcutHelp": {
+    "message": "Show these shortcuts"
+  },
+  "shortcutsMenu": {
+    "message": "In a clip's actions menu"
+  },
+  "shortcutMenuCopy": {
+    "message": "Preview, Copy as, copy without formatting, open link, open source page"
+  },
+  "shortcutMenuEdit": {
+    "message": "Mask, pin, edit, select, delete"
+  },
+  "shortcutsEditor": {
+    "message": "In the editor"
+  },
+  "shortcutEditorDone": {
+    "message": "Close; changes are already saved"
+  },
+  "shortcutsSearch": {
+    "message": "In search"
+  },
+  "shortcutSearchLabels": {
+    "message": "Clips with a tag, category, or subcategory"
+  },
+  "shortcutSearchType": {
+    "message": "Only links, images, code, text, emails, or colours"
+  },
+  "shortcutSearchIs": {
+    "message": "Pinned, template, expiring, masked, hidden, formatted, or snippet clips"
+  },
+  "shortcutSearchDates": {
+    "message": "Clips saved before or after a date"
+  },
+  "tipNew": {
+    "message": "New: choosing a clip pastes it into the page you were on, search ranks the best matches first, and deleted clips go to the Trash. Press ? for every shortcut, or $1 for commands."
   }
 }

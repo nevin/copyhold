@@ -1047,3 +1047,31 @@ textarea { resize: vertical; }
 :root:not(.full-tab) body:has(#clip-preview[open]) { min-block-size: 520px; }
 #export-status, #import-passphrase-status { color: var(--danger); }
 :root:not(.full-tab) body:has(#export-dialog[open]) { min-block-size: 440px; }
+
+/* Searched words in rows. */
+.clip mark { padding: 0 1px; border-radius: 2px; background: color-mix(in srgb, var(--warning) 28%, transparent); color: inherit; }
+
+.menu-count:not(:empty) { margin-inline-start: auto; color: var(--muted); font-size: .78rem; font-variant-numeric: tabular-nums; }
+.trash-list { max-block-size: min(50vh, 340px); overflow: auto; }
+.trash-list .manage-item { align-items: start; padding-block: 6px; }
+.trash-text { flex: 1; min-inline-size: 0; }
+.trash-text .name { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.trash-text .when { color: var(--muted); font-size: .78rem; }
+:root:not(.full-tab) body:has(#trash-dialog[open]), :root:not(.full-tab) body:has(#combine-dialog[open]) { min-block-size: 480px; }
+
+/* The side panel: the popup's layout, as wide and tall as the panel. */
+:root.side-panel body { inline-size: auto; }
+:root.side-panel .clips { max-block-size: none; overflow: visible; }
+.clip.is-dragging { opacity: .5; }
+.abbreviation-label { padding: 0 4px; border: 1px solid var(--line); border-radius: 4px; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: .74rem; }
+
+.shortcuts-list { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 16px; margin: 6px 0 0; font-size: .88rem; }
+.shortcuts-list dt { display: flex; flex-wrap: wrap; gap: 3px; align-items: center; }
+.shortcuts-list dd { margin: 0; color: var(--muted); }
+.shortcuts-list kbd { padding: 0 5px; border: 1px solid var(--control); border-radius: 4px; font: inherit; font-size: .8rem; white-space: nowrap; }
+.shortcuts-list .section { grid-column: 1 / -1; margin-block-start: 6px; color: var(--text); font-weight: 600; }
+.tip-bar { display: flex; align-items: center; gap: 8px; margin: 8px 12px 0; padding: 8px 10px 8px 12px; border-radius: 10px; background: var(--tint); font-size: .86rem; }
+.full-tab .tip-bar { margin-inline: 0; }
+.tip-bar p { flex: 1; }
+.tip-bar button { min-block-size: 28px; color: var(--accent); }
+:root:not(.full-tab) body:has(#shortcuts-dialog[open]) { min-block-size: 560px; }

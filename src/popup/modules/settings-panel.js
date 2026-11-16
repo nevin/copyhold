@@ -17,6 +17,9 @@ const retentionDays = byId("retention-days");
 const historyLimit = byId("history-limit");
 const sensitiveClips = byId("sensitive-clips");
 const captureImages = byId("capture-images");
+const pasteIntoPageInput = byId("paste-into-page");
+const expandInput = byId("expand-abbreviations");
+const siteAccess = { origins: ["<all_urls>"] };
 let savedHistoryLimit = 0;
 
 function applyTheme(theme) {
@@ -87,16 +90,20 @@ run(async () => {
     input.disabled = false;
   }
   savedHistoryLimit = saved.historyLimit;
-  for (const [input, key] of [[closeAfterCopyInput, "closeAfterCopy"], [captureImages, "captureImages"]]) {
+  for (const [input, key] of [[closeAfterCopyInput, "closeAfterCopy"], [captureImages, "captureImages"], [pasteIntoPageInput, "pasteIntoPage"]]) {
     input.checked = saved[key];
     input.disabled = false;
   }
   state.closeAfterCopy = saved.closeAfterCopy;
+  state.pasteIntoPage = saved.pasteIntoPage;
+  expandInput.checked = saved.expandAbbreviations && await chrome.permissions.contains(siteAccess).catch(() => false);
 });
 onSettingsChange((changes) => {
   if ("retentionDays" in changes) retentionDays.value = String(changes.retentionDays);
   if ("sensitiveClips" in changes) sensitiveClips.value = changes.sensitiveClips;
   if ("captureImages" in changes) captureImages.checked = changes.captureImages;
+  if ("expandAbbreviations" in changes) expandInput.checked = changes.expandAbbreviations;
+  if ("pasteIntoPage" in changes) pasteIntoPageInput.checked = state.pasteIntoPage = changes.pasteIntoPage;
   if ("closeAfterCopy" in changes) closeAfterCopyInput.checked = state.closeAfterCopy = changes.closeAfterCopy;
   if ("density" in changes) applyDensity(changes.density);
   if ("sortOrder" in changes && changes.sortOrder !== state.sortOrder) setSortOrder(changes.sortOrder);
@@ -107,6 +114,25 @@ onSettingsChange((changes) => {
 });
 retentionDays.addEventListener("change", () => run(() => updateSettings({ retentionDays: Number(retentionDays.value) })));
 sensitiveClips.addEventListener("change", () => run(() => updateSettings({ sensitiveClips: sensitiveClips.value })));
+// Turning expansion on asks for site access; it's on only if the person allows it.
+expandInput.addEventListener("change", () => run(async () => {
+  if (expandInput.checked) {
+    const granted = await chrome.permissions.request(siteAccess).catch(() => false);
+    expandInput.checked = granted;
+    if (!granted) {
+      status(t("expandNeedsAccess"));
+      return;
+    }
+  } else {
+    await chrome.permissions.remove(siteAccess).catch(() => false);
+  }
+  await updateSettings({ expandAbbreviations: expandInput.checked });
+  status(expandInput.checked ? t("expandOn") : t("expandOff"));
+}));
+pasteIntoPageInput.addEventListener("change", () => run(async () => {
+  state.pasteIntoPage = pasteIntoPageInput.checked;
+  await updateSettings({ pasteIntoPage: state.pasteIntoPage });
+}));
 captureImages.addEventListener("change", () => run(() => updateSettings({ captureImages: captureImages.checked })));
 closeAfterCopyInput.addEventListener("change", () => run(async () => {
   state.closeAfterCopy = closeAfterCopyInput.checked;

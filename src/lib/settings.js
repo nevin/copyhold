@@ -7,6 +7,12 @@ export const defaultSettings = {
   pausedUntil: 0,
   retentionDays: 0,
   closeAfterCopy: true,
+  // Choosing a clip in the popup also pastes it into the text field you were typing in.
+  pasteIntoPage: true,
+  // Typing a clip's abbreviation in a web page expands it. Needs site access, asked for when turned on.
+  expandAbbreviations: false,
+  // The version whose "what's new" tip was dismissed.
+  tipsSeen: "",
   // 0 keeps every clip.
   historyLimit: 0,
   density: "comfortable",

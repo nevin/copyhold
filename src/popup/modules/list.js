@@ -1,6 +1,8 @@
-import { sortEntries } from "../../lib/entries.js";
+import { isExpired, sortEntries } from "../../lib/entries.js";
+import { fillTemplateNow } from "../../lib/transforms.js";
 import { clipPreview, clipType, displayLength, displayUrl, relativeTime, shortAge } from "../../lib/format.js";
-import { emptyFilter, isFiltering, matchesFilter, matchesTagTerms, matchesText, parseQuery } from "../../lib/organize.js";
+import { emptyFilter, isFiltering, matchesFilter } from "../../lib/organize.js";
+import { highlightRanges, matchesKeywords, parseQuery, scoreClip } from "../../lib/search.js";
 import { sensitiveLabel } from "../../lib/sensitive.js";
 import { updateSettings } from "../../lib/settings.js";
 import * as store from "../../lib/store.js";
@@ -90,6 +92,21 @@ function rowButton(action, label, handler, iconName = action) {
   return button;
 }
 
+// Marks the searched words in an element's text. Only shown text is highlighted, never masked text.
+function highlight(element) {
+  const text = element.textContent;
+  const ranges = state.highlight.length ? highlightRanges(text, state.highlight) : [];
+  if (!ranges.length) return element;
+  element.textContent = "";
+  let position = 0;
+  for (const [start, end] of ranges) {
+    element.append(text.slice(position, start), textLine("mark", "", text.slice(start, end)));
+    position = end;
+  }
+  element.append(text.slice(position));
+  return element;
+}
+
 function previewFor(entry, visibility) {
   const visible = visibility === "visible";
   const type = visible ? clipType(entry.text) : "text";
@@ -99,6 +116,7 @@ function previewFor(entry, visibility) {
     `preview${placeholder ? " protected" : ""}${type === "code" ? " code" : ""}${type === "link" ? " link" : ""}`,
     type === "link" ? displayUrl(entry.text) : clipPreview(entry.text, visibility),
   );
+  if (!placeholder) highlight(preview);
   if (type === "color" && CSS.supports("color", entry.text.trim())) {
     const swatch = document.createElement("span");
     swatch.className = "swatch";
@@ -149,7 +167,7 @@ function hostOf(url) {
 // The category, tags, template badge, and source page under a clip. Selecting a tag filters by it.
 function labelsFor(entry) {
   const tags = entry.tags ?? [];
-  if (!entry.category && !tags.length && !entry.template && !entry.sourceUrl && !entry.sensitive) return null;
+  if (!entry.category && !tags.length && !entry.template && !entry.sourceUrl && !entry.sensitive && !entry.abbreviation) return null;
   const labels = document.createElement("div");
   labels.className = "clip-labels";
   // The chips and link are for pointers; screen readers get the same facts as text, since options can't hold controls.
@@ -161,6 +179,11 @@ function labelsFor(entry) {
     marker.title = t("maskedAutomatically", sensitiveLabel(entry.sensitive));
     marker.append(shield);
     labels.append(marker);
+  }
+  if (entry.abbreviation) {
+    const abbreviation = textLine("span", "abbreviation-label", entry.abbreviation);
+    abbreviation.title = t("abbreviationLabel", entry.abbreviation);
+    labels.append(abbreviation);
   }
   if (entry.template) {
     const badge = textLine("span", "template-badge", t("templateLabel"));
@@ -195,6 +218,7 @@ function labelsFor(entry) {
 function describeLabels(entry) {
   const parts = [];
   if (entry.template) parts.push(t("templateLabel"));
+  if (entry.abbreviation) parts.push(t("abbreviationLabel", entry.abbreviation));
   if (entry.category) parts.push(t("categoryDescription", entry.subcategory ? t("categoryPath", entry.category, entry.subcategory) : entry.category));
   if (entry.tags?.length) parts.push(t("tagsDescription", entry.tags.join(", ")));
   if (entry.sourceUrl) parts.push(t("fromSite", hostOf(entry.sourceUrl)));
@@ -294,14 +318,14 @@ function itemFor(entry) {
   const visibility = state.hidePreviews && entry.visibility === "visible" ? "masked" : entry.visibility;
   const details = document.createElement("div");
   details.className = "clip-details";
-  if (entry.title) details.append(textLine("p", "clip-title", entry.title));
+  if (entry.title) details.append(highlight(textLine("p", "clip-title", entry.title)));
   details.append(entry.kind === "image" ? imagePreviewFor(entry, visibility) : previewFor(entry, visibility));
   // Three rows: title, content, then the description with the category and tags after it.
   const labels = labelsFor(entry);
   if (entry.description || labels) {
     const thirdLine = document.createElement("div");
     thirdLine.className = "clip-third-line";
-    if (entry.description) thirdLine.append(textLine("p", "description", entry.description));
+    if (entry.description) thirdLine.append(highlight(textLine("p", "description", entry.description)));
     if (labels) thirdLine.append(labels);
     details.append(thirdLine);
   }
@@ -346,6 +370,31 @@ function itemFor(entry) {
     if (state.selecting) setClipSelected(entry.id, !state.selectedIds.has(entry.id));
     else if (event.shiftKey) startSelection(entry.id);
     else copyEntry(entry);
+  });
+  // Rows can be dragged into any text field or app: text with its formatting, or the image as a file.
+  item.draggable = true;
+  item.addEventListener("dragstart", (event) => {
+    if (state.selecting || isExpired(entry)) {
+      event.preventDefault();
+      return;
+    }
+    const transfer = event.dataTransfer;
+    transfer.effectAllowed = "copy";
+    if (entry.kind === "image") {
+      transfer.items.add(new File([entry.image], "clip.png", { type: entry.image.type }));
+    } else {
+      transfer.setData("text/plain", entry.template ? fillTemplateNow(entry.text) : entry.text);
+      if (entry.html && !entry.template) transfer.setData("text/html", entry.html);
+    }
+    item.classList.add("is-dragging");
+  });
+  item.addEventListener("dragend", (event) => {
+    item.classList.remove("is-dragging");
+    if (event.dataTransfer.dropEffect === "none") return;
+    run(async () => {
+      await store.update(entry.id, { lastUsedAt: new Date().toISOString(), useCount: (entry.useCount ?? 0) + 1 });
+      await refresh();
+    });
   });
   item.addEventListener("contextmenu", (event) => {
     if (state.selecting) return;
@@ -422,7 +471,7 @@ export function updateItemStates() {
   selectVisible.checked = count > 0 && count === shownClips.length;
   selectVisible.indeterminate = count > 0 && count < shownClips.length;
   selectVisible.disabled = shownClips.length === 0;
-  for (const id of ["delete-selected", "copy-selected", "pin-selected", "organize-selected"]) byId(id).disabled = count === 0;
+  for (const id of ["delete-selected", "copy-selected", "pin-selected", "organize-selected", "combine-selected"]) byId(id).disabled = count === 0;
   byId("pin-selected").textContent = count && state.clips.filter((clip) => selectedIds.has(clip.id)).every((clip) => clip.pinned)
     ? t("unpin") : t("pin");
   updateSearchHint();
@@ -441,6 +490,18 @@ export function setActive(id) {
 }
 
 
+/**
+ * The clips Alt+1 to Alt+9 copy: pinned clips first, in the order they were pinned, whatever the sort or
+ * search, so favourites keep their numbers; then the first clips shown.
+ */
+function quickSlots(shown) {
+  const pinned = state.clips.filter((clip) => clip.pinned)
+    .sort((first, second) => (first.pinnedAt ?? first.createdAt).localeCompare(second.pinnedAt ?? second.createdAt))
+    .slice(0, 9);
+  const rest = shown.filter((clip) => !clip.pinned).slice(0, 9 - pinned.length);
+  return [...pinned, ...rest];
+}
+
 export function renderList(resetActive = false) {
   if (document.querySelector("dialog[open]")) {
     pendingListUpdate = true;
@@ -449,11 +510,23 @@ export function renderList(resetActive = false) {
   pendingListUpdate = false;
   const { clips, selectedIds } = state;
   const query = search.value.trim();
-  const { text, tags } = parseQuery(query);
+  const parsed = parseQuery(query);
   const pinnedOnly = pinnedClips.checked;
   const filtering = isFiltering(state.filter);
-  const matches = clips.filter((clip) => (!pinnedOnly || clip.pinned) &&
-    matchesText(clip, text) && matchesTagTerms(clip, tags) && (!filtering || matchesFilter(clip, state.filter)));
+  const candidates = clips.filter((clip) => (!pinnedOnly || clip.pinned) &&
+    matchesKeywords(clip, parsed) && (!filtering || matchesFilter(clip, state.filter)));
+  let matches = candidates;
+  if (parsed.words.length) {
+    const score = (fuzzy) => candidates
+      .map((clip, index) => ({ clip, index, score: scoreClip(clip, parsed.words, { fuzzy }) }))
+      .filter((match) => match.score > 0);
+    let scored = score(false);
+    // With few exact matches, words one typo away count too.
+    if (scored.length < 5) scored = score(true);
+    // Best matches first; equal scores keep the chosen sort order.
+    matches = scored.sort((first, second) => second.score - first.score || first.index - second.index).map(({ clip }) => clip);
+  }
+  state.highlight = parsed.words;
   const hadFocus = clipList.contains(document.activeElement);
   const pinnedMatches = matches.filter((clip) => clip.pinned).length;
   // The Pinned filter shows only pinned clips, so folding them away there would empty the list.
@@ -465,6 +538,7 @@ export function renderList(resetActive = false) {
   hiddenMatches = listed.length - shown.length;
   const visibleIds = new Set(shown.map(({ id }) => id));
   state.shownClips = shown;
+  state.slots = quickSlots(shown);
   for (const id of selectedIds) if (!visibleIds.has(id)) selectedIds.delete(id);
   for (const [id, { item }] of clipItems) {
     if (!visibleIds.has(id)) {
@@ -473,8 +547,8 @@ export function renderList(resetActive = false) {
     }
   }
   const rows = { pinned: [], recent: [] };
-  shown.forEach((entry, index) => {
-    const revision = `${entry.revision ?? 0}:${state.hidePreviews}:${state.colorsVersion}`;
+  shown.forEach((entry) => {
+    const revision = `${entry.revision ?? 0}:${state.hidePreviews}:${state.colorsVersion}:${state.highlight.join(" ")}`;
     let cached = clipItems.get(entry.id);
     if (cached?.revision !== revision) {
       cached?.item.remove();
@@ -482,7 +556,8 @@ export function renderList(resetActive = false) {
       clipItems.set(entry.id, cached);
       if (entry.id === copiedClipId) updateCopyFeedback(entry.id, true);
     }
-    const shortcut = index < 9 ? String(index + 1) : "";
+    const slot = state.slots.indexOf(entry);
+    const shortcut = slot >= 0 ? String(slot + 1) : "";
     cached.item.querySelector(".clip-key").textContent = shortcut;
     if (shortcut) cached.item.setAttribute("aria-keyshortcuts", `Alt+${shortcut}`);
     else cached.item.removeAttribute("aria-keyshortcuts");
@@ -611,7 +686,7 @@ document.addEventListener("keydown", (event) => {
   const digit = /^Digit([1-9])$/.exec(event.code);
   if (!digit || !event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || state.selecting ||
       document.querySelector("dialog[open]") || menuIsOpen()) return;
-  const entry = state.shownClips[Number(digit[1]) - 1];
+  const entry = state.slots[Number(digit[1]) - 1];
   if (!entry) return;
   event.preventDefault();
   setActive(entry.id);

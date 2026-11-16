@@ -38,6 +38,9 @@ function menuActions(entry) {
   if (text && transformsFor(entry.text).length) {
     actions.push({ icon: "copy", label: t("copyAs"), key: t("menuKeyCopyAs"), action: () => showTransforms(entry), stay: true });
   }
+  if (text && entry.html) {
+    actions.push({ icon: "copy", label: t("copyPlainMenu"), key: t("menuKeyPlain"), action: () => copyEntry(entry, undefined, { plain: true }) });
+  }
   if (visible && text && clipType(entry.text) === "link") {
     actions.push({ icon: "open", label: t("openLink"), key: t("menuKeyOpen"), action: () => openLink(entry) });
   }

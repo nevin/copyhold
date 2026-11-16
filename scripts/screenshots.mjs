@@ -65,7 +65,7 @@ async function seed(page, { image = true } = {}) {
     }
     await store.add(clips);
     await updateSettings({
-      autoCapture: false, autoCaptureAsked: true, density: "comfortable", hidePreviews: false, rules: [],
+      autoCapture: false, autoCaptureAsked: true, density: "comfortable", hidePreviews: false, rules: [], tipsSeen: "1.4",
       categoryColors: { work: "blue", personal: "green", design: "pink" },
     });
   }, samples, minute, image);

@@ -1,6 +1,7 @@
 // Chrome and Edge background. A service worker can't read the clipboard, so an offscreen document does.
 import "./expiry.js";
 import "./lock-timer.js";
+import "./expander.js";
 import { setUpMonitor } from "./monitor.js";
 import { setUpShortcuts } from "./shortcuts.js";
 import { t } from "../lib/i18n.js";

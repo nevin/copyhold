@@ -9,7 +9,7 @@ import { t } from "./i18n.js";
 // - Dates, pin state, and other metadata stay unencrypted so expiry and history limits keep working.
 
 export const sealedFields = [
-  "text", "title", "description", "category", "subcategory", "tags", "sourceUrl", "sourceTitle", "image", "thumbnail",
+  "text", "html", "title", "description", "category", "subcategory", "tags", "sourceUrl", "sourceTitle", "image", "thumbnail",
 ];
 const iterations = 600_000;
 const encoder = new TextEncoder();

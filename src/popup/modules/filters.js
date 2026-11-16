@@ -1,5 +1,6 @@
 import { t } from "../../lib/i18n.js";
 import { collectOrganization, emptyFilter, isFiltering } from "../../lib/organize.js";
+import { clipKind, clipKinds } from "../../lib/search.js";
 import { byId, textLine } from "./dom.js";
 import { renderList, search } from "./list.js";
 import { state } from "./state.js";
@@ -27,6 +28,11 @@ function chooseCategory(category, subcategory = "") {
   applyFilter({ ...filter, category: chosen ? "" : category, subcategory: chosen ? "" : subcategory });
 }
 
+function toggleType(kind) {
+  const types = state.filter.types ?? [];
+  applyFilter({ ...state.filter, types: types.includes(kind) ? types.filter((type) => type !== kind) : [...types, kind] });
+}
+
 function toggleTag(tag) {
   const { filter } = state;
   const tags = filter.tags.some((existing) => same(existing, tag))
@@ -50,6 +56,19 @@ function buildPanel() {
   const { categories, tags } = collectOrganization(state.clips);
   const { filter } = state;
   const focusedLabel = panel.contains(document.activeElement) ? document.activeElement.textContent : null;
+
+  // Types first: one click shows only links, code, images, and so on.
+  const typeSection = document.createElement("section");
+  typeSection.append(textLine("h2", "", t("type")));
+  const kindCounts = new Map();
+  for (const clip of state.clips) kindCounts.set(clipKind(clip), (kindCounts.get(clipKind(clip)) ?? 0) + 1);
+  const typeList = document.createElement("div");
+  typeList.className = "filter-tags";
+  for (const kind of clipKinds) {
+    if (!kindCounts.has(kind)) continue;
+    typeList.append(option(t(`type_${kind}`), kindCounts.get(kind), (filter.types ?? []).includes(kind), () => toggleType(kind), "tag"));
+  }
+  typeSection.append(typeList);
 
   const categorySection = document.createElement("section");
   categorySection.append(textLine("h2", "", t("category")));
@@ -95,7 +114,7 @@ function buildPanel() {
   done.addEventListener("click", () => panel.hidePopover());
   actions.append(clear, done);
 
-  panel.replaceChildren(categorySection, tagSection, actions);
+  panel.replaceChildren(typeSection, categorySection, tagSection, actions);
   // Keep focus on the option that was just chosen.
   const refocus = focusedLabel && [...panel.querySelectorAll("button")].find((item) => item.textContent === focusedLabel);
   refocus?.focus();
@@ -145,7 +164,8 @@ function removableChip(label, onRemove) {
 // The list calls this after each render.
 export function showActiveFilters() {
   const { filter } = state;
-  const count = (filter.category ? 1 : 0) + filter.tags.length;
+  const types = filter.types ?? [];
+  const count = (filter.category ? 1 : 0) + filter.tags.length + types.length;
   button.classList.toggle("is-active", count > 0);
   byId("filter-count").textContent = count ? String(count) : "";
   activeFilters.hidden = count === 0;
@@ -158,6 +178,7 @@ export function showActiveFilters() {
     const label = filter.subcategory ? t("categoryPath", filter.category, filter.subcategory) : filter.category;
     chips.push(removableChip(label, () => applyFilter({ ...state.filter, category: "", subcategory: "" })));
   }
+  for (const kind of types) chips.push(removableChip(t(`type_${kind}`), () => toggleType(kind)));
   for (const tag of filter.tags) chips.push(removableChip(`#${tag}`, () => toggleTag(tag)));
   const clear = Object.assign(document.createElement("button"), { type: "button", className: "quiet clear-filters", textContent: t("clearFilters") });
   clear.addEventListener("click", () => applyFilter(emptyFilter()));
