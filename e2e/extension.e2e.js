@@ -13,7 +13,6 @@ import { insertIntoFocusedField } from "../src/lib/paste.js";
 const extensionPath = fileURLToPath(new URL("../dist/chromium", import.meta.url));
 let browser;
 let page;
-let worker;
 let origin;
 
 // A made-up key, assembled at runtime so secret scanners don't mistake it for a real one.
@@ -80,7 +79,6 @@ before(async () => {
   });
   const target = await browser.waitForTarget((candidate) => candidate.type() === "service_worker");
   origin = `chrome-extension://${new URL(target.url()).host}`;
-  worker = await target.worker();
   page = await browser.newPage();
   page.on("pageerror", (error) => { throw error; });
   await openPopup();
@@ -681,15 +679,10 @@ test("the what's-new tip can be dismissed for good", async () => {
 test("automatic saving captures copied text with the popup closed", async () => {
   await page.click("#capture-switch");
   await page.waitForFunction(() => document.querySelector("#capture-switch").getAttribute("aria-checked") === "true");
-  // The monitor waits for keyboard or mouse activity, which headless Chrome never reports,
-  // so the test opens the monitoring document the way the service worker does.
-  await worker.evaluate(async () => {
-    if ((await chrome.runtime.getContexts({ contextTypes: ["OFFSCREEN_DOCUMENT"] })).length) await chrome.offscreen.closeDocument();
-    await chrome.offscreen.createDocument({
-      url: "offscreen/offscreen.html?monitor", reasons: ["CLIPBOARD"], justification: "End-to-end test",
-    });
-  });
-  await wait(1500);
+  // The service worker starts the monitor on its own, even though headless Chrome reports the computer
+  // as idle: only a locked screen stops it.
+  await page.waitForFunction(async () => (await chrome.runtime.sendMessage({ type: "copyhold-capture-health" }).catch(() => null))?.lastSuccess > 0, { timeout: 10_000 });
+  assert.equal(await page.$eval("#capture-switch", (dot) => dot.dataset.state), "active");
   await setClipboard("captured in the background");
   await page.waitForFunction(async () => {
     const { list } = await import("/lib/store.js");
@@ -701,7 +694,8 @@ test("automatic saving captures copied text with the popup closed", async () => 
   assert.equal((await storedClips()).filter((clip) => clip.text === "first clip").length, 1);
   await page.click("#capture-switch");
   await page.waitForFunction(() => document.querySelector("#capture-switch").getAttribute("aria-checked") === "false");
-  await worker.evaluate(() => chrome.offscreen.closeDocument().catch(() => {}));
+  // Turning automatic saving off stops the monitor.
+  await page.waitForFunction(async () => !(await chrome.runtime.sendMessage({ type: "copyhold-capture-health" }).catch(() => null)), { timeout: 10_000 });
 });
 
 test("a large history shows its first screenful, then the rest", async () => {

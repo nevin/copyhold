@@ -25,7 +25,7 @@ Load it with **Load unpacked** on `chrome://extensions` and `edge://extensions`.
 - [ ] **Pause** stops saving; the status shows when it resumes. **Resume** restarts it without saving what was copied during the pause.
 - [ ] Turn auto-save off in Settings, copy something, turn it on: the text copied while it was off is not saved.
 - [ ] Restart the browser: automatic saving comes back on its own if it was on.
-- [ ] Leave the computer idle for two minutes or lock it: the offscreen document disappears from `chrome://extensions` → Copyhold → **Inspect views**. Move the mouse: it comes back, and the next copy is saved.
+- [ ] Leave the computer idle for two minutes, then copy something: it's saved within a few seconds. Lock the screen: the offscreen document disappears from `chrome://extensions` → Copyhold → **Inspect views**; unlock and copy: it's saved again.
 - [ ] Open the popup right after returning from idle: no lasting **Capture needs attention** warning.
 - [ ] Copy text over 1,000,000 characters: it isn't saved automatically, and the next popup open says so once. **Save clipboard** still saves it.
 

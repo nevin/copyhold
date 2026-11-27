@@ -6,7 +6,9 @@ import { t } from "../lib/i18n.js";
 const resumeAlarm = "copyhold-resume-capture";
 // The resume alarm's name before the rename to Copyhold.
 const legacyAlarms = ["clipfile-resume-capture"];
-// Nothing can be copied without input, so the monitor stops after a minute of inactivity.
+// The monitor stops only while the screen is locked. While the computer is merely idle it keeps running
+// and slows down by itself, so a copy right after a pause is never missed waiting for Chrome to report
+// activity again.
 const idleSeconds = 60;
 
 /**
@@ -50,8 +52,8 @@ export function setUpMonitor(driver) {
         : pause === "pause" ? Date.now() + 15 * 60_000
         : saved.pausedUntil > Date.now() ? saved.pausedUntil : 0;
       const changed = autoCapture !== saved.autoCapture || pausedUntil !== saved.pausedUntil;
-      const active = await chrome.idle.queryState(idleSeconds) === "active";
-      const shouldRun = autoCapture && !pausedUntil && active;
+      const unlocked = await chrome.idle.queryState(idleSeconds) !== "locked";
+      const shouldRun = autoCapture && !pausedUntil && unlocked;
       const running = await driver.isRunning();
       const stop = running && (!shouldRun || retry === true);
       if (changed || stop) {
@@ -67,7 +69,7 @@ export function setUpMonitor(driver) {
       if (pause === "pause") await chrome.alarms.create(resumeAlarm, { when: pausedUntil });
       else if (!pausedUntil && saved.pausedUntil) await chrome.alarms.clear(resumeAlarm);
       if (shouldRun && (!running || retry === true)) await driver.start();
-      return { enabled: autoCapture, pausedUntil };
+      return { enabled: autoCapture, pausedUntil, running: shouldRun };
     });
   }
 

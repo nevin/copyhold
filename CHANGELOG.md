@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.4.1
+
+- **Fixed: automatic saving could miss copies.** The background monitor used to stop after a minute without keyboard or mouse input and wait for Chrome to report activity again, so copies made soon after a pause could be missed until Copyhold was opened. It now keeps running, checks every three seconds while nothing new is copied and every second once something is, and stops only while the screen is locked.
+- The automatic-saving dot checks the real state as soon as Copyhold opens, restarts the monitor if it isn't answering, and its tooltip says when it last saved a clip.
+
 ## 1.4.0
 
 **Faster from clip to page**

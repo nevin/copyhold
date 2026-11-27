@@ -1610,5 +1610,8 @@
   },
   "tipNew": {
     "message": "New: choosing a clip pastes it into the page you were on, search ranks the best matches first, and deleted clips go to the Trash. Press ? for every shortcut, or $1 for commands."
+  },
+  "autoSaveActiveLastSaved": {
+    "message": "Saving copied text automatically. Last saved $1."
   }
 }

@@ -57,7 +57,7 @@ Text to paste into the Chrome Web Store developer dashboard, Microsoft Edge Add-
 | `sidePanel` | Opens Copyhold in the side panel when the user chooses Open in side panel. |
 | Optional host access `<all_urls>` | Requested only when the user turns on snippet expansion, to watch for their abbreviations as they type in web pages. Never requested at install; removed when turned off. |
 | `contextMenus` | Adds a "Save selection to Copyhold" item when the user right-clicks selected text. Only the selected text is received, and only when the user chooses the item. |
-| `idle` | Stops the background clipboard monitor while the computer is idle, since nothing can be copied then, and restarts it when the user returns. Also locks the optional passphrase lock when the computer locks. Only the active, idle, or locked state is read. |
+| `idle` | Stops the background clipboard monitor while the screen is locked, and restarts it on unlock. Also locks the optional passphrase lock when the computer locks. Only the active, idle, or locked state is read. |
 | `offscreen` | Reads the clipboard from an offscreen document, because a service worker cannot access the clipboard. The document is created only while automatic saving is on and not paused, or for a moment when the user presses the Save clipboard keyboard shortcut. |
 | `storage` | Holds the unlocked encryption key in session storage, which stays in memory and is cleared when the browser closes, while the user's optional passphrase lock is unlocked. No other data is stored there. |
 

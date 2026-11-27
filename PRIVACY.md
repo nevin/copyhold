@@ -15,7 +15,7 @@ Everything is stored in your browser profile on your device, using the browser's
 
 ## Automatic saving
 
-Copyhold can save text you copy anywhere in the browser, even when its popup is closed. This is **off until you turn it on**. When it's on, Copyhold reads the clipboard about once a second while you're using the computer and saves new plain text, and images too if you turn that on separately. You can pause it for 15 minutes or turn it off at any time. It stops reading while the computer is idle or locked, and it doesn't automatically save text over 1,000,000 characters or images over 10 MB.
+Copyhold can save text you copy anywhere in the browser, even when its popup is closed. This is **off until you turn it on**. When it's on, Copyhold reads the clipboard about once a second while you're using the computer and saves new plain text, and images too if you turn that on separately. You can pause it for 15 minutes or turn it off at any time. It checks less often while nothing new is copied and stops reading while the screen is locked, and it doesn't automatically save text over 1,000,000 characters or images over 10 MB.
 
 Copied text can include passwords and other secrets. Copyhold checks each copy, on your device, for text that looks like a password, API key, access token, private key, or card number. By default it saves such text masked; you can choose to skip it or save it like other text. The check can miss secrets, so mask other sensitive clips yourself.
 
@@ -65,7 +65,7 @@ Clips you delete wait in the Trash for 30 days, then are removed for good; you c
 | Side panel (`sidePanel`, Chrome and Edge) | To open Copyhold in the browser's side panel. |
 | Access to all sites (optional) | Only if you turn on snippet expansion: to watch for your abbreviations as you type in web pages. |
 | Context menus (`contextMenus`) | To add **Save selection to Copyhold** when you right-click selected text. |
-| Idle detection (`idle`) | To stop reading the clipboard while the computer is idle, and to lock Copyhold when the computer locks. Copyhold only learns whether you're active, idle, or locked. |
+| Idle detection (`idle`) | To stop reading the clipboard while the screen is locked, and to lock Copyhold when it locks. Copyhold only learns whether you're active, idle, or locked. |
 | Offscreen document (`offscreen`, Chrome and Edge only) | To read the clipboard in the background while automatic saving is on, or when you use the Save the clipboard shortcut. |
 | Storage (`storage`) | To keep the unlocked key in session storage, in memory only, while the passphrase lock is unlocked. |
 

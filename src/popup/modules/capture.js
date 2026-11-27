@@ -1,3 +1,4 @@
+import { relativeTime } from "../../lib/format.js";
 import { saveClipboard, supportsAutoCapture } from "../../lib/clipboard.js";
 import { getSettings, onSettingsChange, updateSettings } from "../../lib/settings.js";
 import * as store from "../../lib/store.js";
@@ -13,6 +14,7 @@ const captureSwitch = byId("capture-switch");
 const capturePrompt = byId("capture-prompt");
 let capturePausedUntil = 0;
 let captureHealthy = true;
+let lastSavedAt = 0;
 let updatingCapture = false;
 
 function showAutoCapture(enabled, pausedUntil = 0) {
@@ -30,7 +32,9 @@ function showAutoCapture(enabled, pausedUntil = 0) {
   const label = {
     off: t("autoSaveOff"),
     paused: t("autoSavePausedUntil", new Date(pausedUntil).toLocaleTimeString([], { timeStyle: "short" })),
-    active: t("autoSaveActive"),
+    active: lastSavedAt
+      ? t("autoSaveActiveLastSaved", relativeTime(new Date(lastSavedAt).toISOString()))
+      : t("autoSaveActive"),
     issue: t("captureIssue"),
   }[indicatorState];
   indicator.dataset.state = indicatorState;
@@ -57,6 +61,7 @@ async function checkCaptureHealth() {
   const health = await chrome.runtime.sendMessage({ type: "copyhold-capture-health" }).catch(() => null);
   if (!autoCapture.checked || capturePausedUntil || updatingCapture) return;
   captureHealthy = Boolean(health && !health.failed && Date.now() - health.lastSuccess < 10_000);
+  lastSavedAt = health?.lastSavedAt ?? 0;
   if (captureHealthy && document.activeElement === captureRetry) capturePause.focus();
   showAutoCapture(true);
 }
@@ -120,6 +125,15 @@ if (supportsAutoCapture) {
   run(async () => {
     try {
       await configureAutoCapture();
+      // Check the monitor straight away rather than in three seconds, and restart it once if it isn't
+      // answering, so the dot shows the real state as soon as the popup opens.
+      if (!autoCapture.checked || capturePausedUntil) return;
+      await new Promise((resolve) => setTimeout(resolve, 600));
+      await checkCaptureHealth();
+      if (captureHealthy) return;
+      await withCaptureUpdate(() => configureAutoCapture({ retry: true }));
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await checkCaptureHealth();
     } finally {
       autoCapture.disabled = false;
     }

@@ -127,6 +127,9 @@ async function quickKey(content) {
 // Only the clipboard monitor captures automatically, so this is the content it last recorded.
 let lastCaptured;
 
+/** What the last automatic capture did, for the monitor's status. */
+export const captureStatus = { changedAt: 0, savedAt: 0 };
+
 /**
  * @param {() => Content | undefined | Promise<Content | undefined>} read Returns undefined if the read failed.
  * @returns {Promise<boolean | null>} Whether the saved clips changed, or null if the clipboard couldn't be read.
@@ -140,6 +143,8 @@ export function captureAutomatically(read) {
     // Empty content still goes through, so it consumes a pending skip and updates the fingerprint.
     const result = await saveContent(content, "automatic");
     lastCaptured = key;
+    captureStatus.changedAt = Date.now();
+    if (result.added || result.existing) captureStatus.savedAt = captureStatus.changedAt;
     return Boolean(result.added || result.existing);
   });
 }
